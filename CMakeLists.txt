@@ -13,8 +13,8 @@ set(PlatformInstructionSet	"thumb")
 # ARM GNU Toolchain
 #====================
 
-# set(ARM_GNU_PATH "${PROJECT_SOURCE_DIR}/arm-gnu-toolchain")
-# set(ARM_GNU_URL_BASE "https://developer.arm.com/-/media/Files/downloads/gnu-rm")
+set(ARM_GNU_PATH "${PROJECT_SOURCE_DIR}/arm-gnu-toolchain")
+set(ARM_GNU_URL_BASE "https://developer.arm.com/-/media/Files/downloads/gnu-rm")
 
 if(NOT EXISTS "${ARM_GNU_PATH}/arm-none-eabi")
 	if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows)
@@ -109,7 +109,7 @@ find_program(HasClang "clang" "clang++")
 if(HasClang)
 	set(CompilerC "clang")
 	set(CompilerCXX "clang++")
-	set(CompilerFlags "--target=${PlatformTarget}")
+	set(CompilerFlags "--target=arm-arm-none-eabi -isystem${ARM_GNU_PATH}/arm-none-eabi/include/ -I${ARM_GNU_PATH}/arm-none-eabi/include/c++/9.2.1/ -I${ARM_GNU_PATH}/arm-none-eabi/include/c++/9.2.1/arm-none-eabi/")
 	message(STATUS "Clang activated")
 endif()
 
