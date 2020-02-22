@@ -1,6 +1,8 @@
 ﻿cmake_minimum_required(VERSION 3.8)
 
-project("Game Boy Advance")
+project("GameBoyAdvance")
+
+set(GameID "GAME")
 
 set(PlatformTarget			"arm-none-eabi")
 set(PlatformCore			"arm7tdmi")
@@ -8,8 +10,33 @@ set(PlatformArchitecture	"armv4t")
 set(PlatformInstructionSet	"thumb")
 
 set(devkitARM $ENV{DEVKITARM})
-if(NOT devkitARM)
+if(NOT DEFINED devkitARM)
 	message(FATAL_ERROR "Failed to locate devkitARM")
+endif()
+
+set(devkitPro $ENV{DEVKITPRO})
+if(NOT DEFINED devkitPro)
+	message(STATUS "Failed to locate devkitPro")
+endif()
+
+#====================
+# DKP Tools
+#====================
+
+find_program(HasGBAFix "${devkitPro}/tools/bin/gbafix")
+if(HasGBAFix)
+	set(GBAFix ${devkitPro}/tools/bin/gbafix gbatemplate.gba -c${GameID})
+	message(STATUS "gbafix detected")
+endif()
+
+if(${CONFIGURATION_NAME} STREQUAL ROM-Debug)
+	set(SpecsFile "gba.specs")
+elseif (${CONFIGURATION_NAME} STREQUAL ROM-Release)
+	set(SpecsFile "gba.specs")
+elseif (${CONFIGURATION_NAME} STREQUAL Multiboot-Debug)
+	set(SpecsFile "gba_mb.specs")
+elseif (${CONFIGURATION_NAME} STREQUAL Multiboot-Release)
+	set(SpecsFile "gba_mb.specs")
 endif()
 
 #====================
@@ -24,7 +51,7 @@ if(HasGCC)
 	set(CompilerCXX "${GCCBin}g++")
 	set(CompilerFlags "-Wno-packed-bitfield-compat")
 else()
-	message(STATUS "Could not locate GCC")
+	message(FATAL_ERROR "Failed to locate GCC")
 endif()
 
 set(GCCAs "${GCCBin}as")
@@ -143,26 +170,40 @@ set(CMAKE_RANLIB ${GCCRanlib})
 # ELF
 #====================
 
-add_executable(rom.elf)
+set(OutputELF gbatemplate.elf)
+add_executable(${OutputELF})
 
 if(MainSources)
-	target_sources(rom.elf PUBLIC $<TARGET_OBJECTS:MainCode>)
+	target_sources(${OutputELF} PUBLIC $<TARGET_OBJECTS:MainCode>)
 endif()
 
 if(thumbSources)
-	target_sources(rom.elf PUBLIC $<TARGET_OBJECTS:thumbCode>)
+	target_sources(${OutputELF} PUBLIC $<TARGET_OBJECTS:thumbCode>)
 endif()
 
 if(ARMSources)
-	target_sources(rom.elf PUBLIC $<TARGET_OBJECTS:ARMCode>)
+	target_sources(${OutputELF} PUBLIC $<TARGET_OBJECTS:ARMCode>)
 endif()
 
 if(IWRAMSources)
-	target_sources(rom.elf PUBLIC $<TARGET_OBJECTS:IWRAMCode>)
+	target_sources(${OutputELF} PUBLIC $<TARGET_OBJECTS:IWRAMCode>)
 endif()
 
 set(CMAKE_C_COMPILER "${GCCBin}gcc")
-set(CMAKE_C_FLAGS "-specs=gba.specs")
+set(CMAKE_C_FLAGS "-specs=${SpecsFile}")
 
 set(CMAKE_CXX_COMPILER "${GCCBin}g++")
-set(CMAKE_CXX_FLAGS "-specs=gba.specs")
+set(CMAKE_CXX_FLAGS "-specs=${SpecsFile}")
+
+#====================
+# GBA
+#====================
+
+add_custom_command(
+    TARGET ${OutputELF}
+    POST_BUILD
+    COMMAND ${CMAKE_OBJCOPY} -O binary ${OutputELF} gbatemplate.gba
+	COMMAND ${GBAFix}
+	COMMENT "Building ROM"
+	BYPRODUCTS gbatemplate.gba
+)
