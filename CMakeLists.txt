@@ -1,4 +1,4 @@
-﻿cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.8)
 
 project("GameBoyAdvance")
 
@@ -8,6 +8,46 @@ set(PlatformTarget			"arm-none-eabi")
 set(PlatformCore			"arm7tdmi")
 set(PlatformArchitecture	"armv4t")
 set(PlatformInstructionSet	"thumb")
+
+#====================
+# ARM GNU Toolchain
+#====================
+
+# set(ARM_GNU_PATH "${PROJECT_SOURCE_DIR}/arm-gnu-toolchain")
+# set(ARM_GNU_URL_BASE "https://developer.arm.com/-/media/Files/downloads/gnu-rm")
+
+if(NOT EXISTS "${ARM_GNU_PATH}/arm-none-eabi")
+	if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows)
+		set(ARM_GNU_URL "${ARM_GNU_URL_BASE}/9-2019q4/gcc-arm-none-eabi-9-2019-q4-major-win32.zip")
+		set(ARM_GNU_ARCHIVE_PATH "${ARM_GNU_PATH}/gcc-arm-none-eabi.zip")
+	elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL Linux)
+		set(ARM_GNU_URL "${ARM_GNU_URL_BASE}/9-2019q4/gcc-arm-none-eabi-9-2019-q4-major-x86_64-linux.tar.bz2")
+		set(ARM_GNU_ARCHIVE_PATH "${ARM_GNU_PATH}/gcc-arm-none-eabi.tar.bz2")
+	elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL Darwin)
+		set(ARM_GNU_URL "${ARM_GNU_URL_BASE}/9-2019q4/gcc-arm-none-eabi-9-2019-q4-major-mac.tar.bz2")
+		set(ARM_GNU_ARCHIVE_PATH "${ARM_GNU_PATH}/gcc-arm-none-eabi.tar.bz2")
+	else()
+		message(FATAL_ERROR "Failed to recognise host operating system (${CMAKE_HOST_SYSTEM_NAME})")
+	endif()
+
+	message(STATUS "Downloading ARM GNU toolchain from ${ARM_GNU_URL} to ${ARM_GNU_ARCHIVE_PATH}")
+    file(DOWNLOAD "${ARM_GNU_URL}" "${ARM_GNU_ARCHIVE_PATH}")
+
+	message(STATUS "Extracting ARM GNU toolchain to ${ARM_GNU_PATH}")
+	if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows)
+		execute_process(
+			COMMAND powershell.exe -nologo -noprofile -command "& { Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('${ARM_GNU_ARCHIVE_PATH}', '${ARM_GNU_PATH}/'); }"
+		)
+	else()
+		execute_process(
+			COMMAND tar -xvf "${ARM_GNU_ARCHIVE_PATH}" -C "${ARM_GNU_PATH}/"
+		)
+	endif()
+endif()
+
+#====================
+# devkitARM Toolchain
+#====================
 
 set(devkitARM $ENV{DEVKITARM})
 if(NOT DEFINED devkitARM)
@@ -79,18 +119,9 @@ endif()
 
 set(SharedFlags "${CompilerFlags} -mcpu=${PlatformCore} -mtune=${PlatformCore} -march=${PlatformArchitecture} -Wall -pedantic -pedantic-errors -fomit-frame-pointer -ffast-math")
 
-#====================
-# C
-#====================
-
 set(CFlags "${SharedFlags}")
 
-#====================
-# C++
-#====================
-
 set(CXXFlags "${SharedFlags} -fno-rtti -fno-exceptions")
-set(CMAKE_CXX_STANDARD 20)
 
 #====================
 # Main Code
@@ -166,6 +197,14 @@ set(CMAKE_STRIP ${GCCStrip})
 set(CMAKE_NM ${GCCNm})
 set(CMAKE_RANLIB ${GCCRanlib})
 
+set(CMAKE_LINKER "${GCCBin}gcc")
+
+set(CMAKE_C_LINK_FLAGS "-specs=${SpecsFile}")
+set(CMAKE_C_LINK_EXECUTABLE "<CMAKE_LINKER> <CMAKE_C_LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
+
+set(CMAKE_CXX_LINK_FLAGS "-specs=${SpecsFile}")
+set(CMAKE_CXX_LINK_EXECUTABLE "<CMAKE_LINKER> <CMAKE_CXX_LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
+
 #====================
 # ELF
 #====================
@@ -188,12 +227,6 @@ endif()
 if(IWRAMSources)
 	target_sources(${OutputELF} PUBLIC $<TARGET_OBJECTS:IWRAMCode>)
 endif()
-
-set(CMAKE_C_COMPILER "${GCCBin}gcc")
-set(CMAKE_C_FLAGS "-specs=${SpecsFile}")
-
-set(CMAKE_CXX_COMPILER "${GCCBin}g++")
-set(CMAKE_CXX_FLAGS "-specs=${SpecsFile}")
 
 #====================
 # GBA
