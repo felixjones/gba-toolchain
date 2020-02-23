@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.8)
 
-project("GameBoyAdvance")
+project("GameBoyAdvance" ASM C CXX)
+set(CMAKE_SYSTEM_NAME "GBA")
 
 set(GameID "GAME")
 
@@ -8,6 +9,16 @@ set(PlatformTarget			"arm-none-eabi")
 set(PlatformCore			"arm7tdmi")
 set(PlatformArchitecture	"armv4t")
 set(PlatformInstructionSet	"thumb")
+
+if(${CONFIGURATION_NAME} STREQUAL ROM-Debug)
+	set(ExecutableType ROM)
+elseif (${CONFIGURATION_NAME} STREQUAL ROM-Release)
+	set(ExecutableType ROM)
+elseif (${CONFIGURATION_NAME} STREQUAL Multiboot-Debug)
+	set(ExecutableType Multiboot)
+elseif (${CONFIGURATION_NAME} STREQUAL Multiboot-Release)
+	set(ExecutableType Multiboot)
+endif()
 
 #====================
 # ARM GNU Toolchain
@@ -46,22 +57,13 @@ if(NOT EXISTS "${ARM_GNU_PATH}/arm-none-eabi")
 endif()
 
 #====================
-# devkitARM Toolchain
+# DKP Tools
 #====================
-
-set(devkitARM $ENV{DEVKITARM})
-if(NOT DEFINED devkitARM)
-	message(FATAL_ERROR "Failed to locate devkitARM")
-endif()
 
 set(devkitPro $ENV{DEVKITPRO})
 if(NOT DEFINED devkitPro)
 	message(STATUS "Failed to locate devkitPro")
 endif()
-
-#====================
-# DKP Tools
-#====================
 
 find_program(HasGBAFix "${devkitPro}/tools/bin/gbafix")
 if(HasGBAFix)
@@ -69,24 +71,15 @@ if(HasGBAFix)
 	message(STATUS "gbafix detected")
 endif()
 
-if(${CONFIGURATION_NAME} STREQUAL ROM-Debug)
-	set(SpecsFile "gba.specs")
-elseif (${CONFIGURATION_NAME} STREQUAL ROM-Release)
-	set(SpecsFile "gba.specs")
-elseif (${CONFIGURATION_NAME} STREQUAL Multiboot-Debug)
-	set(SpecsFile "gba_mb.specs")
-elseif (${CONFIGURATION_NAME} STREQUAL Multiboot-Release)
-	set(SpecsFile "gba_mb.specs")
-endif()
-
 #====================
 # GCC
 #====================
 
-set(GCCBin "${devkitARM}/bin/${PlatformTarget}-")
+set(GCCBin "${ARM_GNU_PATH}/bin/${PlatformTarget}-")
 
 find_program(HasGCC "${GCCBin}gcc" "${GCCBin}g++")
 if(HasGCC)
+	set(CompilerASM "${GCCBin}gcc")
 	set(CompilerC "${GCCBin}gcc")
 	set(CompilerCXX "${GCCBin}g++")
 	set(CompilerFlags "-Wno-packed-bitfield-compat")
@@ -109,7 +102,7 @@ find_program(HasClang "clang" "clang++")
 if(HasClang)
 	set(CompilerC "clang")
 	set(CompilerCXX "clang++")
-	set(CompilerFlags "--target=arm-arm-none-eabi -isystem${ARM_GNU_PATH}/arm-none-eabi/include/ -I${ARM_GNU_PATH}/arm-none-eabi/include/c++/9.2.1/ -I${ARM_GNU_PATH}/arm-none-eabi/include/c++/9.2.1/arm-none-eabi/")
+	set(CompilerFlags "--target=arm-arm-none-eabi -mfpu=none -isystem${ARM_GNU_PATH}/arm-none-eabi/include/ -I${ARM_GNU_PATH}/arm-none-eabi/include/c++/9.2.1/ -I${ARM_GNU_PATH}/arm-none-eabi/include/c++/9.2.1/arm-none-eabi/")
 	message(STATUS "Clang activated")
 endif()
 
@@ -117,24 +110,35 @@ endif()
 # Language
 #====================
 
-set(SharedFlags "${CompilerFlags} -mcpu=${PlatformCore} -mtune=${PlatformCore} -march=${PlatformArchitecture} -Wall -pedantic -pedantic-errors -fomit-frame-pointer -ffast-math")
-
+set(ASMFlags "-mcpu=${PlatformCore} -mtune=${PlatformCore} -march=${PlatformArchitecture} -mfloat-abi=soft -Wall -pedantic -pedantic-errors -fomit-frame-pointer -ffast-math")
+set(SharedFlags "${CompilerFlags} ${ASMFlags}")
 set(CFlags "${SharedFlags}")
+set(CXXFlags "${SharedFlags} -fno-rtti -fno-exceptions -std=c++2a")
 
-set(CXXFlags "${SharedFlags} -fno-rtti -fno-exceptions")
+#====================
+# Headers
+#====================
+
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/source")
+
+file(GLOB Headers
+	"source/*.h"
+	"source/*.hpp"
+)
 
 #====================
 # Main Code
 #====================
 
 file(GLOB MainSources
+	"source/*.s"
 	"source/*.c"
 	"source/*.cpp"
 )
-list(FILTER MainSources EXCLUDE REGEX "((\.iwram)|(\.arm)|(\.thumb))(\.c[a-z]*)")
+list(FILTER MainSources EXCLUDE REGEX "((\.iwram)|(\.arm)|(\.thumb))(\.s|\.c|\.cpp)")
 
 if(MainSources)
-	add_library(MainCode OBJECT ${MainSources})
+	add_library(MainCode OBJECT ${Headers} ${MainSources})
 	target_compile_options(MainCode PRIVATE "-m${PlatformInstructionSet}")
 endif()
 
@@ -143,12 +147,13 @@ endif()
 #====================
 
 file(GLOB thumbSources
+	"source/*.thumb.s"
 	"source/*.thumb.c"
 	"source/*.thumb.cpp"
 )
 
 if(thumbSources)
-	add_library(thumbCode OBJECT ${thumbSources})
+	add_library(thumbCode OBJECT ${Headers} ${thumbSources})
 	target_compile_options(thumbCode PRIVATE "-mthumb")
 endif()
 
@@ -157,12 +162,13 @@ endif()
 #====================
 
 file(GLOB armSources
+	"source/*.arm.s"
 	"source/*.arm.c"
 	"source/*.arm.cpp"
 )
 
 if(armSources)
-	add_library(ARMCode OBJECT ${armSources})
+	add_library(ARMCode OBJECT ${Headers} ${armSources})
 	target_compile_options(ARMCode PRIVATE "-marm")
 endif()
 
@@ -171,13 +177,48 @@ endif()
 #====================
 
 file(GLOB IWRAMSources
+	"source/*.iwram.s"
 	"source/*.iwram.c"
 	"source/*.iwram.cpp"
 )
 
 if(IWRAMSources)
-	add_library(IWRAMCode OBJECT ${IWRAMSources})
+	add_library(IWRAMCode OBJECT ${Headers} ${IWRAMSources})
 	target_compile_options(IWRAMCode PRIVATE "-marm" "-mlong-calls")
+endif()
+
+#====================
+# Specs
+#====================
+
+string(TOLOWER ${ExecutableType} LinkFolder)
+
+if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows)
+	set(CRT0BinaryPath "CMakeFiles/CRT0Code.dir/lib/${LinkFolder}/crt0.s.obj")
+	set(SyscallsBinaryPath "CMakeFiles/CRT0Code.dir/lib/${LinkFolder}/gba-syscalls.c.obj")
+else()
+	set(CRT0BinaryPath "CMakeFiles/CRT0Code.dir/lib/${LinkFolder}/crt0.o")
+	set(SyscallsBinaryPath "CMakeFiles/CRT0Code.dir/lib/${LinkFolder}/gba-syscalls.o")
+endif()
+
+set(SpecsPath "${CMAKE_BINARY_DIR}/gba.specs")
+if(ExecutableType STREQUAL ROM)	
+	file(GLOB CRT0Source "${PROJECT_SOURCE_DIR}/lib/${LinkFolder}/crt0.s" "${PROJECT_SOURCE_DIR}/lib/${LinkFolder}/gba-syscalls.c")
+	add_library(CRT0Code OBJECT ${CRT0Source})
+	target_compile_options(CRT0Code PRIVATE "-mthumb")
+
+	message(STATUS "Writing ROM specs")
+	string(CONCAT SpecsContents
+		"%rename link link_b\n"
+		"\n"
+		"*link:\n"
+		"%(link_b) -T ${PROJECT_SOURCE_DIR}/lib/${LinkFolder}/gba.ld%s --gc-sections\n"
+		"\n"
+		"*startfile:\n"
+		"${CMAKE_BINARY_DIR}/${CRT0BinaryPath}%s crti%O%s crtbegin%O%s ${CMAKE_BINARY_DIR}/${SyscallsBinaryPath}%s\n"
+		"\n"
+	)
+	file(WRITE ${SpecsPath} ${SpecsContents})
 endif()
 
 #====================
@@ -185,6 +226,9 @@ endif()
 #====================
 
 set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
+
+set(CMAKE_ASM_COMPILER ${CompilerASM})
+set(CMAKE_ASM_FLAGS ${ASMFlags})
 
 set(CMAKE_C_COMPILER ${CompilerC})
 set(CMAKE_C_FLAGS ${CFlags})
@@ -197,12 +241,16 @@ set(CMAKE_STRIP ${GCCStrip})
 set(CMAKE_NM ${GCCNm})
 set(CMAKE_RANLIB ${GCCRanlib})
 
-set(CMAKE_LINKER "${GCCBin}gcc")
+set(CMAKE_LINKER "${GCCBin}g++")
+set(LinkerFlags "-specs=${SpecsPath} -lc_nano -lstdc++_nano")
 
-set(CMAKE_C_LINK_FLAGS "-specs=${SpecsFile}")
+set(CMAKE_ASM_LINK_FLAGS "${LinkerFlags}")
+set(CMAKE_ASM_LINK_EXECUTABLE "<CMAKE_LINKER> <CMAKE_ASM_LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
+
+set(CMAKE_C_LINK_FLAGS "${LinkerFlags}")
 set(CMAKE_C_LINK_EXECUTABLE "<CMAKE_LINKER> <CMAKE_C_LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
 
-set(CMAKE_CXX_LINK_FLAGS "-specs=${SpecsFile}")
+set(CMAKE_CXX_LINK_FLAGS "${LinkerFlags}")
 set(CMAKE_CXX_LINK_EXECUTABLE "<CMAKE_LINKER> <CMAKE_CXX_LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
 
 #====================
@@ -232,11 +280,21 @@ endif()
 # GBA
 #====================
 
-add_custom_command(
-    TARGET ${OutputELF}
-    POST_BUILD
-    COMMAND ${CMAKE_OBJCOPY} -O binary ${OutputELF} gbatemplate.gba
-	COMMAND ${GBAFix}
-	COMMENT "Building ROM"
-	BYPRODUCTS gbatemplate.gba
-)
+if(HasGBAFix)
+	add_custom_command(
+		TARGET ${OutputELF}
+		POST_BUILD
+		COMMAND ${CMAKE_OBJCOPY} -O binary ${OutputELF} gbatemplate.gba
+		COMMAND ${GBAFix}
+		COMMENT "Building ROM and fixing header"
+		BYPRODUCTS gbatemplate.gba
+	)
+else()
+	add_custom_command(
+		TARGET ${OutputELF}
+		POST_BUILD
+		COMMAND ${CMAKE_OBJCOPY} -O binary ${OutputELF} gbatemplate.gba
+		COMMENT "Building ROM (header not fixed)"
+		BYPRODUCTS gbatemplate.gba
+	)
+endif()
