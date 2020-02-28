@@ -35,7 +35,7 @@ _start:
 	mov		r0, #0x12
 	msr		cpsr, r0	@ Switch to IRQ mode (0x12)
 	ldr		sp, =__sp_irq
-	
+
 	@ Set user stack pointer
 	mov		r0, #0x1F
 	msr		cpsr, r0	@ Switch to user mode (0x1F)
@@ -44,32 +44,26 @@ _start:
 	@ Enter thumb mode (bit 0 is set to 1)
 	adr		r0, .thumb_start + 1
 	bx		r0
-	
+
 	.thumb
 .thumb_start:
 	@ Clear bss
 	ldr		r0, =__bss_start
-	ldr		r1, =__bss_end__
+	ldr		r1, =__bss_end
 	sub		r1, r0
 	bl		__aeabi_memclr4
 	
-	@ Clear sbss
-	ldr		r0, =__sbss_start__
-	ldr		r1, =__sbss_end__
-	sub		r1, r0
-	bl		__aeabi_memclr4
-
 	@ Copy data
-	ldr		r0, =__data_start__
+	ldr		r0, =__data_start
 	ldr		r1, =__data_lma
-	ldr		r2, =__data_end__
+	ldr		r2, =__data_end
 	sub		r2, r0
 	bl		__aeabi_memcpy4
 	
 	@ Copy IWRAM
 	ldr		r0, =__iwram_start
 	ldr		r1, =__iwram_lma
-	ldr		r2, =__iwram_end__
+	ldr		r2, =__iwram_end
 	sub		r2, r0
 	bl		__aeabi_memcpy4
 	
@@ -81,13 +75,14 @@ _start:
 	bl		__aeabi_memcpy4
 
 	@ libc
-	ldr		r3, =__libc_init_array
-	bl		.bx_r3
-
+	ldr		r2, =__libc_init_array
+	bl		.bx_r2
+	
 	@ main
 	mov		r0, #0		@ argc
 	mov		r1, #0		@ argv
-	ldr		r3, =main
+	ldr		r2, =main
+	bl		.bx_r2
 
-.bx_r3:
-	bx	r3
+.bx_r2:
+	bx	r2

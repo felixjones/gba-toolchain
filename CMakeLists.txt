@@ -135,7 +135,7 @@ file(GLOB MainSources
 	"source/*.c"
 	"source/*.cpp"
 )
-list(FILTER MainSources EXCLUDE REGEX "((\.iwram)|(\.arm)|(\.thumb))(\.s|\.c|\.cpp)")
+list(FILTER MainSources EXCLUDE REGEX "((\.ewram)|(\.iwram)|(\.arm)|(\.thumb))(\.s|\.c|\.cpp)")
 
 if(MainSources)
 	add_library(MainCode OBJECT ${Headers} ${MainSources})
@@ -188,6 +188,21 @@ if(IWRAMSources)
 endif()
 
 #====================
+# EWRAM Code
+#====================
+
+file(GLOB EWRAMSources
+	"source/*.ewram.s"
+	"source/*.ewram.c"
+	"source/*.ewram.cpp"
+)
+
+if(EWRAMSources)
+	add_library(EWRAMCode OBJECT ${Headers} ${EWRAMSources})
+	target_compile_options(EWRAMCode PRIVATE "-mthumb" "-mlong-calls")
+endif()
+
+#====================
 # Specs
 #====================
 
@@ -203,7 +218,7 @@ endif()
 
 set(SpecsPath "${CMAKE_BINARY_DIR}/gba.specs")
 if(ExecutableType STREQUAL ROM)	
-	file(GLOB CRT0Source "${PROJECT_SOURCE_DIR}/lib/${LinkFolder}/crt0.s" "${PROJECT_SOURCE_DIR}/lib/${LinkFolder}/gba-syscalls.c")
+	file(GLOB CRT0Source "${PROJECT_SOURCE_DIR}/lib/${LinkFolder}/*.h" "${PROJECT_SOURCE_DIR}/lib/${LinkFolder}/*.s" "${PROJECT_SOURCE_DIR}/lib/${LinkFolder}/*.c")
 	add_library(CRT0Code OBJECT ${CRT0Source})
 	target_compile_options(CRT0Code PRIVATE "-mthumb")
 
@@ -274,6 +289,10 @@ endif()
 
 if(IWRAMSources)
 	target_sources(${OutputELF} PUBLIC $<TARGET_OBJECTS:IWRAMCode>)
+endif()
+
+if(EWRAMSources)
+	target_sources(${OutputELF} PUBLIC $<TARGET_OBJECTS:EWRAMCode>)
 endif()
 
 #====================
