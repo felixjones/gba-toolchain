@@ -5,10 +5,10 @@
     {
       "type": "cppdbg",
       "project": "CMakeLists.txt",
-      "projectTarget": "gbatemplate.elf",
+      "projectTarget": "rom.elf",
       "name": "Remote Debug",
       "MIMode": "gdb",
-      "program": "${workspaceRoot}/out/build/${cmake.name}/gbatemplate.elf",
+      "program": "${workspaceRoot}/out/build/${cmake.name}/rom.elf",
       "targetArchitecture": "arm",
       "miDebuggerServerAddress": "localhost:2345",
       "miDebuggerPath": "${env.DEVKITARM}/bin/arm-none-eabi-gdb.exe"

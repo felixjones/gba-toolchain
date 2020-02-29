@@ -3,22 +3,32 @@
   "tasks": [
     {
       "workingDirectory": "E:/mGBA",
-      "taskLabel": "mGBA GDB server",
+      "taskLabel": "mGBA (ROM) GDB server",
       "appliesTo": "/",
       "type": "launch",
       "command": "mGBA.exe",
       "args": [
-        "-g ${workspaceRoot}/out/build/${cmake.name}/gbatemplate.elf"
+        "-g ${workspaceRoot}/out/build/${cmake.name}/rom.elf"
       ]
     },
     {
       "workingDirectory": "E:/mGBA",
-      "taskLabel": "mGBA",
+      "taskLabel": "mGBA (ROM)",
       "appliesTo": "/",
       "type": "launch",
       "command": "mGBA.exe",
       "args": [
-        "${workspaceRoot}/out/build/${cmake.name}/gbatemplate.gba"
+        "${workspaceRoot}/out/build/${cmake.name}/rom.gba"
+      ]
+    },
+    {
+      "workingDirectory": "E:/mGBA",
+      "taskLabel": "mGBA (Multiboot)",
+      "appliesTo": "/",
+      "type": "launch",
+      "command": "mGBA.exe",
+      "args": [
+        "${workspaceRoot}/out/build/${cmake.name}/multiboot.gba"
       ]
     }
   ]

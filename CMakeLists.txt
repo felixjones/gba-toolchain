@@ -10,15 +10,9 @@ set(PlatformCore			"arm7tdmi")
 set(PlatformArchitecture	"armv4t")
 set(PlatformInstructionSet	"thumb")
 
-if(${CONFIGURATION_NAME} STREQUAL ROM-Debug)
-	set(ExecutableType ROM)
-elseif (${CONFIGURATION_NAME} STREQUAL ROM-Release)
-	set(ExecutableType ROM)
-elseif (${CONFIGURATION_NAME} STREQUAL Multiboot-Debug)
-	set(ExecutableType Multiboot)
-elseif (${CONFIGURATION_NAME} STREQUAL Multiboot-Release)
-	set(ExecutableType Multiboot)
-endif()
+if(NOT CMAKE_BUILD_TYPE) 
+    set(CMAKE_BUILD_TYPE Release)
+endif(NOT CMAKE_BUILD_TYPE)
 
 #====================
 # ARM GNU Toolchain
@@ -67,7 +61,8 @@ endif()
 
 find_program(HasGBAFix "${devkitPro}/tools/bin/gbafix")
 if(HasGBAFix)
-	set(GBAFix ${devkitPro}/tools/bin/gbafix gbatemplate.gba -c${GameID})
+	set(GBAFixROM ${devkitPro}/tools/bin/gbafix rom.gba -c${GameID})
+	set(GBAFixMultiboot ${devkitPro}/tools/bin/gbafix multiboot.gba -c${GameID})
 	message(STATUS "gbafix detected")
 endif()
 
@@ -206,35 +201,64 @@ endif()
 # Specs
 #====================
 
-string(TOLOWER ${ExecutableType} LinkFolder)
-
 if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows)
-	set(CRT0BinaryPath "CMakeFiles/CRT0Code.dir/lib/${LinkFolder}/crt0.s.obj")
-	set(SyscallsBinaryPath "CMakeFiles/CRT0Code.dir/lib/${LinkFolder}/gba-syscalls.c.obj")
+	set(CRT0Output "crt0.s.obj")
+	set(SyscallsOutput "gba-syscalls.c.obj")
 else()
-	set(CRT0BinaryPath "CMakeFiles/CRT0Code.dir/lib/${LinkFolder}/crt0.o")
-	set(SyscallsBinaryPath "CMakeFiles/CRT0Code.dir/lib/${LinkFolder}/gba-syscalls.o")
+	set(CRT0Output "crt0.o")
+	set(SyscallsOutput "gba-syscalls.o")
 endif()
 
-file(GLOB CRT0Source "${PROJECT_SOURCE_DIR}/lib/${LinkFolder}/*.h" "${PROJECT_SOURCE_DIR}/lib/${LinkFolder}/*.s" "${PROJECT_SOURCE_DIR}/lib/${LinkFolder}/*.c")
-add_library(CRT0Code OBJECT ${CRT0Source})
-target_compile_options(CRT0Code PRIVATE "-mthumb")
+#====================
+# Specs ROM
+#====================
 
-message(STATUS "Writing specs")
-string(CONCAT SpecsContents
+set(CRT0ROMOutputPath "${CMAKE_BINARY_DIR}/CMakeFiles/CRT0ROM.dir/lib/rom/${CRT0Output}")
+set(SyscallsROMOutputPath "${CMAKE_BINARY_DIR}/CMakeFiles/CRT0ROM.dir/lib/rom/${SyscallsOutput}")
+
+file(GLOB CRT0ROMSource "${PROJECT_SOURCE_DIR}/lib/rom/*.h" "${PROJECT_SOURCE_DIR}/lib/rom/*.s" "${PROJECT_SOURCE_DIR}/lib/rom/*.c")
+add_library(CRT0ROM OBJECT ${CRT0ROMSource})
+target_compile_options(CRT0ROM PRIVATE "-mthumb")
+
+message(STATUS "Writing ROM specs")
+string(CONCAT SpecsROMContents
 	"%rename link link_b\n"
 	"\n"
 	"*link:\n"
-	"%(link_b) -T ${PROJECT_SOURCE_DIR}/lib/${LinkFolder}/gba.ld%s --gc-sections %:replace-outfile(-lc -lc_nano) %:replace-outfile(-lg -lg_nano) %:replace-outfile(-lrdimon -lrdimon_nano) %:replace-outfile(-lstdc++ -lstdc++_nano) %:replace-outfile(-lsupc++ -lsupc++_nano)\n"
+	"%(link_b) -T ${PROJECT_SOURCE_DIR}/lib/rom/gba.ld%s --gc-sections %:replace-outfile(-lc -lc_nano) %:replace-outfile(-lg -lg_nano) %:replace-outfile(-lrdimon -lrdimon_nano) %:replace-outfile(-lstdc++ -lstdc++_nano) %:replace-outfile(-lsupc++ -lsupc++_nano)\n"
 	"\n"
 	"*startfile:\n"
-	"${CMAKE_BINARY_DIR}/${CRT0BinaryPath}%s crti%O%s crtbegin%O%s ${CMAKE_BINARY_DIR}/${SyscallsBinaryPath}%s\n"
+	"${CRT0ROMOutputPath}%s crti%O%s crtbegin%O%s ${SyscallsROMOutputPath}%s\n"
 	"\n"
 )
-file(WRITE "${CMAKE_BINARY_DIR}/gba.specs" ${SpecsContents})
+file(WRITE "${CMAKE_BINARY_DIR}/rom.specs" ${SpecsROMContents})
 
 #====================
-# CMAKE
+# Specs Multiboot
+#====================
+
+set(CRT0MultibootOutputPath "${CMAKE_BINARY_DIR}/CMakeFiles/CRT0Multiboot.dir/lib/multiboot/${CRT0Output}")
+set(SyscallsMultibootOutputPath "${CMAKE_BINARY_DIR}/CMakeFiles/CRT0Multiboot.dir/lib/multiboot/${SyscallsOutput}")
+
+file(GLOB CRT0MultibootSource "${PROJECT_SOURCE_DIR}/lib/multiboot/*.h" "${PROJECT_SOURCE_DIR}/lib/multiboot/*.s" "${PROJECT_SOURCE_DIR}/lib/multiboot/*.c")
+add_library(CRT0Multiboot OBJECT ${CRT0MultibootSource})
+target_compile_options(CRT0Multiboot PRIVATE "-mthumb")
+
+message(STATUS "Writing Multiboot specs")
+string(CONCAT SpecsMultibootContents
+	"%rename link link_b\n"
+	"\n"
+	"*link:\n"
+	"%(link_b) -T ${PROJECT_SOURCE_DIR}/lib/multiboot/gba.ld%s --gc-sections %:replace-outfile(-lc -lc_nano) %:replace-outfile(-lg -lg_nano) %:replace-outfile(-lrdimon -lrdimon_nano) %:replace-outfile(-lstdc++ -lstdc++_nano) %:replace-outfile(-lsupc++ -lsupc++_nano)\n"
+	"\n"
+	"*startfile:\n"
+	"${CRT0MultibootOutputPath}%s crti%O%s crtbegin%O%s ${SyscallsMultibootOutputPath}%s\n"
+	"\n"
+)
+file(WRITE "${CMAKE_BINARY_DIR}/multiboot.specs" ${SpecsMultibootContents})
+
+#====================
+# CMake
 #====================
 
 set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
@@ -254,42 +278,49 @@ set(CMAKE_NM ${GCCNm})
 set(CMAKE_RANLIB ${GCCRanlib})
 
 set(CMAKE_LINKER "${GCCBin}g++")
-set(LinkerFlags "-specs=${CMAKE_BINARY_DIR}/gba.specs -lc -lstdc++")
 
-set(CMAKE_ASM_LINK_FLAGS "${LinkerFlags}")
+set(CMAKE_ASM_LINK_FLAGS "-lc -lstdc++")
 set(CMAKE_ASM_LINK_EXECUTABLE "<CMAKE_LINKER> <CMAKE_ASM_LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
 
-set(CMAKE_C_LINK_FLAGS "${LinkerFlags}")
+set(CMAKE_C_LINK_FLAGS "-lc -lstdc++")
 set(CMAKE_C_LINK_EXECUTABLE "<CMAKE_LINKER> <CMAKE_C_LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
 
-set(CMAKE_CXX_LINK_FLAGS "${LinkerFlags}")
+set(CMAKE_CXX_LINK_FLAGS "-lc -lstdc++")
 set(CMAKE_CXX_LINK_EXECUTABLE "<CMAKE_LINKER> <CMAKE_CXX_LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
 
 #====================
-# ELF
+# ROM & Multiboot
 #====================
 
-set(OutputELF gbatemplate.elf)
-add_executable(${OutputELF})
+add_executable(rom.elf)
+add_executable(multiboot.elf)
+
+target_link_libraries(rom.elf PRIVATE -specs=${CMAKE_BINARY_DIR}/rom.specs)
+target_link_libraries(multiboot.elf PRIVATE -specs=${CMAKE_BINARY_DIR}/multiboot.specs)
 
 if(MainSources)
-	target_sources(${OutputELF} PUBLIC $<TARGET_OBJECTS:MainCode>)
+	target_sources(rom.elf PUBLIC $<TARGET_OBJECTS:MainCode>)
+	target_sources(multiboot.elf PUBLIC $<TARGET_OBJECTS:MainCode>)
 endif()
 
 if(thumbSources)
-	target_sources(${OutputELF} PUBLIC $<TARGET_OBJECTS:thumbCode>)
+	target_sources(rom.elf PUBLIC $<TARGET_OBJECTS:thumbCode>)
+	target_sources(multiboot.elf PUBLIC $<TARGET_OBJECTS:thumbCode>)
 endif()
 
 if(ARMSources)
-	target_sources(${OutputELF} PUBLIC $<TARGET_OBJECTS:ARMCode>)
+	target_sources(rom.elf PUBLIC $<TARGET_OBJECTS:ARMCode>)
+	target_sources(multiboot.elf PUBLIC $<TARGET_OBJECTS:ARMCode>)
 endif()
 
 if(IWRAMSources)
-	target_sources(${OutputELF} PUBLIC $<TARGET_OBJECTS:IWRAMCode>)
+	target_sources(rom.elf PUBLIC $<TARGET_OBJECTS:IWRAMCode>)
+	target_sources(multiboot.elf PUBLIC $<TARGET_OBJECTS:IWRAMCode>)
 endif()
 
 if(EWRAMSources)
-	target_sources(${OutputELF} PUBLIC $<TARGET_OBJECTS:EWRAMCode>)
+	target_sources(rom.elf PUBLIC $<TARGET_OBJECTS:EWRAMCode>)
+	target_sources(multiboot.elf PUBLIC $<TARGET_OBJECTS:EWRAMCode>)
 endif()
 
 #====================
@@ -298,19 +329,36 @@ endif()
 
 if(HasGBAFix)
 	add_custom_command(
-		TARGET ${OutputELF}
+		TARGET rom.elf
 		POST_BUILD
-		COMMAND ${CMAKE_OBJCOPY} -O binary ${OutputELF} gbatemplate.gba
-		COMMAND ${GBAFix}
+		COMMAND ${CMAKE_OBJCOPY} -O binary rom.elf rom.gba
+		COMMAND ${GBAFixROM}
 		COMMENT "Building ROM and fixing header"
-		BYPRODUCTS gbatemplate.gba
+		BYPRODUCTS rom.gba
+	)
+
+	add_custom_command(
+		TARGET multiboot.elf
+		POST_BUILD
+		COMMAND ${CMAKE_OBJCOPY} -O binary multiboot.elf multiboot.gba
+		COMMAND ${GBAFixMultiboot}
+		COMMENT "Building Multiboot and fixing header"
+		BYPRODUCTS multiboot.gba
 	)
 else()
 	add_custom_command(
-		TARGET ${OutputELF}
+		TARGET rom.elf
 		POST_BUILD
-		COMMAND ${CMAKE_OBJCOPY} -O binary ${OutputELF} gbatemplate.gba
+		COMMAND ${CMAKE_OBJCOPY} -O binary rom.elf rom.gba
 		COMMENT "Building ROM (header not fixed)"
-		BYPRODUCTS gbatemplate.gba
+		BYPRODUCTS rom.gba
+	)
+
+	add_custom_command(
+		TARGET multiboot.elf
+		POST_BUILD
+		COMMAND ${CMAKE_OBJCOPY} -O binary multiboot.elf multiboot.gba
+		COMMENT "Building Multiboot (header not fixed)"
+		BYPRODUCTS multiboot.gba
 	)
 endif()

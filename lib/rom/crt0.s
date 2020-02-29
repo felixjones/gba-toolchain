@@ -88,7 +88,7 @@ _start:
   push  {r0}
 
   @ __libc_fini_array
-  ldr 2, =__libc_fini_array
+  ldr r2, =__libc_fini_array
   bl	.bx_r2
 
   @ Restore result of main

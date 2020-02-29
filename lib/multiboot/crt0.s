@@ -84,7 +84,7 @@ _start:
   mov r0, #0  @ argc
   mov r1, #0  @ argv
   ldr r2, =main
-  bl  bx_r2
+  bl  .bx_r2
 
   @ Store result of main
   push  {r0}
