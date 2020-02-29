@@ -1,3 +1,6 @@
 .vs/
 out/
 arm-gnu-toolchain/
+lib/*/crt0.o
+lib/*/gba-syscalls.o
+lib/*/gba.specs

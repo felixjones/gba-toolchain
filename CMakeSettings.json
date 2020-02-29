@@ -9,16 +9,11 @@
       "cmakeCommandArgs": "",
       "buildCommandArgs": "-v",
       "ctestCommandArgs": "",
-      "inheritEnvironments": [ "gcc-arm" ],
+      "inheritEnvironments": [],
       "variables": [
         {
-          "name": "CMAKE_SYSTEM_NAME",
-          "value": "Generic",
-          "type": "STRING"
-        },
-        {
-          "name": "CMAKE_SYSTEM_PROCESSOR",
-          "value": "arm",
+          "name": "CMAKE_TOOLCHAIN_FILE",
+          "value": "${projectDir}\\arm-gba-toolchain.cmake",
           "type": "STRING"
         },
         {
@@ -73,16 +68,11 @@
       "cmakeCommandArgs": "",
       "buildCommandArgs": "-v",
       "ctestCommandArgs": "",
-      "inheritEnvironments": [ "gcc-arm" ],
+      "inheritEnvironments": [],
       "variables": [
         {
-          "name": "CMAKE_SYSTEM_NAME",
-          "value": "Generic",
-          "type": "STRING"
-        },
-        {
-          "name": "CMAKE_SYSTEM_PROCESSOR",
-          "value": "arm",
+          "name": "CMAKE_TOOLCHAIN_FILE",
+          "value": "${projectDir}\\arm-gba-toolchain.cmake",
           "type": "STRING"
         },
         {
