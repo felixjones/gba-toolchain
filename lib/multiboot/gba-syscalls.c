@@ -8,8 +8,9 @@ char * __env[1] = { 0 };
 char ** environ = __env;
 
 void _exit(__attribute__((unused)) int status) {
-  __asm__ volatile("swi #0x00\n"); /* Soft reset */
-  /* __asm__ volatile("swi #0x26\n"); */ /* Hard reset */
+  void __ewram_start(void);
+
+  __ewram_start();
   __builtin_unreachable();
 }
 

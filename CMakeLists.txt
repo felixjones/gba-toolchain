@@ -216,25 +216,22 @@ else()
 	set(SyscallsBinaryPath "CMakeFiles/CRT0Code.dir/lib/${LinkFolder}/gba-syscalls.o")
 endif()
 
-set(SpecsPath "${CMAKE_BINARY_DIR}/gba.specs")
-if(ExecutableType STREQUAL ROM)	
-	file(GLOB CRT0Source "${PROJECT_SOURCE_DIR}/lib/${LinkFolder}/*.h" "${PROJECT_SOURCE_DIR}/lib/${LinkFolder}/*.s" "${PROJECT_SOURCE_DIR}/lib/${LinkFolder}/*.c")
-	add_library(CRT0Code OBJECT ${CRT0Source})
-	target_compile_options(CRT0Code PRIVATE "-mthumb")
+file(GLOB CRT0Source "${PROJECT_SOURCE_DIR}/lib/${LinkFolder}/*.h" "${PROJECT_SOURCE_DIR}/lib/${LinkFolder}/*.s" "${PROJECT_SOURCE_DIR}/lib/${LinkFolder}/*.c")
+add_library(CRT0Code OBJECT ${CRT0Source})
+target_compile_options(CRT0Code PRIVATE "-mthumb")
 
-	message(STATUS "Writing ROM specs")
-	string(CONCAT SpecsContents
-		"%rename link link_b\n"
-		"\n"
-		"*link:\n"
-		"%(link_b) -T ${PROJECT_SOURCE_DIR}/lib/${LinkFolder}/gba.ld%s --gc-sections\n"
-		"\n"
-		"*startfile:\n"
-		"${CMAKE_BINARY_DIR}/${CRT0BinaryPath}%s crti%O%s crtbegin%O%s ${CMAKE_BINARY_DIR}/${SyscallsBinaryPath}%s\n"
-		"\n"
-	)
-	file(WRITE ${SpecsPath} ${SpecsContents})
-endif()
+message(STATUS "Writing specs")
+string(CONCAT SpecsContents
+	"%rename link link_b\n"
+	"\n"
+	"*link:\n"
+	"%(link_b) -T ${PROJECT_SOURCE_DIR}/lib/${LinkFolder}/gba.ld%s --gc-sections %:replace-outfile(-lc -lc_nano) %:replace-outfile(-lg -lg_nano) %:replace-outfile(-lrdimon -lrdimon_nano) %:replace-outfile(-lstdc++ -lstdc++_nano) %:replace-outfile(-lsupc++ -lsupc++_nano)\n"
+	"\n"
+	"*startfile:\n"
+	"${CMAKE_BINARY_DIR}/${CRT0BinaryPath}%s crti%O%s crtbegin%O%s ${CMAKE_BINARY_DIR}/${SyscallsBinaryPath}%s\n"
+	"\n"
+)
+file(WRITE "${CMAKE_BINARY_DIR}/gba.specs" ${SpecsContents})
 
 #====================
 # CMAKE
@@ -257,7 +254,7 @@ set(CMAKE_NM ${GCCNm})
 set(CMAKE_RANLIB ${GCCRanlib})
 
 set(CMAKE_LINKER "${GCCBin}g++")
-set(LinkerFlags "-specs=${SpecsPath} -lc_nano -lstdc++_nano")
+set(LinkerFlags "-specs=${CMAKE_BINARY_DIR}/gba.specs -lc -lstdc++")
 
 set(CMAKE_ASM_LINK_FLAGS "${LinkerFlags}")
 set(CMAKE_ASM_LINK_EXECUTABLE "<CMAKE_LINKER> <CMAKE_ASM_LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")

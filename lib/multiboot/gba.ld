@@ -3,12 +3,10 @@ OUTPUT_ARCH(arm)
 ENTRY(_start)
 
 MEMORY {
-  rom   : ORIGIN = 0x08000000, LENGTH = 32M
   iwram : ORIGIN = 0x03000000, LENGTH = 32K
   ewram : ORIGIN = 0x02000000, LENGTH = 256K
 }
 
-__rom_start   = ORIGIN(rom);
 __iwram_start = ORIGIN(iwram);
 __iwram_top   = ORIGIN(iwram) + LENGTH(iwram);
 __ewram_start = ORIGIN(ewram);
@@ -17,24 +15,24 @@ __sp_irq      = __iwram_top - 0x60; /* IRQ stack */
 __sp_usr      = __sp_irq - 0xa0; /* User stack */
 
 SECTIONS {
-  . = __rom_start;
+  . = __ewram_start;
 
   .crt0 : {
     KEEP (*(.crt0))
     . = ALIGN(4);
-  } >rom
+  } >ewram
 
   .preinit_array : {
     __preinit_array_start = ABSOLUTE(.);
     KEEP (*(.preinit_array))
     __preinit_array_end = ABSOLUTE(.);
     . = ALIGN(4);
-  } >rom
+  } >ewram
 
   .init : {
     KEEP (*(.init))
     . = ALIGN(4);
-  } >rom
+  } >ewram
 
   .init_array : {
     __init_array_start = ABSOLUTE(.);
@@ -42,12 +40,12 @@ SECTIONS {
     KEEP (*(.init_array))
     __init_array_end = ABSOLUTE(.);
     . = ALIGN(4);
-  } >rom
+  } >ewram
 
   .fini : {
     KEEP (*(.fini))
     . = ALIGN(4);
-  } >rom
+  } >ewram
 
   .fini_array : {
     __fini_array_start = ABSOLUTE(.);
@@ -55,20 +53,20 @@ SECTIONS {
     KEEP (*(.fini_array*))
     __fini_array_end = ABSOLUTE(.);
     . = ALIGN(4);
-  } >rom
+  } >ewram
 
   /* Unwinding (C++ exceptions) */
   .ARM.extab : {
     *(.ARM.extab* .gnu.linkonce.armextab.*)
     . = ALIGN(4);
-  } >rom
+  } >ewram
 
   __exidx_start = .;
 
   .ARM.exidx : {
     *(.ARM.exidx* .gnu.linkonce.armexidx.*)
     . = ALIGN(4);
-  } >rom
+  } >ewram
 
   __exidx_end = .;
 
@@ -78,7 +76,7 @@ SECTIONS {
     KEEP (*(SORT(.ctors.*)))
     KEEP (*(.ctors))
     . = ALIGN(4);
-  } >rom
+  } >ewram
 
   .dtors : {
     KEEP (*crtbegin.o(.dtors))
@@ -86,12 +84,12 @@ SECTIONS {
     KEEP (*(SORT(.dtors.*)))
     KEEP (*(.dtors))
     . = ALIGN(4);
-  } >rom
+  } >ewram
 
   .eh_frame : {
     KEEP (*(.eh_frame))
     . = ALIGN(4);
-  } >rom
+  } >ewram
 
   .text : {
     *(EXCLUDE_FILE (*.iwram*) .text*)
@@ -103,14 +101,14 @@ SECTIONS {
     *(.gnu.warning)
     *(.gnu.linkonce.t*)
     *(.glue_7t) *(.glue_7)
-  } >rom
+  } >ewram
 
   .rodata : {
     *(.rodata)
     *(.rodata.*)
     *(.gnu.linkonce.r*)
     . = ALIGN(4);
-  } >rom
+  } >ewram
 
   /*
   ====================
@@ -151,23 +149,7 @@ SECTIONS {
     __data_end = ABSOLUTE(.);
   } >iwram
 
-  /*
-  ====================
-    ewram
-  ====================
-  */
-
-  /* EWRAM load memory address (source) */
-  __ewram_lma = __data_lma + SIZEOF(.data);
-
-  .ewram __ewram_start : AT (__ewram_lma) {
-    *(.ewram .ewram*)
-    *ewram.*(.text* .data*)
-    . = ALIGN(4);
-    __ewram_end = ABSOLUTE(.);
-  } >ewram
-
-  __rom_end = __ewram_lma + SIZEOF(.ewram);
+  __ewram_end = .;
 
   /*
   ====================
