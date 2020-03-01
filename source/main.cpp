@@ -1,19 +1,8 @@
 ﻿#define EVER ;;
 
-extern int __sp_usr;
-
-[[gnu::constructor]]
-void init() {
-}
-
-[[gnu::destructor]]
-void fini() {
-	*(volatile unsigned int*)0x03000000 = 0xDEADBEEF;
-}
-
 int main(int argc, char* argv[]) {
 	*(volatile unsigned int*)0x04000000 = 0x0403;
-	
+
 	int t = 0;
 	for (EVER) {
 		int x, y;
@@ -23,8 +12,6 @@ int main(int argc, char* argv[]) {
 			}
 		}
 		++t;
-
-		if (t == 10) break;
 	}
 
 	return 0;

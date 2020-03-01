@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.1)
 
-project("GameBoyAdvance" C CXX)
+project("GameBoyAdvance" ASM C CXX)
 set(GameID "GAME")
 
 set(DefaultInstructionSet	"thumb")

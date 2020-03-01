@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.1)
+
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_PROCESSOR arm)
 
@@ -6,10 +8,37 @@ set(PlatformCore			"arm7tdmi")
 set(PlatformArchitecture	"armv4t")
 
 #====================
-# ARM GNU Toolchain
+# gbafix
 #====================
 
-set(ARM_GNU_PATH ${CMAKE_CURRENT_LIST_DIR}/arm-gnu-toolchain)
+set(GBAFIX_PATH "${CMAKE_CURRENT_LIST_DIR}/tools/gbafix")
+set(GBAFIX_URL "https://raw.githubusercontent.com/devkitPro/gba-tools/master/src/gbafix.c")
+if(NOT EXISTS "${GBAFIX_PATH}/")
+	set(GBAFIX_SOURCE_FILE "${GBAFIX_PATH}/gbafix.c")
+	
+	message(STATUS "Downloading gbafix.c from ${GBAFIX_URL} to ${GBAFIX_SOURCE_FILE}")
+    file(DOWNLOAD "${GBAFIX_URL}" "${GBAFIX_SOURCE_FILE}")
+	
+	message(STATUS "Compiling gbafix.c")
+	if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows)
+		execute_process(COMMAND gcc -o "${GBAFIX_PATH}/gbafix.exe" "${GBAFIX_SOURCE_FILE}")
+	else()
+		execute_process(COMMAND gcc -o "${GBAFIX_PATH}/gbafix" "${GBAFIX_SOURCE_FILE}")
+	endif()
+endif()
+
+find_program(HasGBAFix "${GBAFIX_PATH}/gbafix")
+if(HasGBAFix)
+	set(GBAFixROM "${GBAFIX_PATH}/gbafix" rom.gba -c${GameID})
+	set(GBAFixMultiboot "${GBAFIX_PATH}/gbafix" multiboot.gba -c${GameID})
+	message(STATUS "gbafix detected")
+endif()
+
+#====================
+# GNU Arm Embedded Toolchain
+#====================
+
+set(ARM_GNU_PATH "${CMAKE_CURRENT_LIST_DIR}/arm-gnu-toolchain")
 set(ARM_GNU_URL_BASE "https://developer.arm.com/-/media/Files/downloads/gnu-rm")
 
 if(NOT EXISTS "${ARM_GNU_PATH}/arm-none-eabi")
@@ -42,19 +71,28 @@ if(NOT EXISTS "${ARM_GNU_PATH}/arm-none-eabi")
 endif()
 
 #====================
-# DKP Tools
+# gbaplusplus
 #====================
 
-set(devkitPro $ENV{DEVKITPRO})
-if(NOT DEFINED devkitPro)
-	message(STATUS "Failed to locate devkitPro")
-endif()
-
-find_program(HasGBAFix "${devkitPro}/tools/bin/gbafix")
-if(HasGBAFix)
-	set(GBAFixROM "${devkitPro}/tools/bin/gbafix" rom.gba -c${GameID})
-	set(GBAFixMultiboot "${devkitPro}/tools/bin/gbafix" multiboot.gba -c${GameID})
-	message(STATUS "gbafix detected")
+set(GBAPLUSPLUS_PATH "${CMAKE_CURRENT_LIST_DIR}/lib")
+set(GBAPLUSPLUS_URL "https://github.com/felixjones/gbaplusplus/archive/master.zip")
+if(NOT EXISTS "${GBAPLUSPLUS_PATH}/gbaplusplus")
+	set(GBAPLUSPLUS_ARCHIVE_PATH "${GBAPLUSPLUS_PATH}/gbaplusplus.zip")
+	
+	message(STATUS "Downloading gbaplusplus from ${GBAPLUSPLUS_URL} to ${GBAPLUSPLUS_ARCHIVE_PATH}")
+    file(DOWNLOAD "${GBAPLUSPLUS_URL}" "${GBAPLUSPLUS_ARCHIVE_PATH}")
+	
+	message(STATUS "Extracting gbaplusplus to ${GBAPLUSPLUS_PATH}")
+	if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows)
+		execute_process(
+			COMMAND powershell.exe -nologo -noprofile -command "& { Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('${GBAPLUSPLUS_ARCHIVE_PATH}', '${GBAPLUSPLUS_PATH}/'); }"
+		)
+	else()
+		execute_process(
+			COMMAND tar -xvf "${GBAPLUSPLUS_ARCHIVE_PATH}" -C "${GBAPLUSPLUS_PATH}/"
+		)
+	endif()
+	file(RENAME "${GBAPLUSPLUS_PATH}/gbaplusplus-master/" "${GBAPLUSPLUS_PATH}/gbaplusplus/")
 endif()
 
 #====================
@@ -65,7 +103,11 @@ set(GCCBin "${ARM_GNU_PATH}/bin/${PlatformTarget}-")
 
 find_program(HasGCC "${GCCBin}gcc" "${GCCBin}g++")
 if(HasGCC)
-	set(CompilerASM "${GCCBin}gcc")
+	if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows)
+		set(CompilerASM "${GCCBin}as.exe") # For some reason NMake wants a .exe here
+	else()
+		set(CompilerASM "${GCCBin}as")
+	endif()
 	set(CompilerC "${GCCBin}gcc")
 	set(CompilerCXX "${GCCBin}g++")
 	set(CompilerFlags "-Wno-packed-bitfield-compat")
@@ -96,10 +138,10 @@ endif()
 # Language
 #====================
 
-set(ASMFlags "-mcpu=${PlatformCore} -mtune=${PlatformCore} -march=${PlatformArchitecture} -mfloat-abi=soft -Wall -pedantic -pedantic-errors -fomit-frame-pointer -ffast-math")
-set(SharedFlags "${CompilerFlags} ${ASMFlags}")
+set(ASMFlags "-mcpu=${PlatformCore} -mtune=${PlatformCore} -march=${PlatformArchitecture} -mfloat-abi=soft -Wall -Wno-c99-extensions -pedantic -pedantic-errors -fomit-frame-pointer -ffast-math")
+set(SharedFlags "${CompilerFlags} ${ASMFlags} -I${GBAPLUSPLUS_PATH}/gbaplusplus/include/")
 set(CFlags "${SharedFlags}")
-set(CXXFlags "${SharedFlags} -fno-rtti -fno-exceptions -std=c++2a")
+set(CXXFlags "${SharedFlags} -fno-rtti -fno-exceptions")
 
 #====================
 # CMake
@@ -137,6 +179,16 @@ set(CMAKE_C_LINK_EXECUTABLE "<CMAKE_LINKER> <CMAKE_C_LINK_FLAGS> <OBJECTS> -o <T
 
 set(CMAKE_CXX_LINK_FLAGS "-lc -lstdc++")
 set(CMAKE_CXX_LINK_EXECUTABLE "<CMAKE_LINKER> <CMAKE_CXX_LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
+
+if(CMAKE_VERSION VERSION_LESS "3.8")
+    set(CMAKE_CXX_STANDARD 14)
+elseif(CMAKE_VERSION VERSION_LESS "3.11")
+    set(CMAKE_CXX_STANDARD 17)
+else()
+    set(CMAKE_CXX_STANDARD 20)
+endif()
+
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 #====================
 # crt0 / syscalls
