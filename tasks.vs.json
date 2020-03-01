@@ -4,7 +4,7 @@
     {
       "workingDirectory": "${env.MGBA}",
       "taskLabel": "mGBA (ROM) GDB server",
-      "appliesTo": "/",
+      "appliesTo": "*",
       "type": "launch",
       "command": "mGBA",
       "args": [
@@ -14,7 +14,7 @@
     {
       "workingDirectory": "${env.MGBA}",
       "taskLabel": "mGBA (ROM)",
-      "appliesTo": "/",
+      "appliesTo": "*",
       "type": "launch",
       "command": "mGBA",
       "args": [
@@ -24,7 +24,7 @@
     {
       "workingDirectory": "${env.MGBA}",
       "taskLabel": "mGBA (Multiboot)",
-      "appliesTo": "/",
+      "appliesTo": "*",
       "type": "launch",
       "command": "mGBA",
       "args": [

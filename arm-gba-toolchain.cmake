@@ -11,7 +11,7 @@ set(PlatformArchitecture	"armv4t")
 # gbafix
 #====================
 
-set(GBAFIX_PATH "${CMAKE_CURRENT_LIST_DIR}/tools/gbafix")
+set(GBAFIX_PATH "${CMAKE_CURRENT_LIST_DIR}/bin/gbafix")
 set(GBAFIX_URL "https://raw.githubusercontent.com/devkitPro/gba-tools/master/src/gbafix.c")
 if(NOT EXISTS "${GBAFIX_PATH}/")
 	set(GBAFIX_SOURCE_FILE "${GBAFIX_PATH}/gbafix.c")

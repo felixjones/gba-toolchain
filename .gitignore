@@ -5,4 +5,4 @@ lib/*/crt0.o
 lib/*/gba-syscalls.o
 lib/*/gba.specs
 lib/gbaplusplus*
-tools/
+bin/

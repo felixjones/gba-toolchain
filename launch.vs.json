@@ -6,12 +6,43 @@
       "type": "cppdbg",
       "project": "CMakeLists.txt",
       "projectTarget": "rom.elf",
-      "name": "Remote Debug",
+      "name": "mGBA Debug",
       "MIMode": "gdb",
       "program": "${workspaceRoot}/out/build/${cmake.name}/rom.elf",
       "targetArchitecture": "arm",
       "miDebuggerServerAddress": "localhost:2345",
-      "miDebuggerPath": "${workspaceRoot}/arm-gnu-toolchain/bin/arm-none-eabi-gdb.exe"
+      "miDebuggerPath": "${workspaceRoot}/arm-gnu-toolchain/bin/arm-none-eabi-gdb.exe",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        },
+        {
+          "description": "mGBA",
+          "text": "shell start /b ${env.MGBA}/mGBA.exe -g ${workspaceRoot}/out/build/${cmake.name}/rom.elf",
+          "ignoreFailures": false
+        }
+      ]
+    },
+    {
+      "type": "cppdbg",
+      "project": "CMakeLists.txt",
+      "projectTarget": "rom.elf",
+      "name": "Attach Debugger",
+      "MIMode": "gdb",
+      "program": "${workspaceRoot}/out/build/${cmake.name}/rom.elf",
+      "targetArchitecture": "arm",
+      "miDebuggerServerAddress": "localhost:2345",
+      "miDebuggerPath": "${workspaceRoot}/arm-gnu-toolchain/bin/arm-none-eabi-gdb.exe",
+      "request": "attach",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
     }
   ]
 }
