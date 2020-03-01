@@ -65,7 +65,7 @@ if(NOT EXISTS "${ARM_GNU_PATH}/arm-none-eabi")
 		)
 	else()
 		execute_process(
-			COMMAND tar -xvf "${ARM_GNU_ARCHIVE_PATH}" -C "${ARM_GNU_PATH}/"
+			COMMAND tar -xvf "${ARM_GNU_ARCHIVE_PATH}" -C "${ARM_GNU_PATH}/" --strip-components=1
 		)
 	endif()
 endif()
