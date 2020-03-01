@@ -12,11 +12,6 @@
       "inheritEnvironments": [],
       "variables": [
         {
-          "name": "CMAKE_TOOLCHAIN_FILE",
-          "value": "${projectDir}\\arm-gba-toolchain.cmake",
-          "type": "STRING"
-        },
-        {
           "name": "CMAKE_C_FLAGS_DEBUG",
           "value": "-g",
           "type": "STRING"
@@ -57,7 +52,8 @@
           "type": "STRING"
         }
       ],
-      "intelliSenseMode": "linux-gcc-arm"
+      "intelliSenseMode": "linux-gcc-arm",
+      "cmakeToolchain": "${projectDir}\\arm-gba-toolchain.cmake"
     },
     {
       "name": "Release",
@@ -71,11 +67,6 @@
       "inheritEnvironments": [],
       "variables": [
         {
-          "name": "CMAKE_TOOLCHAIN_FILE",
-          "value": "${projectDir}\\arm-gba-toolchain.cmake",
-          "type": "STRING"
-        },
-        {
           "name": "CMAKE_C_FLAGS_DEBUG",
           "value": "-g",
           "type": "STRING"
@@ -116,7 +107,8 @@
           "type": "STRING"
         }
       ],
-      "intelliSenseMode": "linux-gcc-arm"
+      "intelliSenseMode": "linux-gcc-arm",
+      "cmakeToolchain": "${projectDir}\\arm-gba-toolchain.cmake"
     }
   ]
 }

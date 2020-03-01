@@ -15,10 +15,10 @@ set(GBAFIX_PATH "${CMAKE_CURRENT_LIST_DIR}/tools/gbafix")
 set(GBAFIX_URL "https://raw.githubusercontent.com/devkitPro/gba-tools/master/src/gbafix.c")
 if(NOT EXISTS "${GBAFIX_PATH}/")
 	set(GBAFIX_SOURCE_FILE "${GBAFIX_PATH}/gbafix.c")
-	
+
 	message(STATUS "Downloading gbafix.c from ${GBAFIX_URL} to ${GBAFIX_SOURCE_FILE}")
     file(DOWNLOAD "${GBAFIX_URL}" "${GBAFIX_SOURCE_FILE}")
-	
+
 	message(STATUS "Compiling gbafix.c")
 	if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows)
 		execute_process(COMMAND gcc -o "${GBAFIX_PATH}/gbafix.exe" "${GBAFIX_SOURCE_FILE}")
@@ -78,10 +78,10 @@ set(GBAPLUSPLUS_PATH "${CMAKE_CURRENT_LIST_DIR}/lib")
 set(GBAPLUSPLUS_URL "https://github.com/felixjones/gbaplusplus/archive/master.zip")
 if(NOT EXISTS "${GBAPLUSPLUS_PATH}/gbaplusplus")
 	set(GBAPLUSPLUS_ARCHIVE_PATH "${GBAPLUSPLUS_PATH}/gbaplusplus.zip")
-	
+
 	message(STATUS "Downloading gbaplusplus from ${GBAPLUSPLUS_URL} to ${GBAPLUSPLUS_ARCHIVE_PATH}")
     file(DOWNLOAD "${GBAPLUSPLUS_URL}" "${GBAPLUSPLUS_ARCHIVE_PATH}")
-	
+
 	message(STATUS "Extracting gbaplusplus to ${GBAPLUSPLUS_PATH}")
 	if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows)
 		execute_process(
@@ -112,7 +112,7 @@ if(HasGCC)
 	set(CompilerCXX "${GCCBin}g++")
 	set(CompilerFlags "-Wno-packed-bitfield-compat")
 else()
-	message(FATAL_ERROR "Failed to locate GCC")
+	message(FATAL_ERROR "Failed to locate ARM GNU GCC")
 endif()
 
 set(GCCAs "${GCCBin}as")

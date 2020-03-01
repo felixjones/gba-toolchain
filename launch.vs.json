@@ -11,7 +11,7 @@
       "program": "${workspaceRoot}/out/build/${cmake.name}/rom.elf",
       "targetArchitecture": "arm",
       "miDebuggerServerAddress": "localhost:2345",
-      "miDebuggerPath": "${env.DEVKITARM}/bin/arm-none-eabi-gdb.exe"
+      "miDebuggerPath": "${workspaceRoot}/arm-gnu-toolchain/bin/arm-none-eabi-gdb.exe"
     }
   ]
 }
