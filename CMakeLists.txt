@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.1)
 project("GameBoyAdvance" ASM C CXX)
 set(GameID "GAME")
 
-set(DefaultInstructionSet	"thumb")
+set(DefaultInstructionSet "thumb")
 
 if(NOT CMAKE_BUILD_TYPE) 
     set(CMAKE_BUILD_TYPE Release)
@@ -170,3 +170,9 @@ else()
 		BYPRODUCTS multiboot.gba
 	)
 endif()
+
+#====================
+# ARM Debugger
+#====================
+
+file(COPY "${GDBPath}/${GDBExecutable}" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")

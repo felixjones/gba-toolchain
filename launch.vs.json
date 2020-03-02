@@ -8,10 +8,10 @@
       "projectTarget": "rom.elf",
       "name": "mGBA Debug",
       "MIMode": "gdb",
-      "program": "${workspaceRoot}/out/build/${cmake.name}/rom.elf",
+      "program": "${cmake.buildRoot}/rom.elf",
       "targetArchitecture": "arm",
       "miDebuggerServerAddress": "localhost:2345",
-      "miDebuggerPath": "${workspaceRoot}/arm-gnu-toolchain/bin/arm-none-eabi-gdb.exe",
+      "miDebuggerPath": "${cmake.buildRoot}/arm-none-eabi-gdb.exe",
       "setupCommands": [
         {
           "description": "Enable pretty-printing for gdb",
@@ -31,10 +31,10 @@
       "projectTarget": "rom.elf",
       "name": "Attach Debugger",
       "MIMode": "gdb",
-      "program": "${workspaceRoot}/out/build/${cmake.name}/rom.elf",
+      "program": "${cmake.buildRoot}/rom.elf",
       "targetArchitecture": "arm",
       "miDebuggerServerAddress": "localhost:2345",
-      "miDebuggerPath": "${workspaceRoot}/arm-gnu-toolchain/bin/arm-none-eabi-gdb.exe",
+      "miDebuggerPath": "${cmake.buildRoot}/arm-none-eabi-gdb.exe",
       "request": "attach",
       "setupCommands": [
         {

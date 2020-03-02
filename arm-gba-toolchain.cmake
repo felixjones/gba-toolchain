@@ -18,8 +18,8 @@ if(NOT EXISTS "${GBAFIX_PATH}/")
 
 	message(STATUS "Downloading gbafix.c from ${GBAFIX_URL} to ${GBAFIX_SOURCE_FILE}")
     file(DOWNLOAD "${GBAFIX_URL}" "${GBAFIX_SOURCE_FILE}")
-
-	message(STATUS "Compiling gbafix.c")
+	
+	message(STATUS "Compiling gbafix")
 	if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows)
 		execute_process(COMMAND gcc -o "${GBAFIX_PATH}/gbafix.exe" "${GBAFIX_SOURCE_FILE}")
 	else()
@@ -68,6 +68,13 @@ if(NOT EXISTS "${ARM_GNU_PATH}/arm-none-eabi")
 			COMMAND tar -xvf "${ARM_GNU_ARCHIVE_PATH}" -C "${ARM_GNU_PATH}/" --strip-components=1
 		)
 	endif()
+endif()
+
+set(GDBPath "${CMAKE_CURRENT_LIST_DIR}/arm-gnu-toolchain/bin")
+if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows)
+	set(GDBExecutable "arm-none-eabi-gdb.exe")
+else()
+	set(GDBExecutable "arm-none-eabi-gdb")
 endif()
 
 #====================
