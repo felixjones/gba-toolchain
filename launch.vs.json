@@ -20,7 +20,7 @@
         },
         {
           "description": "mGBA",
-          "text": "shell start /b ${env.MGBA}/mGBA.exe -g ${workspaceRoot}/out/build/${cmake.name}/rom.elf",
+          "text": "shell start /b ${env.MGBA}/mGBA.exe -g ${cmake.buildRoot}/rom.elf",
           "ignoreFailures": false
         }
       ]
