@@ -1,4 +1,7 @@
 .vs/
+.vscode/*
+!.vscode/cmake-kits.json
+build/
 out/
 arm-gnu-toolchain/
 lib/*/crt0.o

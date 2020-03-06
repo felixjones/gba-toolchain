@@ -7,6 +7,10 @@ set(PlatformTarget			"arm-none-eabi")
 set(PlatformCore			"arm7tdmi")
 set(PlatformArchitecture	"armv4t")
 
+#====================
+# OS stuff
+#====================
+
 if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows)
 	set(BinarySuffix ".exe")
 	set(DCMAKE_SH="CMAKE_SH-NOTFOUND")
@@ -171,26 +175,14 @@ set(CMAKE_STRIP ${GCCStrip})
 set(CMAKE_NM ${GCCNm})
 set(CMAKE_RANLIB ${GCCRanlib})
 
-set(CMAKE_LINKER ${GCCBin}g++)
-
 set(CMAKE_ASM_LINK_FLAGS "-lc")
-set(CMAKE_ASM_LINK_EXECUTABLE "<CMAKE_LINKER> <CMAKE_ASM_LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
+set(CMAKE_ASM_LINK_EXECUTABLE "${GCCBin}g++${BinarySuffix} <CMAKE_ASM_LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
 
 set(CMAKE_C_LINK_FLAGS "-lc")
-set(CMAKE_C_LINK_EXECUTABLE "<CMAKE_LINKER> <CMAKE_C_LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
+set(CMAKE_C_LINK_EXECUTABLE "${GCCBin}g++${BinarySuffix} <CMAKE_C_LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
 
 set(CMAKE_CXX_LINK_FLAGS "-lc -lstdc++")
-set(CMAKE_CXX_LINK_EXECUTABLE "<CMAKE_LINKER> <CMAKE_CXX_LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
-
-if(CMAKE_VERSION VERSION_LESS "3.8")
-    set(CMAKE_CXX_STANDARD 14)
-elseif(CMAKE_VERSION VERSION_LESS "3.11")
-    set(CMAKE_CXX_STANDARD 17)
-else()
-    set(CMAKE_CXX_STANDARD 20)
-endif()
-
-set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_LINK_EXECUTABLE "${GCCBin}g++${BinarySuffix} <CMAKE_CXX_LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
 
 #====================
 # crt0 / syscalls
