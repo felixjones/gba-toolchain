@@ -7,6 +7,13 @@ set(PlatformTarget			"arm-none-eabi")
 set(PlatformCore			"arm7tdmi")
 set(PlatformArchitecture	"armv4t")
 
+if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows)
+	set(BinarySuffix ".exe")
+	set(DCMAKE_SH="CMAKE_SH-NOTFOUND")
+else()
+	set(BinarySuffix "")
+endif()
+
 #====================
 # gbafix
 #====================
@@ -20,11 +27,7 @@ if(NOT EXISTS "${GBAFIX_PATH}/")
     file(DOWNLOAD "${GBAFIX_URL}" "${GBAFIX_SOURCE_FILE}")
 	
 	message(STATUS "Compiling gbafix")
-	if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows)
-		execute_process(COMMAND gcc -o "${GBAFIX_PATH}/gbafix.exe" "${GBAFIX_SOURCE_FILE}")
-	else()
-		execute_process(COMMAND gcc -o "${GBAFIX_PATH}/gbafix" "${GBAFIX_SOURCE_FILE}")
-	endif()
+	execute_process(COMMAND gcc -o "${GBAFIX_PATH}/gbafix${BinarySuffix}" "${GBAFIX_SOURCE_FILE}")
 endif()
 
 find_program(HasGBAFix "${GBAFIX_PATH}/gbafix")
@@ -71,11 +74,7 @@ if(NOT EXISTS "${ARM_GNU_PATH}/arm-none-eabi")
 endif()
 
 set(GDBPath "${CMAKE_CURRENT_LIST_DIR}/arm-gnu-toolchain/bin")
-if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows)
-	set(GDBExecutable "arm-none-eabi-gdb.exe")
-else()
-	set(GDBExecutable "arm-none-eabi-gdb")
-endif()
+set(GDBExecutable "arm-none-eabi-gdb${BinarySuffix}")
 
 #====================
 # gbaplusplus
@@ -110,24 +109,20 @@ set(GCCBin "${ARM_GNU_PATH}/bin/${PlatformTarget}-")
 
 find_program(HasGCC "${GCCBin}gcc" "${GCCBin}g++")
 if(HasGCC)
-	if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows)
-		set(CompilerASM "${GCCBin}as.exe") # For some reason NMake wants a .exe here
-	else()
-		set(CompilerASM "${GCCBin}as")
-	endif()
-	set(CompilerC "${GCCBin}gcc")
-	set(CompilerCXX "${GCCBin}g++")
+	set(CompilerASM "${GCCBin}as${BinarySuffix}")
+	set(CompilerC "${GCCBin}gcc${BinarySuffix}")
+	set(CompilerCXX "${GCCBin}g++${BinarySuffix}")
 	set(CompilerFlags "-Wno-packed-bitfield-compat")
 else()
 	message(FATAL_ERROR "Failed to locate ARM GNU GCC")
 endif()
 
-set(GCCAs "${GCCBin}as")
-set(GCCAr "${GCCBin}gcc-ar")
-set(GCCObjcopy "${GCCBin}objcopy")
-set(GCCStrip "${GCCBin}strip")
-set(GCCNm "${GCCBin}gcc-nm")
-set(GCCRanlib "${GCCBin}gcc-ranlib")
+set(GCCAs "${GCCBin}as${BinarySuffix}")
+set(GCCAr "${GCCBin}gcc-ar${BinarySuffix}")
+set(GCCObjcopy "${GCCBin}objcopy${BinarySuffix}")
+set(GCCStrip "${GCCBin}strip${BinarySuffix}")
+set(GCCNm "${GCCBin}gcc-nm${BinarySuffix}")
+set(GCCRanlib "${GCCBin}gcc-ranlib${BinarySuffix}")
 
 #====================
 # Clang
@@ -135,8 +130,8 @@ set(GCCRanlib "${GCCBin}gcc-ranlib")
 
 find_program(HasClang "clang" "clang++")
 if(HasClang)
-	set(CompilerC "clang")
-	set(CompilerCXX "clang++")
+	set(CompilerC "clang${BinarySuffix}")
+	set(CompilerCXX "clang++${BinarySuffix}")
 	set(CompilerFlags "--target=arm-arm-none-eabi -mfpu=none -isystem${ARM_GNU_PATH}/arm-none-eabi/include/ -I${ARM_GNU_PATH}/arm-none-eabi/include/c++/9.2.1/ -I${ARM_GNU_PATH}/arm-none-eabi/include/c++/9.2.1/arm-none-eabi/")
 	message(STATUS "Clang activated")
 endif()

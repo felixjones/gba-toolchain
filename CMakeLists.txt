@@ -10,6 +10,12 @@ if(NOT CMAKE_BUILD_TYPE)
 endif(NOT CMAKE_BUILD_TYPE)
 
 #====================
+# ARM Debugger
+#====================
+
+file(COPY "${GDBPath}/${GDBExecutable}" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+
+#====================
 # Headers
 #====================
 
@@ -18,6 +24,7 @@ include_directories("${CMAKE_CURRENT_SOURCE_DIR}/source")
 file(GLOB Headers
 	"source/*.h"
 	"source/*.hpp"
+	"${GBAPLUSPLUS_PATH}/gbaplusplus/include/gba/*.hpp"
 )
 
 #====================
@@ -170,9 +177,3 @@ else()
 		BYPRODUCTS multiboot.gba
 	)
 endif()
-
-#====================
-# ARM Debugger
-#====================
-
-file(COPY "${GDBPath}/${GDBExecutable}" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
