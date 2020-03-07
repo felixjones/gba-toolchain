@@ -1,7 +1,26 @@
-﻿#define EVER ;;
+﻿#include <gba/gba.hpp>
+
+#define EVER ;;
+
+using namespace gba;
 
 int main(int argc, char* argv[]) {
-	*(volatile unsigned int*)0x04000000 = 0x0403;
+	io::interrupt_handler::write( interrupt_handler::empty_handler );
+
+	io::display_control::write( display_control::make( []( display_control& v ) {
+		v.mode = 3;
+		v.background_layer2 = true;
+	} ) );
+
+	io::display_status::write( display_status::make( []( display_status& v ) {
+		v.emit_vblank = true;
+	} ) );
+
+	io::interrupt_mask_enable::write( interrupt::make( []( interrupt& v ) {
+		v.vblank = true;
+	} ) );
+
+	io::interrupt_master_enable::write( true );
 
 	int t = 0;
 	for (EVER) {
@@ -12,6 +31,8 @@ int main(int argc, char* argv[]) {
 			}
 		}
 		++t;
+
+		bios::vblank_intr_wait();
 	}
 
 	return 0;

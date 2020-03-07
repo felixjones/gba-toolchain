@@ -136,7 +136,7 @@ find_program(HasClang "clang" "clang++")
 if(HasClang)
 	set(CompilerC "clang${BinarySuffix}")
 	set(CompilerCXX "clang++${BinarySuffix}")
-	set(CompilerFlags "--target=arm-arm-none-eabi -mfpu=none -isystem${ARM_GNU_PATH}/arm-none-eabi/include/ -I${ARM_GNU_PATH}/arm-none-eabi/include/c++/9.2.1/ -I${ARM_GNU_PATH}/arm-none-eabi/include/c++/9.2.1/arm-none-eabi/")
+	set(CompilerFlags "--target=arm-arm-none-eabi -mfpu=none -isystem${ARM_GNU_PATH}/arm-none-eabi/include/ -I${ARM_GNU_PATH}/arm-none-eabi/include/ -I${ARM_GNU_PATH}/arm-none-eabi/include/c++/9.2.1/ -I${ARM_GNU_PATH}/arm-none-eabi/include/c++/9.2.1/arm-none-eabi/")
 	message(STATUS "Clang activated")
 endif()
 
@@ -144,7 +144,7 @@ endif()
 # Language
 #====================
 
-set(ASMFlags "-mcpu=${PlatformCore} -mtune=${PlatformCore} -march=${PlatformArchitecture} -mfloat-abi=soft -Wall -Wno-c99-extensions -pedantic -pedantic-errors -fomit-frame-pointer -ffast-math")
+set(ASMFlags "-mcpu=${PlatformCore} -mtune=${PlatformCore} -march=${PlatformArchitecture} -mfloat-abi=soft -Wall -Wpedantic -fomit-frame-pointer -ffast-math")
 set(SharedFlags "${CompilerFlags} ${ASMFlags} -I${GBAPLUSPLUS_PATH}/gbaplusplus/include/")
 set(CFlags "${SharedFlags}")
 set(CXXFlags "${SharedFlags} -fno-rtti -fno-exceptions")
@@ -152,6 +152,16 @@ set(CXXFlags "${SharedFlags} -fno-rtti -fno-exceptions")
 #====================
 # CMake
 #====================
+
+if(${CMAKE_VERSION} VERSION_LESS_EQUAL "3.8")
+    set(CMAKE_CXX_STANDARD 14)
+elseif(${CMAKE_VERSION} VERSION_LESS "3.12")
+    set(CMAKE_CXX_STANDARD 17)
+else()
+    set(CMAKE_CXX_STANDARD 20)
+endif()
+
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CMAKE_ASM_COMPILER_WORKS 1)
 set(CMAKE_C_COMPILER_WORKS 1)
