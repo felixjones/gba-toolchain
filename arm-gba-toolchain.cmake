@@ -198,10 +198,12 @@ set(CMAKE_CXX_LINK_EXECUTABLE "${GCCBin}g++${BinarySuffix} <CMAKE_CXX_LINK_FLAGS
 # crt0 / syscalls
 #====================
 
-message(STATUS "Compiling crt0.o & gba-syscalls.o")
+message(STATUS "Compiling crt0.o, gba-irq.o and gba-syscalls.o")
 execute_process(
 	COMMAND ${CMAKE_ASM_COMPILER} -c -o ${CMAKE_CURRENT_LIST_DIR}/lib/rom/crt0.o ${CMAKE_CURRENT_LIST_DIR}/lib/rom/crt0.s
 	COMMAND ${CMAKE_ASM_COMPILER} -c -o ${CMAKE_CURRENT_LIST_DIR}/lib/multiboot/crt0.o ${CMAKE_CURRENT_LIST_DIR}/lib/multiboot/crt0.s
+	COMMAND ${CMAKE_ASM_COMPILER} -c -o ${CMAKE_CURRENT_LIST_DIR}/lib/rom/gba-irq.o ${CMAKE_CURRENT_LIST_DIR}/lib/rom/gba-irq.s
+	COMMAND ${CMAKE_ASM_COMPILER} -c -o ${CMAKE_CURRENT_LIST_DIR}/lib/multiboot/gba-irq.o ${CMAKE_CURRENT_LIST_DIR}/lib/multiboot/gba-irq.s
 	COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAGS} -mthumb -O3 -I${ARM_GNU_PATH}/arm-none-eabi/include/ -c -o ${CMAKE_CURRENT_LIST_DIR}/lib/rom/gba-syscalls.o ${CMAKE_CURRENT_LIST_DIR}/lib/rom/gba-syscalls.c
 	COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAGS} -mthumb -O3 -I${ARM_GNU_PATH}/arm-none-eabi/include/ -c -o ${CMAKE_CURRENT_LIST_DIR}/lib/multiboot/gba-syscalls.o ${CMAKE_CURRENT_LIST_DIR}/lib/multiboot/gba-syscalls.c
 )
@@ -211,6 +213,7 @@ execute_process(
 #====================
 
 set(CRT0ROMOutputPath "${CMAKE_CURRENT_LIST_DIR}/lib/rom/crt0.o")
+set(IrqROMOutputPath "${CMAKE_CURRENT_LIST_DIR}/lib/rom/gba-irq.o")
 set(SyscallsROMOutputPath "${CMAKE_CURRENT_LIST_DIR}/lib/rom/gba-syscalls.o")
 
 message(STATUS "Writing ROM specs")
@@ -221,7 +224,7 @@ string(CONCAT SpecsROMContents
 	"%(link_b) -T ${CMAKE_CURRENT_LIST_DIR}/lib/rom/gba.ld%s --gc-sections %:replace-outfile(-lc -lc_nano) %:replace-outfile(-lg -lg_nano) %:replace-outfile(-lrdimon -lrdimon_nano) %:replace-outfile(-lstdc++ -lstdc++_nano) %:replace-outfile(-lsupc++ -lsupc++_nano)\n"
 	"\n"
 	"*startfile:\n"
-	"${CRT0ROMOutputPath}%s crti%O%s crtbegin%O%s ${SyscallsROMOutputPath}%s\n"
+	"${CRT0ROMOutputPath}%s crti%O%s crtbegin%O%s ${SyscallsROMOutputPath}%s ${IrqROMOutputPath}%s\n"
 	"\n"
 )
 file(WRITE "${CMAKE_CURRENT_LIST_DIR}/lib/rom/gba.specs" ${SpecsROMContents})
@@ -231,6 +234,7 @@ file(WRITE "${CMAKE_CURRENT_LIST_DIR}/lib/rom/gba.specs" ${SpecsROMContents})
 #====================
 
 set(CRT0MultibootOutputPath "${CMAKE_CURRENT_LIST_DIR}/lib/multiboot/crt0.o")
+set(IrqMultibootOutputPath "${CMAKE_CURRENT_LIST_DIR}/lib/multiboot/gba-irq.o")
 set(SyscallsMultibootOutputPath "${CMAKE_CURRENT_LIST_DIR}/lib/multiboot/gba-syscalls.o")
 
 message(STATUS "Writing Multiboot specs")
@@ -241,7 +245,7 @@ string(CONCAT SpecsMultibootContents
 	"%(link_b) -T ${CMAKE_CURRENT_LIST_DIR}/lib/multiboot/gba.ld%s --gc-sections %:replace-outfile(-lc -lc_nano) %:replace-outfile(-lg -lg_nano) %:replace-outfile(-lrdimon -lrdimon_nano) %:replace-outfile(-lstdc++ -lstdc++_nano) %:replace-outfile(-lsupc++ -lsupc++_nano)\n"
 	"\n"
 	"*startfile:\n"
-	"${CRT0MultibootOutputPath}%s crti%O%s crtbegin%O%s ${SyscallsMultibootOutputPath}%s\n"
+	"${CRT0MultibootOutputPath}%s crti%O%s crtbegin%O%s ${SyscallsMultibootOutputPath}%s ${IrqMultibootOutputPath}%s\n"
 	"\n"
 )
 file(WRITE "${CMAKE_CURRENT_LIST_DIR}/lib/multiboot/gba.specs" ${SpecsMultibootContents})

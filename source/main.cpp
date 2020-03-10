@@ -19,8 +19,8 @@ static void vblank_handler() {
 	t++;
 }
 
-[[gnu::section( ".iwram" )]]
-static constexpr auto irq_handler = jump_table( interrupt_condition { 0x1, vblank_handler } );
+[[gnu::section( ".iwram.data" )]]
+static const auto irq_handler = jump_table( interrupt_condition { 0x1, vblank_handler } );
 
 int main(int argc, char* argv[]) {
 	interrupt_handler::set( irq_handler );

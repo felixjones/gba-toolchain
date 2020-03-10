@@ -57,18 +57,16 @@ SECTIONS {
   } >ewram
 
   /* Unwinding (C++ exceptions) */
-  .ARM.extab : {
+  .ARM.extab : ALIGN(4) {
     *(.ARM.extab* .gnu.linkonce.armextab.*)
-    . = ALIGN(4);
   } >ewram
+
+  . = ALIGN(4);
 
   __exidx_start = .;
-
-  .ARM.exidx : {
+  .ARM.exidx : ALIGN(4) {
     *(.ARM.exidx* .gnu.linkonce.armexidx.*)
-    . = ALIGN(4);
   } >ewram
-
   __exidx_end = .;
 
   .ctors : {
