@@ -8,6 +8,13 @@ set(PlatformCore			"arm7tdmi")
 set(PlatformArchitecture	"armv4t")
 
 #====================
+# Compiler stuff
+#====================
+
+set(UseClang		true)
+set(UseModernCxx	true)
+
+#====================
 # OS stuff
 #====================
 
@@ -79,6 +86,7 @@ endif()
 
 set(GDBPath "${CMAKE_CURRENT_LIST_DIR}/arm-gnu-toolchain/bin")
 set(GDBExecutable "arm-none-eabi-gdb${BinarySuffix}")
+set(IncludePaths "-I${ARM_GNU_PATH}/arm-none-eabi/include/ -I${ARM_GNU_PATH}/arm-none-eabi/include/c++/9.2.1/ -I${ARM_GNU_PATH}/arm-none-eabi/include/c++/9.2.1/arm-none-eabi/")
 
 #====================
 # gbaplusplus
@@ -116,7 +124,7 @@ if(HasGCC)
 	set(CompilerASM "${GCCBin}as${BinarySuffix}")
 	set(CompilerC "${GCCBin}gcc${BinarySuffix}")
 	set(CompilerCXX "${GCCBin}g++${BinarySuffix}")
-	set(CompilerFlags "-Wno-packed-bitfield-compat")
+	set(CompilerFlags "-Wno-packed-bitfield-compat ${IncludePaths}")
 else()
 	message(FATAL_ERROR "Failed to locate ARM GNU GCC")
 endif()
@@ -132,12 +140,14 @@ set(GCCRanlib "${GCCBin}gcc-ranlib${BinarySuffix}")
 # Clang
 #====================
 
-find_program(HasClang "clang" "clang++")
-if(HasClang)
-	set(CompilerC "clang${BinarySuffix}")
-	set(CompilerCXX "clang++${BinarySuffix}")
-	set(CompilerFlags "--target=arm-arm-none-eabi -mfpu=none -isystem${ARM_GNU_PATH}/arm-none-eabi/include/ -I${ARM_GNU_PATH}/arm-none-eabi/include/ -I${ARM_GNU_PATH}/arm-none-eabi/include/c++/9.2.1/ -I${ARM_GNU_PATH}/arm-none-eabi/include/c++/9.2.1/arm-none-eabi/")
-	message(STATUS "Clang activated")
+if(${UseClang}) 
+	find_program(HasClang "clang" "clang++")
+	if(HasClang)
+		set(CompilerC "clang${BinarySuffix}")
+		set(CompilerCXX "clang++${BinarySuffix}")
+		set(CompilerFlags "--target=arm-arm-none-eabi -mfpu=none -isystem${ARM_GNU_PATH}/arm-none-eabi/include/ ${IncludePaths}")
+		message(STATUS "Clang activated")
+	endif()
 endif()
 
 #====================
@@ -153,12 +163,16 @@ set(CXXFlags "${SharedFlags} -fno-rtti -fno-exceptions")
 # CMake
 #====================
 
-if(${CMAKE_VERSION} VERSION_LESS_EQUAL "3.8")
-    set(CMAKE_CXX_STANDARD 14)
-elseif(${CMAKE_VERSION} VERSION_LESS "3.12")
-    set(CMAKE_CXX_STANDARD 17)
+if(${UseModernCxx})
+	if(${CMAKE_VERSION} VERSION_LESS_EQUAL "3.8")
+		set(CMAKE_CXX_STANDARD 14)
+	elseif(${CMAKE_VERSION} VERSION_LESS "3.12")
+		set(CMAKE_CXX_STANDARD 17)
+	else()
+		set(CMAKE_CXX_STANDARD 20)
+	endif()
 else()
-    set(CMAKE_CXX_STANDARD 20)
+	set(CMAKE_CXX_STANDARD 14)
 endif()
 
 set(CMAKE_CXX_EXTENSIONS OFF)
