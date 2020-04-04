@@ -25,7 +25,7 @@ static void vblank( interrupt i ) {
 				cd
 			)
 		);
-		io::background2_origin::write( { 120, 80 } );
+		io::background2_offset::write( { 120, 80 } );
 	}
 }
 

@@ -12,6 +12,7 @@
       "targetArchitecture": "arm",
       "miDebuggerServerAddress": "localhost:2345",
       "miDebuggerPath": "${cmake.buildRoot}/arm-none-eabi-gdb.exe",
+      "timeout": 10000,
       "setupCommands": [
         {
           "description": "Enable pretty-printing for gdb",
@@ -20,7 +21,7 @@
         },
         {
           "description": "mGBA",
-          "text": "shell start /b ${env.MGBA}/mGBA.exe -g ${cmake.buildRoot}/rom.elf",
+          "text": "shell start /b \"\" \"${env.MGBA}/mGBA.exe\" -g ${cmake.buildRoot}/rom.elf",
           "ignoreFailures": false
         }
       ]
