@@ -93,3 +93,5 @@ int _wait(int * status) {
 int _write(int file, char * ptr, int len) {
   return 0;
 }
+
+void __sync_synchronize() {}

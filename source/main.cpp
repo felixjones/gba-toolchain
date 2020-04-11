@@ -1,7 +1,5 @@
 ﻿#include <gba/gba.hpp>
 
-#include <cmath>
-
 #define EVER ;;
 
 using namespace gba;
@@ -10,27 +8,31 @@ using namespace gba;
 fixed_point<int, 6> d;
 
 [[gnu::target( "arm" ), gnu::section( ".iwram" )]]
-static void vblank( interrupt i ) {
+static void interrupt_handler_proc( interrupt i ) {
 	if ( i.vblank ) {
 		d.data()++;
 		const auto cd = math::cos( d );
 		const auto sd = math::sin( d );
-		io::background2_matrix::write(
-			io::background2_matrix::type(
-				cd, -sd,
-				sd, cd
-			)
-			*
-			io::background2_matrix::type(
-				cd
-			)
+
+		const auto rotation = io::background2_matrix::type(
+			cd, -sd,
+			sd, cd
 		);
-		io::background2_offset::write( { 120, 80 } );
+		
+		const auto scale = io::background2_matrix::type( cd );
+
+		const auto matrix = rotation * scale;
+
+		constexpr auto pivot = io::background2_offset::type { 120, 80 };
+		constexpr auto translation = io::background2_offset::type { -120, -80 };
+
+		io::background2_matrix::write( matrix );
+		io::background2_offset::write( pivot + ( translation * matrix ) );
 	}
 }
 
-int main(int argc, char* argv[]) {
-	interrupt_handler::set( vblank );
+int main( int argc, char* argv[] ) {
+	interrupt_handler::set( interrupt_handler_proc );
 
 	io::display_control::write( make<display_control>( []( auto& v ) {
 		v.mode = 3;
