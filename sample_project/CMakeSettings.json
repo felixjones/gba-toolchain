@@ -53,7 +53,7 @@
         }
       ],
       "intelliSenseMode": "linux-gcc-arm",
-      "cmakeToolchain": "${projectDir}\\arm-gba-toolchain.cmake"
+      "cmakeToolchain": "${projectDir}\\..\\arm-gba-toolchain.cmake"
     },
     {
       "name": "Release",
@@ -108,7 +108,7 @@
         }
       ],
       "intelliSenseMode": "linux-gcc-arm",
-      "cmakeToolchain": "${projectDir}\\arm-gba-toolchain.cmake"
+      "cmakeToolchain": "${projectDir}\\..\\arm-gba-toolchain.cmake"
     }
   ]
 }

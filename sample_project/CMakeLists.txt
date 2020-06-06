@@ -147,7 +147,7 @@ if(HasGBAFix)
 		TARGET rom.elf
 		POST_BUILD
 		COMMAND ${CMAKE_OBJCOPY} -O binary rom.elf rom.gba
-		COMMAND ${GBAFixROM}
+		COMMAND "${GBAFIX_PATH}/gbafix" rom.gba -c${GameID}
 		COMMENT "Building ROM and fixing header"
 		BYPRODUCTS rom.gba
 	)
@@ -156,7 +156,7 @@ if(HasGBAFix)
 		TARGET multiboot.elf
 		POST_BUILD
 		COMMAND ${CMAKE_OBJCOPY} -O binary multiboot.elf multiboot.gba
-		COMMAND ${GBAFixMultiboot}
+		COMMAND "${GBAFIX_PATH}/gbafix" multiboot.gba -c${GameID}
 		COMMENT "Building Multiboot and fixing header"
 		BYPRODUCTS multiboot.gba
 	)

@@ -43,8 +43,6 @@ endif()
 
 find_program(HasGBAFix "${GBAFIX_PATH}/gbafix")
 if(HasGBAFix)
-	set(GBAFixROM "${GBAFIX_PATH}/gbafix" rom.gba -c${GameID})
-	set(GBAFixMultiboot "${GBAFIX_PATH}/gbafix" multiboot.gba -c${GameID})
 	message(STATUS "gbafix detected")
 endif()
 
