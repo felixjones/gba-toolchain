@@ -3,16 +3,16 @@ cmake_minimum_required(VERSION 3.1)
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_PROCESSOR arm)
 
-set(PlatformTarget			"arm-none-eabi")
-set(PlatformCore			"arm7tdmi")
-set(PlatformArchitecture	"armv4t")
+set(PlatformTarget "arm-none-eabi")
+set(PlatformCore "arm7tdmi")
+set(PlatformArchitecture "armv4t")
 
 #====================
 # Compiler stuff
 #====================
 
-set(UseClang		true)
-set(UseModernCxx	true)
+set(UseClang true)
+set(UseModernCxx true)
 
 #====================
 # OS stuff
@@ -30,13 +30,13 @@ endif()
 #====================
 
 set(GBAFIX_PATH "${CMAKE_CURRENT_LIST_DIR}/bin/gbafix")
-set(GBAFIX_URL "https://raw.githubusercontent.com/devkitPro/gba-tools/master/src/gbafix.c")
 if(NOT EXISTS "${GBAFIX_PATH}/")
 	set(GBAFIX_SOURCE_FILE "${GBAFIX_PATH}/gbafix.c")
+	set(GBAFIX_URL "https://raw.githubusercontent.com/devkitPro/gba-tools/master/src/gbafix.c")
 
 	message(STATUS "Downloading gbafix.c from ${GBAFIX_URL} to ${GBAFIX_SOURCE_FILE}")
     file(DOWNLOAD "${GBAFIX_URL}" "${GBAFIX_SOURCE_FILE}")
-	
+
 	message(STATUS "Compiling gbafix")
 	execute_process(COMMAND gcc -o "${GBAFIX_PATH}/gbafix${BinarySuffix}" "${GBAFIX_SOURCE_FILE}")
 endif()
@@ -51,17 +51,18 @@ endif()
 #====================
 
 set(ARM_GNU_PATH "${CMAKE_CURRENT_LIST_DIR}/arm-gnu-toolchain")
-set(ARM_GNU_URL_BASE "https://developer.arm.com/-/media/Files/downloads/gnu-rm")
-
 if(NOT EXISTS "${ARM_GNU_PATH}/arm-none-eabi")
+	set(ARM_GNU_URL_BASE "https://developer.arm.com/-/media/Files/downloads/gnu-rm")
+	set(ARM_GNU_URL "${ARM_GNU_URL_BASE}/9-2020q2/gcc-arm-none-eabi-9-2020-q2-update")
+
 	if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows)
-		set(ARM_GNU_URL "${ARM_GNU_URL_BASE}/9-2019q4/gcc-arm-none-eabi-9-2019-q4-major-win32.zip")
+		set(ARM_GNU_URL "${ARM_GNU_URL}-win32.zip")
 		set(ARM_GNU_ARCHIVE_PATH "${ARM_GNU_PATH}/gcc-arm-none-eabi.zip")
 	elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL Linux)
-		set(ARM_GNU_URL "${ARM_GNU_URL_BASE}/9-2019q4/gcc-arm-none-eabi-9-2019-q4-major-x86_64-linux.tar.bz2")
+		set(ARM_GNU_URL "${ARM_GNU_URL}-x86_64-linux.tar.bz2")
 		set(ARM_GNU_ARCHIVE_PATH "${ARM_GNU_PATH}/gcc-arm-none-eabi.tar.bz2")
 	elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL Darwin)
-		set(ARM_GNU_URL "${ARM_GNU_URL_BASE}/9-2019q4/gcc-arm-none-eabi-9-2019-q4-major-mac.tar.bz2")
+		set(ARM_GNU_URL "${ARM_GNU_URL}-mac.tar.bz2")
 		set(ARM_GNU_ARCHIVE_PATH "${ARM_GNU_PATH}/gcc-arm-none-eabi.tar.bz2")
 	else()
 		message(FATAL_ERROR "Failed to recognise host operating system (${CMAKE_HOST_SYSTEM_NAME})")
@@ -84,16 +85,16 @@ endif()
 
 set(GDBPath "${CMAKE_CURRENT_LIST_DIR}/arm-gnu-toolchain/bin")
 set(GDBExecutable "arm-none-eabi-gdb${BinarySuffix}")
-set(IncludePaths "-I${ARM_GNU_PATH}/arm-none-eabi/include/ -I${ARM_GNU_PATH}/arm-none-eabi/include/c++/9.2.1/ -I${ARM_GNU_PATH}/arm-none-eabi/include/c++/9.2.1/arm-none-eabi/")
+set(IncludePaths "-I${ARM_GNU_PATH}/arm-none-eabi/include/ -I${ARM_GNU_PATH}/arm-none-eabi/include/c++/9.3.1/ -I${ARM_GNU_PATH}/arm-none-eabi/include/c++/9.3.1/arm-none-eabi/ -I${ARM_GNU_PATH}/lib/gcc/arm-none-eabi/9.3.1/include")
 
 #====================
 # gbaplusplus
 #====================
 
 set(GBAPLUSPLUS_PATH "${CMAKE_CURRENT_LIST_DIR}/lib")
-set(GBAPLUSPLUS_URL "https://github.com/felixjones/gbaplusplus/archive/master.zip")
 if(NOT EXISTS "${GBAPLUSPLUS_PATH}/gbaplusplus")
 	set(GBAPLUSPLUS_ARCHIVE_PATH "${GBAPLUSPLUS_PATH}/gbaplusplus.zip")
+	set(GBAPLUSPLUS_URL "https://github.com/felixjones/gbaplusplus/archive/master.zip")
 
 	message(STATUS "Downloading gbaplusplus from ${GBAPLUSPLUS_URL} to ${GBAPLUSPLUS_ARCHIVE_PATH}")
     file(DOWNLOAD "${GBAPLUSPLUS_URL}" "${GBAPLUSPLUS_ARCHIVE_PATH}")
@@ -138,7 +139,7 @@ set(GCCRanlib "${GCCBin}gcc-ranlib${BinarySuffix}")
 # Clang
 #====================
 
-if(${UseClang}) 
+if(${UseClang})
 	find_program(HasClang "clang" "clang++")
 	if(HasClang)
 		set(CompilerC "clang${BinarySuffix}")

@@ -19,12 +19,9 @@ file(COPY "${GDBPath}/${GDBExecutable}" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}
 # Headers
 #====================
 
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/source")
-
 file(GLOB Headers
 	"source/*.h"
 	"source/*.hpp"
-	"${GBAPLUSPLUS_PATH}/gbaplusplus/include/gba/*.hpp"
 )
 
 #====================
