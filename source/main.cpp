@@ -31,7 +31,12 @@ static void interrupt_handler_proc( interrupt i ) {
 	}
 }
 
+static mgba::streambuf buf( mgba::log_info );
+
 int main( int argc, char* argv[] ) {
+	auto stream = std::ostream( &buf );
+	stream << "Hello, world!" << std::flush;
+
 	interrupt_handler::set( interrupt_handler_proc );
 
 	io::display_control::write( make<display_control>( []( auto& v ) {

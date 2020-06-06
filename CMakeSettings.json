@@ -13,7 +13,7 @@
       "variables": [
         {
           "name": "CMAKE_C_FLAGS_DEBUG",
-          "value": "-g",
+          "value": "-O0 -g3",
           "type": "STRING"
         },
         {
@@ -33,7 +33,7 @@
         },
         {
           "name": "CMAKE_CXX_FLAGS_DEBUG",
-          "value": "-g",
+          "value": "-O0  -g3",
           "type": "STRING"
         },
         {
