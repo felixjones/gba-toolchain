@@ -94,4 +94,6 @@ int _write(int file, char * ptr, int len) {
   return 0;
 }
 
+#if !defined( __clang__ )
 void __sync_synchronize() {}
+#endif
