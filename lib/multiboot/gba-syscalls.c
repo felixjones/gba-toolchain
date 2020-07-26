@@ -95,6 +95,4 @@ int _write(int file, char * ptr, int len) {
   return 0;
 }
 
-#if !__has_builtin( __sync_synchronize )
-void __attribute__((weak)) __sync_synchronize() {}
-#endif
+void __sync_synchronize() {}

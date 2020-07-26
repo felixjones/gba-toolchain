@@ -101,6 +101,84 @@ if(EWRAMSources)
 endif()
 
 #====================
+# ROM Data
+#====================
+
+file(GLOB romData "data/rom/*")
+
+foreach(file ${romData})
+	file(RELATIVE_PATH fileName ${CMAKE_CURRENT_SOURCE_DIR}/data/rom/ ${file})
+	set(fileOutput ${CMAKE_CURRENT_BINARY_DIR}/data/rom/${fileName}.o)
+	
+	add_custom_command(
+		OUTPUT ${fileOutput}
+		COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR}/data/rom/ && ${CMAKE_LINKER} -r -b binary -o ${fileOutput} ${fileName}
+		COMMAND ${CMAKE_OBJCOPY} --prefix-symbol=_rom --rename-section .data=.rodata,alloc,load,readonly,data,contents ${fileOutput} ${fileOutput}
+	)
+
+	set_source_files_properties(
+	  ${fileOutput}
+	  PROPERTIES
+	  EXTERNAL_OBJECT true
+	  GENERATED true
+	)
+
+	list(APPEND DataObjects ${fileOutput})
+endforeach()
+
+#====================
+# IWRAM Data
+#====================
+
+file(GLOB iwramData "data/iwram/*")
+
+foreach(file ${iwramData})
+	file(RELATIVE_PATH fileName ${CMAKE_CURRENT_SOURCE_DIR}/data/iwram/ ${file})
+	set(fileOutput ${CMAKE_CURRENT_BINARY_DIR}/data/iwram/${fileName}.o)
+	
+	add_custom_command(
+		OUTPUT ${fileOutput}
+		COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR}/data/iwram/ && ${CMAKE_LINKER} -r -b binary -o ${fileOutput} ${fileName}
+		COMMAND ${CMAKE_OBJCOPY} --prefix-symbol=_iwram --rename-section .data=.iwram.rodata,alloc,load,readonly,data,contents ${fileOutput} ${fileOutput}
+	)
+
+	set_source_files_properties(
+	  ${fileOutput}
+	  PROPERTIES
+	  EXTERNAL_OBJECT true
+	  GENERATED true
+	)
+
+	list(APPEND DataObjects ${fileOutput})
+endforeach()
+
+#====================
+# EWRAM Data
+#====================
+
+file(GLOB ewramData "data/ewram/*")
+
+foreach(file ${ewramData})
+	file(RELATIVE_PATH fileName ${CMAKE_CURRENT_SOURCE_DIR}/data/ewram/ ${file})
+	set(fileOutput ${CMAKE_CURRENT_BINARY_DIR}/data/ewram/${fileName}.o)
+	
+	add_custom_command(
+		OUTPUT ${fileOutput}
+		COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR}/data/ewram/ && ${CMAKE_LINKER} -r -b binary -o ${fileOutput} ${fileName}
+		COMMAND ${CMAKE_OBJCOPY} --prefix-symbol=_ewram --rename-section .data=.ewram.rodata,alloc,load,readonly,data,contents ${fileOutput} ${fileOutput}
+	)
+
+	set_source_files_properties(
+	  ${fileOutput}
+	  PROPERTIES
+	  EXTERNAL_OBJECT true
+	  GENERATED true
+	)
+
+	list(APPEND DataObjects ${fileOutput})
+endforeach()
+
+#====================
 # ROM & Multiboot
 #====================
 
@@ -133,6 +211,18 @@ endif()
 if(EWRAMSources)
 	target_sources(rom.elf PUBLIC $<TARGET_OBJECTS:EWRAMCode>)
 	target_sources(multiboot.elf PUBLIC $<TARGET_OBJECTS:EWRAMCode>)
+endif()
+
+#====================
+# Data library
+#====================
+
+if(DataObjects)
+	add_library(DataLib STATIC ${DataObjects})
+	set_target_properties(DataLib PROPERTIES LINKER_LANGUAGE C)
+	
+	target_link_libraries(rom.elf PRIVATE DataLib)
+	target_link_libraries(multiboot.elf PRIVATE DataLib)
 endif()
 
 #====================

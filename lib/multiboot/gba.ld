@@ -103,8 +103,11 @@ SECTIONS {
   } >ewram
 
   .rodata : {
+    *(EXCLUDE_FILE (*.iwram*) .rodata*)
     *(.rodata)
     *(.rodata.*)
+    *(.ewram.rodata)
+    *(.ewram.rodata.*)
     *(.gnu.linkonce.r*)
     . = ALIGN(4);
   } >ewram
