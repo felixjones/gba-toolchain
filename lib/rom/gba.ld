@@ -118,7 +118,8 @@ SECTIONS {
   __iwram_lma = .;
 
   .iwram __iwram_start : AT (__iwram_lma) {
-    *.iwram.* (.text* .data*)
+    *(.iwram .iwram*)
+    *iwram.*(.text* .data*)
     . = ALIGN(4);
     __iwram_end = ABSOLUTE(.);
   } >iwram
@@ -156,7 +157,8 @@ SECTIONS {
   __ewram_lma = __data_lma + SIZEOF(.data);
 
   .ewram __ewram_start : AT (__ewram_lma) {
-    *.ewram.* (.text* .data*)
+    *(.ewram .ewram*)
+    *ewram.*(.text* .data*)
     . = ALIGN(4);
     __ewram_end = ABSOLUTE(.);
   } >ewram

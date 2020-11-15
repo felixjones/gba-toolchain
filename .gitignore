@@ -2,4 +2,5 @@
 arm-gnu-toolchain/
 lib/tonc/
 tools/
+devel/
 dependencies.txt
