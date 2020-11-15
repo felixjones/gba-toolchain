@@ -23,11 +23,9 @@ function(gba_find_compilers)
 
     if(DEFINED CLANG_C_COMPILER AND DEFINED CLANG_CXX_COMPILER)
         if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows)
-            find_program(GNU_OBJCOPY NAMES "${ARM_GNU_TOOLS}/bin/arm-none-eabi-objcopy.exe")
             find_program(GNU_C_COMPILER NAMES "${ARM_GNU_TOOLS}/bin/arm-none-eabi-gcc.exe")
             find_program(GNU_CXX_COMPILER NAMES "${ARM_GNU_TOOLS}/bin/arm-none-eabi-g++.exe")
         else()
-            find_program(GNU_OBJCOPY NAMES "${ARM_GNU_TOOLS}/bin/arm-none-eabi-objcopy")
             find_program(GNU_C_COMPILER NAMES "${ARM_GNU_TOOLS}/bin/arm-none-eabi-gcc")
             find_program(GNU_CXX_COMPILER NAMES "${ARM_GNU_TOOLS}/bin/arm-none-eabi-g++")
         endif()
@@ -49,8 +47,6 @@ function(gba_find_compilers)
 
         set(CMAKE_C_LINK_EXECUTABLE "\"${GNU_C_COMPILER}\" -g <CMAKE_C_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>" PARENT_SCOPE)
         set(CMAKE_CXX_LINK_EXECUTABLE "\"${GNU_CXX_COMPILER}\" -g <CMAKE_CXX_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>" PARENT_SCOPE)
-
-        set(CMAKE_OBJCOPY "${GNU_OBJCOPY}" PARENT_SCOPE)
     else()
         if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows)
             set(CMAKE_C_COMPILER "${ARM_GNU_TOOLS}/bin/arm-none-eabi-gcc.exe" PARENT_SCOPE)
@@ -60,6 +56,17 @@ function(gba_find_compilers)
             set(CMAKE_CXX_COMPILER "${ARM_GNU_TOOLS}/bin/arm-none-eabi-g++" PARENT_SCOPE)
         endif()
     endif()
+
+    #====================
+    # objcopy
+    #====================
+
+    if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows)
+        find_program(GNU_OBJCOPY NAMES "${ARM_GNU_TOOLS}/bin/arm-none-eabi-objcopy.exe")
+    else()
+        find_program(GNU_OBJCOPY NAMES "${ARM_GNU_TOOLS}/bin/arm-none-eabi-objcopy")
+    endif()
+    set(CMAKE_OBJCOPY "${GNU_OBJCOPY}" PARENT_SCOPE)
 
     #====================
     # ASM
