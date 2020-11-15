@@ -1,4 +1,4 @@
-﻿#include "toolbox.hpp"
+#include "toolbox.hpp"
 
 int main( int argc, char * argv[] ) {
     reg::dispcnt_set( display_control().mode( 3 ).background( 2 ) );

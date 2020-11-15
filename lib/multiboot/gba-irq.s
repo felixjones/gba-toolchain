@@ -5,7 +5,7 @@
   .section .iwram,"ax",%progbits
   .align 2
   .arm
-  
+
   .global _gba_intr_empty
 _gba_intr_empty:
   mov r3, #0x4000000
@@ -14,7 +14,7 @@ _gba_intr_empty:
   add r3, r3, #0x200
   strh r2, [r3, #2]
   mov pc, lr
-  
+
 
   .global _gba_intr_wrapped
 _gba_intr_wrapped:
@@ -45,7 +45,7 @@ _gba_intr_wrapped:
   msr cpsr_c, #0x92
   mov pc, lr
 
-  
+
   .global _gba_intr_jump_table
 _gba_intr_jump_table:
   mov r3, #0x4000000 @ REG_BASE
@@ -75,7 +75,7 @@ _gba_intr_jump_table:
 
   tst r1, r0
   beq .continue
-		
+
   ldr r1, [r2, #4]
 
   push {r0-r3, lr}
