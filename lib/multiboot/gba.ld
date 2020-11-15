@@ -116,7 +116,8 @@ SECTIONS {
   __iwram_lma = .;
 
   .iwram __iwram_start : AT (__iwram_lma) {
-    *.iwram.* (.text* .data*)
+    *(.iwram .iwram*)
+    *iwram.*(.text* .data*)
     . = ALIGN(4);
     __iwram_end = ABSOLUTE(.);
   } >iwram
