@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="BranchesTreeState">
+    <expand>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </expand>
+    <select />
+  </component>
+  <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
+    <generated>
+      <config projectName="cplusplus" targetName="cplusplus" />
+      <config projectName="cplusplus" targetName="rom" />
+    </generated>
+  </component>
+  <component name="CMakeSettings">
+    <configurations>
+      <configuration PROFILE_NAME="Debug" CONFIG_NAME="Debug" TOOLCHAIN_NAME="MinGW (gba-toolchain)" GENERATION_OPTIONS="-DCMAKE_TOOLCHAIN_FILE=../../arm-gba-toolchain.cmake" />
+      <configuration PROFILE_NAME="Debug Clang" CONFIG_NAME="Debug" TOOLCHAIN_NAME="MinGW (gba-toolchain)" GENERATION_OPTIONS="-DCMAKE_TOOLCHAIN_FILE=../../arm-gba-toolchain.cmake -DUSE_CLANG=ON" />
+      <configuration PROFILE_NAME="Release" CONFIG_NAME="Release" TOOLCHAIN_NAME="MinGW (gba-toolchain)" GENERATION_OPTIONS="-DCMAKE_TOOLCHAIN_FILE=../../arm-gba-toolchain.cmake" />
+      <configuration PROFILE_NAME="Release Clang" CONFIG_NAME="Release" TOOLCHAIN_NAME="MinGW (gba-toolchain)" GENERATION_OPTIONS="-DCMAKE_TOOLCHAIN_FILE=../../arm-gba-toolchain.cmake -DUSE_CLANG=ON" />
+    </configurations>
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="6a79b511-16fb-4f54-b4c1-3e9b277a6881" name="Default Changelist" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
+  </component>
+  <component name="ProjectId" id="1kIsGVGVQxTacAkzt1QEr9OiqMO" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="cf.first.check.clang-format" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="nodejs_package_manager_path" value="npm" />
+    <property name="settings.editor.selected.configurable" value="CMakeSettings" />
+  </component>
+  <component name="RunAnythingCache">
+    <option name="myCommands">
+      <command value="mGBA Debug Clang" />
+    </option>
+  </component>
+  <component name="RunManager" selected="CMake Application.cplusplus">
+    <configuration name="cplusplus" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="cplusplus" TARGET_NAME="cplusplus" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="cplusplus" RUN_TARGET_NAME="cplusplus">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <list>
+      <item itemvalue="CMake Application.cplusplus" />
+      <item itemvalue="Embedded GDB Server.mGBA Debug" />
+      <item itemvalue="Embedded GDB Server.mGBA Debug Clang" />
+    </list>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="6a79b511-16fb-4f54-b4c1-3e9b277a6881" name="Default Changelist" comment="" />
+      <created>1605399346383</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1605399346383</updated>
+      <workItem from="1605399347702" duration="221000" />
+      <workItem from="1605399578646" duration="115000" />
+      <workItem from="1605399990513" duration="8000" />
+      <workItem from="1605400041922" duration="58000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="734" y="355" width="1092" height="714" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1605400069157">
+      <screen x="0" y="0" width="2560" height="1400" />
+    </state>
+    <state x="734" y="355" width="1092" height="714" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.2560.1400/-1440.-557.1440.2520@0.0.2560.1400" timestamp="1605400069157" />
+    <state x="1060" y="455" key="FileChooserDialogImpl" timestamp="1605399565827">
+      <screen x="0" y="0" width="2560" height="1400" />
+    </state>
+    <state x="1060" y="455" key="FileChooserDialogImpl/0.0.2560.1400/-1440.-557.1440.2520@0.0.2560.1400" timestamp="1605399565827" />
+    <state width="2517" height="492" key="GridCell.Tab.0.bottom" timestamp="1605399694143">
+      <screen x="0" y="0" width="2560" height="1400" />
+    </state>
+    <state width="2517" height="492" key="GridCell.Tab.0.bottom/0.0.2560.1400/-1440.-557.1440.2520@0.0.2560.1400" timestamp="1605399694143" />
+    <state width="2517" height="492" key="GridCell.Tab.0.center" timestamp="1605399694143">
+      <screen x="0" y="0" width="2560" height="1400" />
+    </state>
+    <state width="2517" height="492" key="GridCell.Tab.0.center/0.0.2560.1400/-1440.-557.1440.2520@0.0.2560.1400" timestamp="1605399694143" />
+    <state width="2517" height="492" key="GridCell.Tab.0.left" timestamp="1605399694143">
+      <screen x="0" y="0" width="2560" height="1400" />
+    </state>
+    <state width="2517" height="492" key="GridCell.Tab.0.left/0.0.2560.1400/-1440.-557.1440.2520@0.0.2560.1400" timestamp="1605399694143" />
+    <state width="2517" height="492" key="GridCell.Tab.0.right" timestamp="1605399694143">
+      <screen x="0" y="0" width="2560" height="1400" />
+    </state>
+    <state width="2517" height="492" key="GridCell.Tab.0.right/0.0.2560.1400/-1440.-557.1440.2520@0.0.2560.1400" timestamp="1605399694143" />
+    <state width="2517" height="492" key="GridCell.Tab.1.bottom" timestamp="1605399694143">
+      <screen x="0" y="0" width="2560" height="1400" />
+    </state>
+    <state width="2517" height="492" key="GridCell.Tab.1.bottom/0.0.2560.1400/-1440.-557.1440.2520@0.0.2560.1400" timestamp="1605399694143" />
+    <state width="2517" height="492" key="GridCell.Tab.1.center" timestamp="1605399694143">
+      <screen x="0" y="0" width="2560" height="1400" />
+    </state>
+    <state width="2517" height="492" key="GridCell.Tab.1.center/0.0.2560.1400/-1440.-557.1440.2520@0.0.2560.1400" timestamp="1605399694143" />
+    <state width="2517" height="492" key="GridCell.Tab.1.left" timestamp="1605399694143">
+      <screen x="0" y="0" width="2560" height="1400" />
+    </state>
+    <state width="2517" height="492" key="GridCell.Tab.1.left/0.0.2560.1400/-1440.-557.1440.2520@0.0.2560.1400" timestamp="1605399694143" />
+    <state width="2517" height="492" key="GridCell.Tab.1.right" timestamp="1605399694143">
+      <screen x="0" y="0" width="2560" height="1400" />
+    </state>
+    <state width="2517" height="492" key="GridCell.Tab.1.right/0.0.2560.1400/-1440.-557.1440.2520@0.0.2560.1400" timestamp="1605399694143" />
+    <state width="2517" height="492" key="GridCell.Tab.2.bottom" timestamp="1605399694143">
+      <screen x="0" y="0" width="2560" height="1400" />
+    </state>
+    <state width="2517" height="492" key="GridCell.Tab.2.bottom/0.0.2560.1400/-1440.-557.1440.2520@0.0.2560.1400" timestamp="1605399694143" />
+    <state width="2517" height="492" key="GridCell.Tab.2.center" timestamp="1605399694143">
+      <screen x="0" y="0" width="2560" height="1400" />
+    </state>
+    <state width="2517" height="492" key="GridCell.Tab.2.center/0.0.2560.1400/-1440.-557.1440.2520@0.0.2560.1400" timestamp="1605399694143" />
+    <state width="2517" height="492" key="GridCell.Tab.2.left" timestamp="1605399694143">
+      <screen x="0" y="0" width="2560" height="1400" />
+    </state>
+    <state width="2517" height="492" key="GridCell.Tab.2.left/0.0.2560.1400/-1440.-557.1440.2520@0.0.2560.1400" timestamp="1605399694143" />
+    <state width="2517" height="492" key="GridCell.Tab.2.right" timestamp="1605399694143">
+      <screen x="0" y="0" width="2560" height="1400" />
+    </state>
+    <state width="2517" height="492" key="GridCell.Tab.2.right/0.0.2560.1400/-1440.-557.1440.2520@0.0.2560.1400" timestamp="1605399694143" />
+    <state x="781" y="345" key="SettingsEditor" timestamp="1605399621114">
+      <screen x="0" y="0" width="2560" height="1400" />
+    </state>
+    <state x="781" y="345" key="SettingsEditor/0.0.2560.1400/-1440.-557.1440.2520@0.0.2560.1400" timestamp="1605399621114" />
+    <state x="936" y="330" width="672" height="677" key="run.anything.popup" timestamp="1605399534424">
+      <screen x="0" y="0" width="2560" height="1400" />
+    </state>
+    <state x="936" y="330" width="672" height="677" key="run.anything.popup/0.0.2560.1400/-1440.-557.1440.2520@0.0.2560.1400" timestamp="1605399534424" />
+  </component>
+</project>

@@ -93,10 +93,7 @@ SECTIONS {
   } >rom
 
   .text : {
-    *(EXCLUDE_FILE (*.iwram*) .text*)
-    *(EXCLUDE_FILE (*.ewram*) .text*)
-    *(.text)
-    *(.text.*)
+    *(EXCLUDE_FILE (*.iwram.* *.ewram.*) .text*)
     *(.stub)
     /* .gnu.warning sections are handled specially by elf32.em.  */
     *(.gnu.warning)
@@ -121,8 +118,7 @@ SECTIONS {
   __iwram_lma = .;
 
   .iwram __iwram_start : AT (__iwram_lma) {
-    *(.iwram .iwram*)
-    *iwram.*(.text* .data*)
+    *.iwram.* (.text* .data*)
     . = ALIGN(4);
     __iwram_end = ABSOLUTE(.);
   } >iwram
@@ -160,8 +156,7 @@ SECTIONS {
   __ewram_lma = __data_lma + SIZEOF(.data);
 
   .ewram __ewram_start : AT (__ewram_lma) {
-    *(.ewram .ewram*)
-    *ewram.*(.text* .data*)
+    *.ewram.* (.text* .data*)
     . = ALIGN(4);
     __ewram_end = ABSOLUTE(.);
   } >ewram

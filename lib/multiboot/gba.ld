@@ -91,10 +91,7 @@ SECTIONS {
   } >ewram
 
   .text : {
-    *(EXCLUDE_FILE (*.iwram*) .text*)
-    *(EXCLUDE_FILE (*.ewram*) .text*)
-    *(.text)
-    *(.text.*)
+    *(EXCLUDE_FILE (*.iwram.*) .text*)
     *(.stub)
     /* .gnu.warning sections are handled specially by elf32.em.  */
     *(.gnu.warning)
@@ -103,11 +100,8 @@ SECTIONS {
   } >ewram
 
   .rodata : {
-    *(EXCLUDE_FILE (*.iwram*) .rodata*)
     *(.rodata)
     *(.rodata.*)
-    *(.ewram.rodata)
-    *(.ewram.rodata.*)
     *(.gnu.linkonce.r*)
     . = ALIGN(4);
   } >ewram
@@ -122,8 +116,7 @@ SECTIONS {
   __iwram_lma = .;
 
   .iwram __iwram_start : AT (__iwram_lma) {
-    *(.iwram .iwram*)
-    *iwram.*(.text* .data*)
+    *.iwram.* (.text* .data*)
     . = ALIGN(4);
     __iwram_end = ABSOLUTE(.);
   } >iwram
