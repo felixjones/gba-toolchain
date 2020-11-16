@@ -10,7 +10,7 @@ MEMORY {
 
 __rom_start   = ORIGIN(rom);
 __iwram_start = ORIGIN(iwram) + 0x4;
-__iwram_top   = ORIGIN(iwram) + LENGTH(iwram) - 0x4;
+__iwram_top   = ORIGIN(iwram) + LENGTH(iwram);
 __ewram_start = ORIGIN(ewram);
 __ewram_top   = ORIGIN(ewram) + LENGTH(ewram); /* Heap end */
 __sp_irq      = __iwram_top - 0x60; /* IRQ stack */

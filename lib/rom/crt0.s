@@ -47,6 +47,16 @@ _start:
 
   .thumb
 .thumb_start:
+  @ Slow copy IWRAM: __aeabi_memclr4 and __aeabi_memcpy4 might be in there
+  ldr	r0, =__iwram_lma
+  ldr	r1, =__iwram_start
+  ldr	r2, =__iwram_end
+.iwram_copy:
+  ldm   r0!, {r3-r7}
+  stm   r1!, {r3-r7}
+  cmp   r1, r2
+  blt	.iwram_copy
+
   @ Clear bss
   ldr	r0, =__bss_start
   ldr	r1, =__bss_end
@@ -57,13 +67,6 @@ _start:
   ldr	r0, =__data_start
   ldr	r1, =__data_lma
   ldr	r2, =__data_end
-  sub	r2, r0
-  bl	__aeabi_memcpy4
-
-  @ Copy IWRAM
-  ldr	r0, =__iwram_start
-  ldr	r1, =__iwram_lma
-  ldr	r2, =__iwram_end
   sub	r2, r0
   bl	__aeabi_memcpy4
 

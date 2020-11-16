@@ -81,6 +81,12 @@ endfunction()
 
 function(gba_target_link_tonc target)
     add_subdirectory("${GBA_TOOLCHAIN_LIB_TONC_DIR}" "./tonc")
-    add_dependencies(${target} tonc)
+    target_link_libraries(${target} PRIVATE tonc)
     target_include_directories(${target} PUBLIC "${GBA_TOOLCHAIN_LIB_TONC_DIR}/include")
+endfunction()
+
+function(gba_target_link_agb_abi target)
+    add_subdirectory("${GBA_TOOLCHAIN_LIB_AGBABI_DIR}" "./agbabi")
+    target_link_libraries(${target} PRIVATE agbabi)
+    target_include_directories(${target} PUBLIC "${GBA_TOOLCHAIN_LIB_AGBABI_DIR}/include")
 endfunction()
