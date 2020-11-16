@@ -67,7 +67,7 @@ char * _sbrk(int incr) {
   extern char __ewram_top;
   static char * heap_end = &__ewram_end;
 
-  if (heap_end + incr > &__ewram_top) {
+  if (( uintptr_t ) (heap_end + incr) > ( uintptr_t ) &__ewram_top) {
       errno = ENOMEM;
       return (char *) -1;
   }
