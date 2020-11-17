@@ -8,6 +8,8 @@ CMake based toolchain for GBA homebrew development.
 
 All the setup is performed via CMake. This allows any CMake compatible IDE to work out of the box.
 
+Add the toolchain to your CMake project with `-DCMAKE_TOOLCHAIN_FILE=path/to/arm-gba-toolchain.cmake`, this defines `GBA_TOOLCHAIN` which can be tested for on your cross-platform CMake project.
+
 ## Internet connection (initial setup)
 
 The `arm-gba-toolchain.cmake` script will attempt to download the following dependencies
@@ -30,6 +32,9 @@ project(my_gba_project)
 
 add_executable(gba_example main.c)
 set_target_properties(gba_example PROPERTIES SUFFIX ".elf") # Building gba_example.elf
+
+# activate & link GBA optimized ABI library
+gba_target_link_agb_abi(gba_example)
 
 # activate & link tonc dependency
 gba_target_link_tonc(gba_example)
