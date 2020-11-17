@@ -22,7 +22,7 @@ The `arm-gba-toolchain.cmake` script will attempt to download the following depe
 
 gbafix requires a host compiler, such as Visual Studio's CL.exe, GCC or Clang.
 
-## Example CMake
+# Example CMake
 
 This example CMake has the source file `main.c` and builds `gba_example.elf` and `example_out.gba`.
 
@@ -58,6 +58,11 @@ set(ROM_VERSION 100)
 gba_target_fix(gba_example "example_out.gba" "${ROM_TITLE}" "${ROM_GAME_CODE}" "${ROM_MAKER_CODE}" ${ROM_VERSION})
 ```
 
-## Enable Clang
+# Enable Clang
 
 The CMake option `-DUSE_CLANG=ON` will enable searching for and activating Clang compilers.
+
+# libagbabi
+
+This library provides GBA optimized replacements for several default arm-eabi functions.
+For example, the integer division operator is up to almost 3 times faster with this library, at the cost of some IWRAM.
