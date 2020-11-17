@@ -8,4 +8,4 @@ add_library(agbabi STATIC ${AGBABI_SRC})
 target_include_directories(agbabi SYSTEM PUBLIC "include/")
 
 set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} -marm -x assembler-with-cpp")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fno-strict-aliasing -marm")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -marm -Wall -fno-strict-aliasing")
