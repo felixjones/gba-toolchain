@@ -14,10 +14,9 @@ void __agbabi_makecontext( struct ucontext_t * ucp, void ( * func )( void ), int
     }
 
     ucp->uc_mcontext.arm_sp = ( long unsigned int ) funcstack;
-    ucp->uc_mcontext.arm_pc = ( long unsigned int ) func;
-
-    ucp->uc_mcontext.arm_r4 = ( long unsigned int ) ucp->uc_link;
     ucp->uc_mcontext.arm_lr = ( long unsigned int ) __agbabi_ctx_start;
+    ucp->uc_mcontext.arm_r4 = ( long unsigned int ) func;
+    ucp->uc_mcontext.arm_r5 = ( long unsigned int ) ucp->uc_link;
 
     va_list vl;
     va_start( vl, argc );

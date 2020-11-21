@@ -4,9 +4,8 @@
 @ Sort of based on https://www.man7.org/linux/man-pages/man3/swapcontext.3.html
 @--------------------------------------------------------------------------------
 
-#define MCONTEXT_ARM_SP     64
-#define MCONTEXT_ARM_LR     68
-#define MCONTEXT_ARM_PC     72
+#define MCONTEXT_ARM_SP     60
+#define MCONTEXT_ARM_LR     64
 
     .section .iwram, "ax", %progbits
     .align 2
@@ -17,11 +16,10 @@ __agbabi_swapcontext:
     push    {r0-r1, lr}
     .extern __agbabi_getcontext
     bl      __agbabi_getcontext
-    pop    {r0-r1, lr}
+    pop     {r0-r1, lr}
 
     str     sp, [r0, #MCONTEXT_ARM_SP]
     str     lr, [r0, #MCONTEXT_ARM_LR]
-    str     lr, [r0, #MCONTEXT_ARM_PC]
 
     mov     r0, r1
     .extern __agbabi_setcontext

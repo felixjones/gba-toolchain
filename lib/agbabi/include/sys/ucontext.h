@@ -9,10 +9,10 @@ typedef struct {
 } stack_t;
 
 typedef struct {
-    unsigned long int   arm_r0;
-    unsigned long int   arm_r1;
-    unsigned long int   arm_r2;
-    unsigned long int   arm_r3;
+    unsigned long int   arm_r0; // makecontext arg0
+    unsigned long int   arm_r1; // makecontext arg1
+    unsigned long int   arm_r2; // makecontext arg2
+    unsigned long int   arm_r3; // makecontext arg3
     unsigned long int   arm_r4;
     unsigned long int   arm_r5;
     unsigned long int   arm_r6;
@@ -21,11 +21,8 @@ typedef struct {
     unsigned long int   arm_r9;
     unsigned long int   arm_r10;
     unsigned long int   arm_r11;
-    unsigned long int   arm_r12;
     unsigned long int   arm_sp;
     unsigned long int   arm_lr;
-    unsigned long int   arm_pc;
-    unsigned long int   arm_cpsr;
 } mcontext_t;
 
 typedef struct ucontext_t {

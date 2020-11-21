@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 3.1)
 
 project(rom C ASM)
 
-add_library(rom STATIC crt0.s gba-irq.s gba-syscalls.c)
+add_library(rom STATIC crt0.s gba-syscalls.c)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mthumb -Wall -fno-strict-aliasing")
 
 message(STATUS "Activating GBA ROM runtime")
 

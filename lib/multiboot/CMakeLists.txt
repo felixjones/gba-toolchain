@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 3.1)
 
 project(multiboot C ASM)
 
-add_library(multiboot STATIC crt0.s gba-irq.s gba-syscalls.c)
+add_library(multiboot STATIC crt0.s gba-syscalls.c)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mthumb -Wall -fno-strict-aliasing")
 
 message(STATUS "Activating GBA multiboot runtime")
 

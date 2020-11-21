@@ -7,70 +7,70 @@ extern int errno;
 char * __env[1] = { 0 };
 char ** environ = __env;
 
-void _exit(__attribute__((unused)) int status) {
-    void __ewram_start(void);
+void _exit( __attribute__((unused)) int status ) {
+    void __ewram_start( void );
 
     __ewram_start();
     __builtin_unreachable();
 }
 
-int _close(int file) {
+int _close( int file ) {
     return -1;
 }
 
-int _execve(char * name, char ** argv, char ** env) {
+int _execve( char * name, char ** argv, char ** env ) {
     errno = ENOMEM;
     return -1;
 }
 
-int _fork(void) {
+int _fork( void ) {
     errno = EAGAIN;
     return -1;
 }
 
-int _fstat(int __fd, struct stat * __sbuf) {
+int _fstat( int __fd, struct stat * __sbuf ) {
     __sbuf->st_mode = S_IFCHR;
     return 0;
 }
 
-int _getpid(void) {
+int _getpid( void ) {
     return 1;
 }
 
-int _isatty(int file) {
+int _isatty( int file ) {
     return 1;
 }
 
-int _kill(int pid, int sig) {
+int _kill( int pid, int sig ) {
     errno = EINVAL;
     return -1;
 }
 
-int _link(char * old, char * next) {
+int _link( char * old, char * next ) {
     errno = EMLINK;
     return -1;
 }
 
-int _lseek(int file, int ptr, int dir) {
+int _lseek( int file, int ptr, int dir ) {
     return 0;
 }
 
-int _open(const char * name, int flags, int mode) {
+int _open( const char * name, int flags, int mode ) {
     return -1;
 }
 
-int _read(int file, char * ptr, int len) {
+int _read( int file, char * ptr, int len ) {
     return 0;
 }
 
-char * _sbrk(int incr) {
+char * _sbrk( int incr ) {
     extern char __ewram_end;
     extern char __ewram_top;
     static char * heap_end = &__ewram_end;
 
-    if (heap_end + incr > &__ewram_top) {
+    if ( heap_end + incr > &__ewram_top ) {
         errno = ENOMEM;
-        return (char *) -1;
+        return ( char * ) -1;
     }
 
     char * const prev_heap_end = heap_end;
@@ -78,25 +78,25 @@ char * _sbrk(int incr) {
     return prev_heap_end;
 }
 
-int _stat(char * file, struct stat * st) {
+int _stat( char * file, struct stat * st ) {
     st->st_mode = S_IFCHR;
     return 0;
 }
 
-int _times(void * buf) {
+int _times( void * buf ) {
     return -1;
 }
 
-int _unlink(char * name) {
+int _unlink( char * name ) {
     errno = ENOENT;
     return -1;
 }
 
-int _wait(int * status) {
+int _wait( int * status ) {
     errno = ECHILD;
     return -1;
 }
 
-int _write(int file, char * ptr, int len) {
+int _write( int file, char * ptr, int len ) {
     return 0;
 }
