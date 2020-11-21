@@ -1,7 +1,18 @@
 #ifndef _AGBABI_SYS_UCONTEXT_H_
 #define _AGBABI_SYS_UCONTEXT_H_
 
+#include <stddef.h>
+
 typedef struct {
+    void *  ss_sp;
+    size_t  ss_size;
+} stack_t;
+
+typedef struct {
+    unsigned long int   arm_r0;
+    unsigned long int   arm_r1;
+    unsigned long int   arm_r2;
+    unsigned long int   arm_r3;
     unsigned long int   arm_r4;
     unsigned long int   arm_r5;
     unsigned long int   arm_r6;
@@ -19,6 +30,7 @@ typedef struct {
 
 typedef struct ucontext_t {
     struct ucontext_t * uc_link;
+    stack_t             uc_stack;
     mcontext_t          uc_mcontext;
 } ucontext_t;
 

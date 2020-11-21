@@ -1,12 +1,14 @@
 @--------------------------------------------------------------------------------
 @ setcontext.s
 @--------------------------------------------------------------------------------
-@ Implementation of https://www.man7.org/linux/man-pages/man3/setcontext.3.html
+@ Sort of based on https://www.man7.org/linux/man-pages/man3/setcontext.3.html
 @--------------------------------------------------------------------------------
 
-#define MCONTEXT_ARM_R4     4
-#define MCONTEXT_ARM_PC     48
-#define MCONTEXT_ARM_CPSR   52
+#define MCONTEXT_ARM_R0     12
+#define MCONTEXT_ARM_SP     64
+#define MCONTEXT_ARM_LR     68
+#define MCONTEXT_ARM_PC     72
+#define MCONTEXT_ARM_CPSR   76
 
     .section .iwram, "ax", %progbits
     .align 2
@@ -14,15 +16,28 @@
     .global __agbabi_setcontext
     .type   __agbabi_setcontext STT_FUNC
 __agbabi_setcontext:
-    @ Restore r4-r12, sp and lr
-    add     r1, r0, #MCONTEXT_ARM_R4
-    ldmia   r1, {r4-r12, sp, lr}
+    @ Restore cpsr
+    ldr     r12, [r0, #MCONTEXT_ARM_CPSR]
+    msr     cpsr, r12
 
-    @ Load cpsr
-    ldr     r1, [r0, #MCONTEXT_ARM_CPSR]
-    msr     cpsr, r1
+    @ Restore sp, lr
+    ldr     sp, [r0, #MCONTEXT_ARM_SP]
+    ldr     lr, [r0, #MCONTEXT_ARM_LR]
 
-    @ Return 0
-    ldr     r1, [r0, #MCONTEXT_ARM_PC]
-    mov     r0, #0
-    bx      r1
+    @ Restore r0-r11
+    add     r12, r0, #MCONTEXT_ARM_R0
+    ldmia   r12, {r0-r11}
+
+    @ Restore pc and bx to it
+    ldr     r12, [r12, #(MCONTEXT_ARM_PC - MCONTEXT_ARM_R0)]
+    bx      r12
+
+    .section .iwram, "ax", %progbits
+    .align 2
+    .arm
+    .global __agbabi_ctx_start
+    .type   __agbabi_ctx_start STT_FUNC
+__agbabi_ctx_start:
+    movs    r0, r4
+    bne     __agbabi_setcontext
+    b       __rom_start
