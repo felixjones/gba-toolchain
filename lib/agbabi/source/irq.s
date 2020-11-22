@@ -63,30 +63,34 @@ __agbabi_irq_user:
     mov     r2, #0
     str     r2, [r1, #(REG_IME - REG_IE_IF)]
 
-    @ Change to system mode
-    mrs     r3, cpsr
-    bic     r3, r3, #0xdf
-    orr     r3, r3, #0x1f
-    msr     cpsr, r3
+    @ Change to user mode
+    mrs     r2, cpsr
+    bic     r2, r2, #0xdf
+    orr     r2, r2, #0x1f
+    msr     cpsr, r2
 
     @ Load user IRQ proc
     .weak   __agbabi_irq_uproc
-    ldr     r3, =__agbabi_irq_uproc
-    ldr     r3, [r3]
+    ldr     r2, =__agbabi_irq_uproc
+    ldr     r2, [r2]
 
-    push    { r0-r2, r4-r11, lr }
+    push    { r0-r1, r4-r11, lr }
 
     @ Call __agbabi_irq_proc
     mov     lr, pc
-    bx      r3
+    bx      r2
 
-    pop     { r0-r2, r4-r11, lr }
+    pop     { r0-r1, r4-r11, lr }
+
+    @ Disable REG_IME again
+    mov     r2, #0
+    str     r2, [r1, #(REG_IME - REG_IE_IF)]
 
     @ Change to irq mode
-    mrs     r3, cpsr
-    bic     r3, r3, #0xdf
-    orr     r3, r3, #0x92
-    msr     cpsr, r3
+    mrs     r2, cpsr
+    bic     r2, r2, #0xdf
+    orr     r2, r2, #0x92
+    msr     cpsr, r2
 
     @ Restore REG_IE
     ldrh    r2, [r1]
