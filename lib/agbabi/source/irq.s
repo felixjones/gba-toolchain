@@ -3,12 +3,14 @@
 @--------------------------------------------------------------------------------
 @ Collection of default irq handlers
 @ __agbabi_irq_empty | Does nothing but acknowledge raised IRQs
+@ __agbabi_irq_user  | Executes a provided function in user mode (__agbabi_irq_uproc)
 @--------------------------------------------------------------------------------
 
+#define REG_BIOSIF  0x3FFFFF8
 #define REG_BASE    0x4000000
 #define REG_IE_IF   0x4000200
 #define REG_IF      0x4000202
-#define REG_BIOSIF  0x3FFFFF8
+#define REG_IME     0x4000208
 
     .section .iwram,"ax",%progbits
     .align 2
@@ -26,10 +28,73 @@ __agbabi_irq_empty:
     ldr     r2, [r0, #(REG_BIOSIF - REG_IE_IF)]
     orr     r2, r2, r1
 
-    @ Acknowledge REG_IF
+    @ Acknowledge REG_IF and REG_BIOSIF
     strh    r1, [r0, #(REG_IF - REG_IE_IF)]
-
-    @ Acknowledge REG_BIOSIF
     str     r2, [r0, #(REG_BIOSIF - REG_IE_IF)]
+
+    bx lr
+
+    .section .iwram,"ax",%progbits
+    .align 2
+    .arm
+    .global __agbabi_irq_user
+    .type __agbabi_irq_user STT_FUNC
+__agbabi_irq_user:
+    mov     r1, #REG_BASE
+
+    @ r1 = REG_IE & REG_IF, r0 = &REG_IE_IF
+    ldr     r0, [r1, #(REG_IE_IF - REG_BASE)]!
+    and     r0, r0, r0, lsr #16
+
+    @ r2 = REG_BIOSIF | r0
+    ldr     r2, [r1, #(REG_BIOSIF - REG_IE_IF)]
+    orr     r2, r2, r0
+
+    @ Acknowledge REG_IF and REG_BIOSIF
+    strh    r0, [r1, #(REG_IF - REG_IE_IF)]
+    str     r2, [r1, #(REG_BIOSIF - REG_IE_IF)]
+
+    @ Clear handled from REG_IE
+    ldrh    r2, [r1]
+    bic     r2, r2, r0
+    strh    r2, [r1]
+
+    @ Disable REG_IME
+    mov     r2, #0
+    str     r2, [r1, #(REG_IME - REG_IE_IF)]
+
+    @ Change to system mode
+    mrs     r3, cpsr
+    bic     r3, r3, #0xdf
+    orr     r3, r3, #0x1f
+    msr     cpsr, r3
+
+    @ Load user IRQ proc
+    .weak   __agbabi_irq_uproc
+    ldr     r3, =__agbabi_irq_uproc
+    ldr     r3, [r3]
+
+    push    { r0-r2, r4-r11, lr }
+
+    @ Call __agbabi_irq_proc
+    mov     lr, pc
+    bx      r3
+
+    pop     { r0-r2, r4-r11, lr }
+
+    @ Change to irq mode
+    mrs     r3, cpsr
+    bic     r3, r3, #0xdf
+    orr     r3, r3, #0x92
+    msr     cpsr, r3
+
+    @ Restore REG_IE
+    ldrh    r2, [r1]
+    orr     r2, r2, r0
+    strh    r2, [r1]
+
+    @ Enable REG_IME
+    mov     r2, #1
+    str     r2, [r1, #(REG_IME - REG_IE_IF)]
 
     bx lr
