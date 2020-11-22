@@ -14,61 +14,12 @@ void _exit( __attribute__((unused)) int status ) {
     __builtin_unreachable();
 }
 
-int _close( int file ) {
-    return -1;
-}
-
-int _execve( char * name, char ** argv, char ** env ) {
-    errno = ENOMEM;
-    return -1;
-}
-
-int _fork( void ) {
-    errno = EAGAIN;
-    return -1;
-}
-
-int _fstat( int __fd, struct stat * __sbuf ) {
-    __sbuf->st_mode = S_IFCHR;
-    return 0;
-}
-
-int _getpid( void ) {
-    return 1;
-}
-
-int _isatty( int file ) {
-    return 1;
-}
-
-int _kill( int pid, int sig ) {
-    errno = EINVAL;
-    return -1;
-}
-
-int _link( char * old, char * next ) {
-    errno = EMLINK;
-    return -1;
-}
-
-int _lseek( int file, int ptr, int dir ) {
-    return 0;
-}
-
-int _open( const char * name, int flags, int mode ) {
-    return -1;
-}
-
-int _read( int file, char * ptr, int len ) {
-    return 0;
-}
-
 char * _sbrk( int incr ) {
     extern char __ewram_end;
     extern char __ewram_top;
     static char * heap_end = &__ewram_end;
 
-    if ( heap_end + incr > &__ewram_top ) {
+    if ( ( uintptr_t ) ( heap_end + incr ) > ( uintptr_t ) &__ewram_top ) {
         errno = ENOMEM;
         return ( char * ) -1;
     }
@@ -78,25 +29,41 @@ char * _sbrk( int incr ) {
     return prev_heap_end;
 }
 
-int _stat( char * file, struct stat * st ) {
-    st->st_mode = S_IFCHR;
+int _getpid( void ) {
     return 0;
 }
 
-int _times( void * buf ) {
+static int _gba_nosys() {
+    errno = ENOSYS;
     return -1;
 }
 
-int _unlink( char * name ) {
-    errno = ENOENT;
-    return -1;
-}
+int _close( int file ) __attribute__((alias("_gba_nosys")));
 
-int _wait( int * status ) {
-    errno = ECHILD;
-    return -1;
-}
+int _execve( char * name, char ** argv, char ** env ) __attribute__((alias("_gba_nosys")));
 
-int _write( int file, char * ptr, int len ) {
-    return 0;
-}
+int _fork( void ) __attribute__((alias("_gba_nosys")));
+
+int _fstat( int __fd, struct stat * __sbuf ) __attribute__((alias("_gba_nosys")));
+
+int _isatty( int file ) __attribute__((alias("_gba_nosys")));
+
+int _kill( int pid, int sig ) __attribute__((alias("_gba_nosys")));
+
+int _link( char * old, char * next ) __attribute__((alias("_gba_nosys")));
+
+int _lseek( int file, int ptr, int dir ) __attribute__((alias("_gba_nosys")));
+
+int _open( const char * name, int flags, int mode ) __attribute__((alias("_gba_nosys")));
+
+int _read( int file, char * ptr, int len ) __attribute__((alias("_gba_nosys")));
+
+int _stat( char * file, struct stat * st ) __attribute__((alias("_gba_nosys")));
+
+int _times( void * buf ) __attribute__((alias("_gba_nosys")));
+
+int _unlink( char * name ) __attribute__((alias("_gba_nosys")));
+
+int _wait( int * status ) __attribute__((alias("_gba_nosys")));
+
+int _write( int file, char * ptr, int len ) __attribute__((alias("_gba_nosys")));
