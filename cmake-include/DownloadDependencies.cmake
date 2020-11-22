@@ -114,6 +114,9 @@ function(gba_download_dependencies manifestUrl)
 
     if(DEFINED URL_ARM)
         gba_download_extract("${URL_ARM}" "${CMAKE_CURRENT_LIST_DIR}/arm-gnu-toolchain")
+
+        get_filename_component(ARM_GNU_FILE "${URL_ARM}" NAME_WE)
+        gba_key_value_set("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "arm-gnu" "${ARM_GNU_FILE}")
     endif()
 
     #====================
@@ -122,6 +125,9 @@ function(gba_download_dependencies manifestUrl)
 
     if(DEFINED URL_GBAFIX)
         gba_download_compile("${URL_GBAFIX}" "${CMAKE_CURRENT_LIST_DIR}/tools")
+
+        gba_github_get_commit("${URL_GBAFIX}")
+        gba_key_value_set("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "gbafix" "${GBA_GITHUB_COMMIT_OUT}")
     endif()
 
     #====================
@@ -135,5 +141,7 @@ function(gba_download_dependencies manifestUrl)
         file(REMOVE_RECURSE "${CMAKE_CURRENT_LIST_DIR}/lib/tonc/libtonc-${GBA_GITHUB_COMMIT_OUT}/")
         file(COPY "${CMAKE_CURRENT_LIST_DIR}/cmake-include/ToncCMakeLists.cmake" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/lib/tonc")
         file(RENAME "${CMAKE_CURRENT_LIST_DIR}/lib/tonc/ToncCMakeLists.cmake" "${CMAKE_CURRENT_LIST_DIR}/lib/tonc/CMakeLists.txt")
+
+        gba_key_value_set("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "tonc" "${GBA_GITHUB_COMMIT_OUT}")
     endif()
 endfunction()
