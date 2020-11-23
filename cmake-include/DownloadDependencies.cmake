@@ -89,7 +89,9 @@ function(gba_download_dependencies manifestUrl)
         gba_github_get_commit("${URL_GBAFIX}")
         gba_key_value_get("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "gbafix")
         if(NOT "${GBA_GITHUB_COMMIT_OUT}" STREQUAL "${GBA_KEY_VALUE_OUT}")
-            gba_key_value_set("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "gbafix" "${GBA_GITHUB_COMMIT_OUT}")
+            if (NOT "${GBA_KEY_VALUE_OUT}" STREQUAL "")
+                gba_key_value_set("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "gbafix" "${GBA_GITHUB_COMMIT_OUT}")
+            endif()
         else()
             # Already got it
             unset(URL_GBAFIX)
@@ -125,9 +127,10 @@ function(gba_download_dependencies manifestUrl)
 
     if(DEFINED URL_GBAFIX)
         gba_download_compile("${URL_GBAFIX}" "${CMAKE_CURRENT_LIST_DIR}/tools")
-
-        gba_github_get_commit("${URL_GBAFIX}")
-        gba_key_value_set("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "gbafix" "${GBA_GITHUB_COMMIT_OUT}")
+        if (NOT "${GBA_COMPILE_C_OUT}" STREQUAL "")
+            gba_github_get_commit("${URL_GBAFIX}")
+            gba_key_value_set("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "gbafix" "${GBA_GITHUB_COMMIT_OUT}")
+        endif()
     endif()
 
     #====================
