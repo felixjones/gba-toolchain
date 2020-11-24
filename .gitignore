@@ -1,6 +1,7 @@
 .idea/
 arm-gnu-toolchain/
 lib/tonc/
+lib/gba-plusplus/
 tools/
 devel/
 dependencies.txt

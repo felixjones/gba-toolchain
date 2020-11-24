@@ -33,6 +33,9 @@ function(gba_download_dependencies manifestUrl)
 
         gba_key_value_get("${CMAKE_CURRENT_LIST_DIR}/urls.txt" "tonc")
         set(URL_TONC ${GBA_KEY_VALUE_OUT})
+
+        gba_key_value_get("${CMAKE_CURRENT_LIST_DIR}/urls.txt" "gba-plusplus")
+        set(URL_GBA_PLUSPLUS ${GBA_KEY_VALUE_OUT})
     endif()
 
     #====================
@@ -62,6 +65,13 @@ function(gba_download_dependencies manifestUrl)
         set(TMP_URL_TONC ${GBA_KEY_VALUE_OUT})
         if(NOT "${TMP_URL_TONC}" STREQUAL "${URL_TONC}")
             set(URL_TONC "${TMP_URL_TONC}")
+        endif()
+
+        # Replace URL_GBA_PLUSPLUS
+        gba_key_value_get("${CMAKE_CURRENT_LIST_DIR}/urls.tmp" "gba-plusplus")
+        set(TMP_URL_GBA_PLUSPLUS ${GBA_KEY_VALUE_OUT})
+        if(NOT "${TMP_URL_GBA_PLUSPLUS}" STREQUAL "${URL_GBA_PLUSPLUS}")
+            set(URL_GBA_PLUSPLUS "${TMP_URL_GBA_PLUSPLUS}")
         endif()
 
         file(RENAME "${CMAKE_CURRENT_LIST_DIR}/urls.tmp" "${CMAKE_CURRENT_LIST_DIR}/urls.txt")
@@ -110,6 +120,18 @@ function(gba_download_dependencies manifestUrl)
         endif()
     endif()
 
+    if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/lib/gba-plusplus")
+        # Check URL_GBA_PLUSPLUS
+        gba_github_get_commit("${URL_GBA_PLUSPLUS}")
+        gba_key_value_get("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "gba-plusplus")
+        if(NOT "${GBA_GITHUB_COMMIT_OUT}" STREQUAL "${GBA_KEY_VALUE_OUT}")
+            gba_key_value_set("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "gba-plusplus" "${GBA_GITHUB_COMMIT_OUT}")
+        else()
+            # Already got it
+            unset(URL_GBA_PLUSPLUS)
+        endif()
+    endif()
+
     #====================
     # Download arm-gnu-toolchain
     #====================
@@ -146,5 +168,19 @@ function(gba_download_dependencies manifestUrl)
         file(RENAME "${CMAKE_CURRENT_LIST_DIR}/lib/tonc/ToncCMakeLists.cmake" "${CMAKE_CURRENT_LIST_DIR}/lib/tonc/CMakeLists.txt")
 
         gba_key_value_set("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "tonc" "${GBA_GITHUB_COMMIT_OUT}")
+    endif()
+
+    #====================
+    # Download gba-plusplus
+    #====================
+
+    if(DEFINED URL_GBA_PLUSPLUS)
+        message(STATUS "GBAPP ${URL_GBA_PLUSPLUS}")
+        gba_download_extract("${URL_GBA_PLUSPLUS}" "${CMAKE_CURRENT_LIST_DIR}/lib/gba-plusplus")
+        gba_github_get_commit("${URL_GBA_PLUSPLUS}")
+        file(COPY "${CMAKE_CURRENT_LIST_DIR}/lib/gba-plusplus/gba-plusplus-${GBA_GITHUB_COMMIT_OUT}/" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/lib/gba-plusplus/")
+        file(REMOVE_RECURSE "${CMAKE_CURRENT_LIST_DIR}/lib/gba-plusplus/gba-plusplus-${GBA_GITHUB_COMMIT_OUT}/")
+
+        gba_key_value_set("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "gba-plusplus" "${GBA_GITHUB_COMMIT_OUT}")
     endif()
 endfunction()
