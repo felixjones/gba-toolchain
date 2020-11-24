@@ -90,3 +90,7 @@ function(gba_target_link_agb_abi target)
     target_link_libraries(${target} PRIVATE agbabi)
     target_include_directories(${target} PUBLIC "${GBA_TOOLCHAIN_LIB_AGBABI_DIR}/include")
 endfunction()
+
+function(gba_target_link_gba_plusplus target)
+    target_include_directories(${target} PUBLIC "${GBA_TOOLCHAIN_LIB_GBA_PLUSPLUS_DIR}/include")
+endfunction()
