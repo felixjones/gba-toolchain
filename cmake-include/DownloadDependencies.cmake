@@ -175,7 +175,6 @@ function(gba_download_dependencies manifestUrl)
     #====================
 
     if(DEFINED URL_GBA_PLUSPLUS)
-        message(STATUS "GBAPP ${URL_GBA_PLUSPLUS}")
         gba_download_extract("${URL_GBA_PLUSPLUS}" "${CMAKE_CURRENT_LIST_DIR}/lib/gba-plusplus")
         gba_github_get_commit("${URL_GBA_PLUSPLUS}")
         file(COPY "${CMAKE_CURRENT_LIST_DIR}/lib/gba-plusplus/gba-plusplus-${GBA_GITHUB_COMMIT_OUT}/" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/lib/gba-plusplus/")
