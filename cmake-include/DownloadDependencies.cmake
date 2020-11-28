@@ -36,6 +36,9 @@ function(gba_download_dependencies manifestUrl)
 
         gba_key_value_get("${CMAKE_CURRENT_LIST_DIR}/urls.txt" "gba-plusplus")
         set(URL_GBA_PLUSPLUS ${GBA_KEY_VALUE_OUT})
+
+        gba_key_value_get("${CMAKE_CURRENT_LIST_DIR}/urls.txt" "maxmod")
+        set(URL_MAXMOD ${GBA_KEY_VALUE_OUT})
     endif()
 
     #====================
@@ -72,6 +75,13 @@ function(gba_download_dependencies manifestUrl)
         set(TMP_URL_GBA_PLUSPLUS ${GBA_KEY_VALUE_OUT})
         if(NOT "${TMP_URL_GBA_PLUSPLUS}" STREQUAL "${URL_GBA_PLUSPLUS}")
             set(URL_GBA_PLUSPLUS "${TMP_URL_GBA_PLUSPLUS}")
+        endif()
+
+        # Replace URL_MAXMOD
+        gba_key_value_get("${CMAKE_CURRENT_LIST_DIR}/urls.tmp" "maxmod")
+        set(TMP_URL_MAXMOD ${GBA_KEY_VALUE_OUT})
+        if(NOT "${TMP_URL_MAXMOD}" STREQUAL "${URL_MAXMOD}")
+            set(URL_MAXMOD "${TMP_URL_MAXMOD}")
         endif()
 
         file(RENAME "${CMAKE_CURRENT_LIST_DIR}/urls.tmp" "${CMAKE_CURRENT_LIST_DIR}/urls.txt")
@@ -132,6 +142,18 @@ function(gba_download_dependencies manifestUrl)
         endif()
     endif()
 
+    if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/lib/maxmod")
+        # Check URL_MAXMOD
+        gba_github_get_commit("${URL_MAXMOD}")
+        gba_key_value_get("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "maxmod")
+        if(NOT "${GBA_GITHUB_COMMIT_OUT}" STREQUAL "${GBA_KEY_VALUE_OUT}")
+            gba_key_value_set("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "maxmod" "${GBA_GITHUB_COMMIT_OUT}")
+        else()
+            # Already got it
+            unset(URL_MAXMOD)
+        endif()
+    endif()
+
     #====================
     # Download arm-gnu-toolchain
     #====================
@@ -181,5 +203,20 @@ function(gba_download_dependencies manifestUrl)
         file(REMOVE_RECURSE "${CMAKE_CURRENT_LIST_DIR}/lib/gba-plusplus/gba-plusplus-${GBA_GITHUB_COMMIT_OUT}/")
 
         gba_key_value_set("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "gba-plusplus" "${GBA_GITHUB_COMMIT_OUT}")
+    endif()
+
+    #====================
+    # Download maxmod
+    #====================
+
+    if(DEFINED URL_MAXMOD)
+        gba_download_extract("${URL_MAXMOD}" "${CMAKE_CURRENT_LIST_DIR}/lib/maxmod")
+        gba_github_get_commit("${URL_MAXMOD}")
+        file(COPY "${CMAKE_CURRENT_LIST_DIR}/lib/maxmod/maxmod-${GBA_GITHUB_COMMIT_OUT}/" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/lib/maxmod/")
+        file(REMOVE_RECURSE "${CMAKE_CURRENT_LIST_DIR}/lib/maxmod/maxmod-${GBA_GITHUB_COMMIT_OUT}/")
+        file(COPY "${CMAKE_CURRENT_LIST_DIR}/cmake-include/MaxmodCMakeLists.cmake" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/lib/maxmod")
+        file(RENAME "${CMAKE_CURRENT_LIST_DIR}/lib/maxmod/MaxmodCMakeLists.cmake" "${CMAKE_CURRENT_LIST_DIR}/lib/maxmod/CMakeLists.txt")
+
+        gba_key_value_set("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "maxmod" "${GBA_GITHUB_COMMIT_OUT}")
     endif()
 endfunction()

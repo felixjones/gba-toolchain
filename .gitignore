@@ -2,6 +2,7 @@
 arm-gnu-toolchain/
 lib/tonc/
 lib/gba-plusplus/
+lib/maxmod/
 tools/
 devel/
 dependencies.txt
