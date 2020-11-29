@@ -39,6 +39,9 @@ function(gba_download_dependencies manifestUrl)
 
         gba_key_value_get("${CMAKE_CURRENT_LIST_DIR}/urls.txt" "maxmod")
         set(URL_MAXMOD ${GBA_KEY_VALUE_OUT})
+
+        gba_key_value_get("${CMAKE_CURRENT_LIST_DIR}/urls.txt" "gbfs")
+        set(URL_GBFS ${GBA_KEY_VALUE_OUT})
     endif()
 
     #====================
@@ -84,6 +87,13 @@ function(gba_download_dependencies manifestUrl)
             set(URL_MAXMOD "${TMP_URL_MAXMOD}")
         endif()
 
+        # Replace URL_GBFS
+        gba_key_value_get("${CMAKE_CURRENT_LIST_DIR}/urls.tmp" "gbfs")
+        set(TMP_URL_GBFS ${GBA_KEY_VALUE_OUT})
+        if(NOT "${TMP_URL_GBFS}" STREQUAL "${URL_GBFS}")
+            set(URL_GBFS "${TMP_URL_GBFS}")
+        endif()
+
         file(RENAME "${CMAKE_CURRENT_LIST_DIR}/urls.tmp" "${CMAKE_CURRENT_LIST_DIR}/urls.txt")
     endif()
     file(REMOVE "${CMAKE_CURRENT_LIST_DIR}/urls.tmp")
@@ -104,7 +114,8 @@ function(gba_download_dependencies manifestUrl)
         endif()
     endif()
 
-    if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/tools")
+    get_filename_component(GBAFIX_NAME_WE "${URL_GBAFIX}" NAME_WE)
+    if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/tools/${GBAFIX_NAME_WE}")
         # Check URL_GBAFIX
         gba_github_get_commit("${URL_GBAFIX}")
         gba_key_value_get("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "gbafix")
@@ -151,6 +162,19 @@ function(gba_download_dependencies manifestUrl)
         else()
             # Already got it
             unset(URL_MAXMOD)
+        endif()
+    endif()
+
+    get_filename_component(GBFS_NAME_WE "${URL_GBFS}" NAME_WE)
+    if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/tools/${GBFS_NAME_WE}")
+        # Check URL_GBFS
+        get_filename_component(GBFS_FILE "${URL_GBFS}" NAME_WE)
+        gba_key_value_get("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "gbfs")
+        if(NOT "${GBFS_FILE}" STREQUAL "${GBA_KEY_VALUE_OUT}")
+            gba_key_value_set("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "gbfs" "${GBFS_FILE}")
+        else()
+            # Already got it
+            unset(URL_GBFS)
         endif()
     endif()
 
@@ -218,5 +242,39 @@ function(gba_download_dependencies manifestUrl)
         file(RENAME "${CMAKE_CURRENT_LIST_DIR}/lib/maxmod/MaxmodCMakeLists.cmake" "${CMAKE_CURRENT_LIST_DIR}/lib/maxmod/CMakeLists.txt")
 
         gba_key_value_set("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "maxmod" "${GBA_GITHUB_COMMIT_OUT}")
+    endif()
+
+    #====================
+    # Download gbfs
+    #====================
+
+    if(DEFINED URL_GBFS)
+        set(GBFS_COMPILE_SUCCESS ON)
+        get_filename_component(GBFS_FILE "${URL_GBFS}" NAME_WE)
+        gba_download_extract("${URL_GBFS}" "${CMAKE_CURRENT_LIST_DIR}/tools/${GBFS_FILE}")
+
+        gba_compile_c("${CMAKE_CURRENT_LIST_DIR}/tools/${GBFS_FILE}/tools/gbfs.c" "${CMAKE_CURRENT_LIST_DIR}/tools")
+        if ("${GBA_COMPILE_C_OUT}" STREQUAL "")
+            set(GBFS_COMPILE_SUCCESS OFF)
+        endif()
+
+        gba_compile_c("${CMAKE_CURRENT_LIST_DIR}/tools/${GBFS_FILE}/tools/bin2s.c" "${CMAKE_CURRENT_LIST_DIR}/tools")
+        if ("${GBA_COMPILE_C_OUT}" STREQUAL "")
+            set(GBFS_COMPILE_SUCCESS OFF)
+        endif()
+
+        gba_compile_c("${CMAKE_CURRENT_LIST_DIR}/tools/${GBFS_FILE}/tools/padbin.c" "${CMAKE_CURRENT_LIST_DIR}/tools")
+        if ("${GBA_COMPILE_C_OUT}" STREQUAL "")
+            set(GBFS_COMPILE_SUCCESS OFF)
+        endif()
+
+        gba_compile_c("${CMAKE_CURRENT_LIST_DIR}/tools/${GBFS_FILE}/tools/insgbfs.c" "${CMAKE_CURRENT_LIST_DIR}/tools")
+        if ("${GBA_COMPILE_C_OUT}" STREQUAL "")
+            set(GBFS_COMPILE_SUCCESS OFF)
+        endif()
+
+        if (${GBFS_COMPILE_SUCCESS})
+            gba_key_value_set("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "gbfs" "${GBFS_FILE}")
+        endif()
     endif()
 endfunction()
