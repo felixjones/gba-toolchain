@@ -8,6 +8,8 @@ CMake based toolchain for GBA homebrew development.
 
 All the setup is performed via CMake. This allows any CMake compatible IDE to work out of the box.
 
+Add the toolchain to your CMake project with `-DCMAKE_TOOLCHAIN_FILE=path/to/arm-gba-toolchain.cmake`, this defines `GBA_TOOLCHAIN` which can be tested for on your cross-platform CMake project.
+
 ## Internet connection (initial setup)
 
 The `arm-gba-toolchain.cmake` script will attempt to download the following dependencies
@@ -20,7 +22,7 @@ The `arm-gba-toolchain.cmake` script will attempt to download the following depe
 
 gbafix requires a host compiler, such as Visual Studio's CL.exe, GCC or Clang.
 
-## Example CMake
+# Example CMake
 
 This example CMake has the source file `main.c` and builds `gba_example.elf` and `example_out.gba`.
 
@@ -31,8 +33,8 @@ project(my_gba_project)
 add_executable(gba_example main.c)
 set_target_properties(gba_example PROPERTIES SUFFIX ".elf") # Building gba_example.elf
 
-# activate & link libagbabi
-gba_target_link_agb_abi( gba_example )
+# activate & link GBA optimized ABI library
+gba_target_link_agb_abi(gba_example)
 
 # activate & link tonc dependency
 gba_target_link_tonc(gba_example)
@@ -59,6 +61,11 @@ set(ROM_VERSION 100)
 gba_target_fix(gba_example "example_out.gba" "${ROM_TITLE}" "${ROM_GAME_CODE}" "${ROM_MAKER_CODE}" ${ROM_VERSION})
 ```
 
-## Enable Clang
+# Enable Clang
 
 The CMake option `-DUSE_CLANG=ON` will enable searching for and activating Clang compilers.
+
+# libagbabi
+
+This library provides GBA optimized replacements for several default arm-eabi functions.
+For example, the integer division operator is up to almost 3 times faster with this library, at the cost of some IWRAM.
