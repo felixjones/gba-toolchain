@@ -39,6 +39,9 @@ gba_target_link_agb_abi(gba_example)
 # activate & link tonc dependency
 gba_target_link_tonc(gba_example)
 
+# activate & link maxmod dependency
+gba_target_link_maxmod(gba_example)
+
 # setup IWRAM/EWRAM instruction sets and set default ROM instruction set to thumb
 gba_target_sources_instruction_set(gba_example thumb)
 
