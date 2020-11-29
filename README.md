@@ -31,8 +31,14 @@ project(my_gba_project)
 add_executable(gba_example main.c)
 set_target_properties(gba_example PROPERTIES SUFFIX ".elf") # Building gba_example.elf
 
+# activate & link libagbabi
+gba_target_link_agb_abi( gba_example )
+
 # activate & link tonc dependency
 gba_target_link_tonc(gba_example)
+
+# activate & link maxmod dependency
+gba_target_link_maxmod(gba_example)
 
 # setup IWRAM/EWRAM instruction sets and set default ROM instruction set to thumb
 gba_target_sources_instruction_set(gba_example thumb)
