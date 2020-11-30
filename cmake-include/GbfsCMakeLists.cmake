@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.1)
 
-project(gbfs ASM)
+project(gbfs C)
 
 add_library(gbfs STATIC "source/libgbfs.c")
 target_include_directories(gbfs SYSTEM PUBLIC "include/")
