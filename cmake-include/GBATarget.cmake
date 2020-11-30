@@ -91,6 +91,12 @@ function(gba_target_link_maxmod target)
     target_include_directories(${target} PUBLIC "${GBA_TOOLCHAIN_LIB_MAXMOD_DIR}/include")
 endfunction()
 
+function(gba_target_link_gbfs target)
+    add_subdirectory("${GBA_TOOLCHAIN_LIB_GBFS_DIR}" "./gbfs")
+    target_link_libraries(${target} PRIVATE gbfs)
+    target_include_directories(${target} PUBLIC "${GBA_TOOLCHAIN_LIB_GBFS_DIR}/include")
+endfunction()
+
 function(gba_target_link_agb_abi target)
     add_subdirectory("${GBA_TOOLCHAIN_LIB_AGBABI_DIR}" "./agbabi")
     target_link_libraries(${target} PRIVATE agbabi)
