@@ -107,6 +107,8 @@ SECTIONS {
     . = ALIGN(4);
   } >rom
 
+  __rom_end = .;
+
   /*
   ====================
     iwram
