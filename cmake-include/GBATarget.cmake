@@ -106,3 +106,36 @@ endfunction()
 function(gba_target_link_gba_plusplus target)
     target_include_directories(${target} PUBLIC "${GBA_TOOLCHAIN_LIB_GBA_PLUSPLUS_DIR}/include")
 endfunction()
+
+function(gba_add_gbfs_target target)
+    cmake_minimum_required(VERSION 3.0)
+
+    list(TRANSFORM ARGN PREPEND "${CMAKE_CURRENT_SOURCE_DIR}/")
+    get_filename_component(GBFS_FILE_WE "${target}" NAME_WE)
+
+    add_custom_target(${target}
+        COMMAND "${GBA_TOOLCHAIN_GBFS}" "${target}" ${ARGN}
+        DEPENDS ${ARGN}
+        BYPRODUCTS "${target}"
+        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+        COMMENT "GBFS -> \"${target}\""
+    )
+endfunction()
+
+function(gba_target_add_gbfs_dependency target dependency)
+    cmake_minimum_required(VERSION 3.0)
+
+    get_filename_component(GBFS_FILE_WE "${dependency}" NAME_WE)
+
+    add_custom_target("${dependency}.s"
+        COMMAND "${GBA_TOOLCHAIN_BIN2S}" "${dependency}" > "${GBFS_FILE_WE}.s"
+        DEPENDS "${dependency}"
+        BYPRODUCTS "${GBFS_FILE_WE}.s"
+        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+        SOURCES "${GBFS_FILE_WE}.s"
+    )
+    add_dependencies("${dependency}.s" ${dependency})
+
+    add_dependencies(${target} "${dependency}.s")
+    target_sources(${target} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/${GBFS_FILE_WE}.s")
+endfunction()

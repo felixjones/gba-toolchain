@@ -258,20 +258,10 @@ function(gba_download_dependencies manifestUrl)
             set(GBFS_COMPILE_SUCCESS OFF)
         endif()
 
-#        gba_compile_c("${CMAKE_CURRENT_LIST_DIR}/tools/${GBFS_FILE}/tools/bin2s.c" "${CMAKE_CURRENT_LIST_DIR}/tools")
-#        if ("${GBA_COMPILE_C_OUT}" STREQUAL "")
-#            set(GBFS_COMPILE_SUCCESS OFF)
-#        endif()
-#
-#        gba_compile_c("${CMAKE_CURRENT_LIST_DIR}/tools/${GBFS_FILE}/tools/padbin.c" "${CMAKE_CURRENT_LIST_DIR}/tools")
-#        if ("${GBA_COMPILE_C_OUT}" STREQUAL "")
-#            set(GBFS_COMPILE_SUCCESS OFF)
-#        endif()
-#
-#        gba_compile_c("${CMAKE_CURRENT_LIST_DIR}/tools/${GBFS_FILE}/tools/insgbfs.c" "${CMAKE_CURRENT_LIST_DIR}/tools")
-#        if ("${GBA_COMPILE_C_OUT}" STREQUAL "")
-#            set(GBFS_COMPILE_SUCCESS OFF)
-#        endif()
+        gba_compile_c("${CMAKE_CURRENT_LIST_DIR}/tools/${GBFS_FILE}/tools/bin2s.c" "${CMAKE_CURRENT_LIST_DIR}/tools")
+        if ("${GBA_COMPILE_C_OUT}" STREQUAL "")
+            set(GBFS_COMPILE_SUCCESS OFF)
+        endif()
 
         if (${GBFS_COMPILE_SUCCESS})
             # Copy gbfs library to lib/
