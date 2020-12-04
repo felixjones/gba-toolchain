@@ -14,6 +14,12 @@
 
     .section .iwram,"ax",%progbits
     .align 2
+    .weak __agbabi_irq_uproc
+__agbabi_irq_uproc:
+    .word  0x00000000
+
+    .section .iwram,"ax",%progbits
+    .align 2
     .arm
     .global __agbabi_irq_empty
     .type __agbabi_irq_empty STT_FUNC
