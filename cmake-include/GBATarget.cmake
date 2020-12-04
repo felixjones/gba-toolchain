@@ -101,6 +101,7 @@ function(gba_target_link_agb_abi target)
     add_subdirectory("${GBA_TOOLCHAIN_LIB_AGBABI_DIR}" "./agbabi")
     target_link_libraries(${target} PRIVATE agbabi)
     target_include_directories(${target} PUBLIC "${GBA_TOOLCHAIN_LIB_AGBABI_DIR}/include")
+    target_compile_definitions(${target} PRIVATE __agb_abi=1)
 endfunction()
 
 function(gba_target_link_gba_plusplus target)
