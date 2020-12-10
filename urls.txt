@@ -3,6 +3,6 @@ arm-x86_64-linux=https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2020
 arm-mac=https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2020q2/gcc-arm-none-eabi-9-2020-q2-update-mac.tar.bz2
 gbafix=https://raw.githubusercontent.com/devkitPro/gba-tools/054d507f90d32784274b6cf7e03f1c43d02d7a57/src/gbafix.c
 tonc=https://github.com/devkitPro/libtonc/archive/ccc03fa321e56f51aed5e2ee1d6e3df3d1cbc803.zip
-gba-plusplus=https://github.com/felixjones/gba-plusplus/archive/892966342b13d03177efc9c30fcabde2ae28c17c.zip
+gba-plusplus=https://github.com/felixjones/gba-plusplus/archive/472174333ba9f82af0b7ad17c2c98afb4ad9d7cd.zip
 maxmod=https://github.com/devkitPro/maxmod/archive/7983881f8f5eba7416470920bcc9bfcae47fae18.zip
 gbfs=http://www.pineight.com/gba/gbfs.zip
