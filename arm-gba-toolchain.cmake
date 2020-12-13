@@ -45,9 +45,9 @@ gba_find_compilers()
 #====================
 
 if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows)
-    set(GBA_TOOLCHAIN_GBAFIX "${CMAKE_CURRENT_LIST_DIR}/tools/gbafix.exe")
+    set(GBA_TOOLCHAIN_GBAFIX "${CMAKE_CURRENT_LIST_DIR}/tools/bin/gbafix.exe")
 else()
-    set(GBA_TOOLCHAIN_GBAFIX "${CMAKE_CURRENT_LIST_DIR}/tools/gbafix")
+    set(GBA_TOOLCHAIN_GBAFIX "${CMAKE_CURRENT_LIST_DIR}/tools/bin/gbafix")
 endif()
 
 #====================
@@ -55,11 +55,11 @@ endif()
 #====================
 
 if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows)
-    set(GBA_TOOLCHAIN_GBFS "${CMAKE_CURRENT_LIST_DIR}/tools/gbfs.exe")
-    set(GBA_TOOLCHAIN_BIN2S "${CMAKE_CURRENT_LIST_DIR}/tools/bin2s.exe")
+    set(GBA_TOOLCHAIN_GBFS "${CMAKE_CURRENT_LIST_DIR}/tools/bin/gbfs.exe")
+    set(GBA_TOOLCHAIN_BIN2S "${CMAKE_CURRENT_LIST_DIR}/tools/bin/bin2s.exe")
 else()
-    set(GBA_TOOLCHAIN_GBFS "${CMAKE_CURRENT_LIST_DIR}/tools/gbfs")
-    set(GBA_TOOLCHAIN_BIN2S "${CMAKE_CURRENT_LIST_DIR}/tools/bin2s")
+    set(GBA_TOOLCHAIN_GBFS "${CMAKE_CURRENT_LIST_DIR}/tools/bin/gbfs")
+    set(GBA_TOOLCHAIN_BIN2S "${CMAKE_CURRENT_LIST_DIR}/tools/bin/bin2s")
 endif()
 
 #====================
