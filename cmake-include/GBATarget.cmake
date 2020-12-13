@@ -47,9 +47,13 @@ function(gba_target_fix target inputOutput title gameCode makerCode version)
         message(FATAL_ERROR "gba_target_fix version ${version} must be less than 256!")
     endif()
 
+    if(NOT ${version} MATCHES "^[0-9]+$")
+        message(FATAL_ERROR "gba_target_fix version ${version} must be a number!")
+    endif()
+
     add_custom_command(TARGET ${target}
         POST_BUILD
-        COMMAND "${GBA_TOOLCHAIN_GBAFIX}" "${inputOutput}" "-t${title}" "-c${gameCode}" "-m${makerCode}" -r${version}
+        COMMAND "${GBA_TOOLCHAIN_GBAFIX}" "${inputOutput}" "-t${title}" "-c${gameCode}" "-m${makerCode}" "-r${version}"
         COMMENT "GBA header-fix \"${title}\" ${gameCode}:${makerCode} version ${version}"
         BYPRODUCTS "${inputOutput}"
     )
