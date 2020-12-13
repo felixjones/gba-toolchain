@@ -12,7 +12,7 @@ function(gba_find_compilers)
             find_program(CLANG_C_COMPILER NAMES "clang.exe")
             find_program(CLANG_CXX_COMPILER NAMES "clang++.exe")
         else()
-            find_program(CLANG_C_COMPILER N NAMES "clang")
+            find_program(CLANG_C_COMPILER NAMES "clang")
             find_program(CLANG_CXX_COMPILER NAMES "clang++")
         endif()
 
