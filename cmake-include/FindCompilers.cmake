@@ -58,15 +58,49 @@ function(gba_find_compilers)
     endif()
 
     #====================
-    # objcopy
+    # objcopy ar ranlib nm objdump strip
     #====================
 
     if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows)
         find_program(GNU_OBJCOPY NAMES "${ARM_GNU_TOOLS}/bin/arm-none-eabi-objcopy.exe")
+        find_program(GNU_AR NAMES "${ARM_GNU_TOOLS}/bin/arm-none-eabi-ar.exe")
+        find_program(GNU_RANLIB NAMES "${ARM_GNU_TOOLS}/bin/arm-none-eabi-ranlib.exe")
+        find_program(GNU_NM NAMES "${ARM_GNU_TOOLS}/bin/arm-none-eabi-nm.exe")
+        find_program(GNU_OBJDUMP NAMES "${ARM_GNU_TOOLS}/bin/arm-none-eabi-objdump.exe")
+        find_program(GNU_STRIP NAMES "${ARM_GNU_TOOLS}/bin/arm-none-eabi-strip.exe")
     else()
         find_program(GNU_OBJCOPY NAMES "${ARM_GNU_TOOLS}/bin/arm-none-eabi-objcopy")
+        find_program(GNU_AR NAMES "${ARM_GNU_TOOLS}/bin/arm-none-eabi-ar")
+        find_program(GNU_RANLIB NAMES "${ARM_GNU_TOOLS}/bin/arm-none-eabi-ranlib")
+        find_program(GNU_NM NAMES "${ARM_GNU_TOOLS}/bin/arm-none-eabi-nm")
+        find_program(GNU_OBJDUMP NAMES "${ARM_GNU_TOOLS}/bin/arm-none-eabi-objdump")
+        find_program(GNU_STRIP NAMES "${ARM_GNU_TOOLS}/bin/arm-none-eabi-strip")
     endif()
-    set(CMAKE_OBJCOPY "${GNU_OBJCOPY}" PARENT_SCOPE)
+
+    set(CMAKE_OBJCOPY "${GNU_OBJCOPY}" CACHE FILEPATH "objcopy")
+    set(CMAKE_AR "${GNU_AR}" CACHE FILEPATH "ar")
+    set(CMAKE_RANLIB "${GNU_RANLIB}" CACHE FILEPATH "ranlib")
+    set(CMAKE_NM "${GNU_NM}" CACHE FILEPATH "nm")
+    set(CMAKE_OBJDUMP "${GNU_OBJDUMP}" CACHE FILEPATH "objdump")
+    set(CMAKE_STRIP "${GNU_STRIP}" CACHE FILEPATH "strip")
+
+    #====================
+    # Linkers
+    #====================
+
+    set(CMAKE_LINKER "${GNU_C_COMPILER}" CACHE FILEPATH "ld")
+    set(CMAKE_SHARED_LINKER "${GNU_C_COMPILER}" CACHE FILEPATH "shared ld")
+    set(CMAKE_STATIC_LINKER "${GNU_C_COMPILER}" CACHE FILEPATH "static ld")
+
+    #====================
+    # Archivers
+    #====================
+
+    set(CMAKE_C_COMPILER_AR "${CMAKE_AR}" CACHE FILEPATH "c ar")
+    set(CMAKE_C_COMPILER_RANLIB "${CMAKE_RANLIB}" CACHE FILEPATH "c ranlib")
+
+    set(CMAKE_CXX_COMPILER_AR "${CMAKE_AR}" CACHE FILEPATH "c++ ar")
+    set(CMAKE_CXX_COMPILER_RANLIB "${CMAKE_RANLIB}" CACHE FILEPATH "c++ ranlib")
 
     #====================
     # ASM
