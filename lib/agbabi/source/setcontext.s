@@ -9,6 +9,8 @@
     .section .iwram, "ax", %progbits
     .align 2
     .arm
+    
+    .func   __agbabi_setcontext
     .global __agbabi_setcontext
     .type   __agbabi_setcontext STT_FUNC
 __agbabi_setcontext:
@@ -16,10 +18,9 @@ __agbabi_setcontext:
     add     lr, r0, #MCONTEXT_ARM_R0
     ldmia   lr, {r0-r11, sp, lr}
     bx      lr
+    .endfunc
 
-    .section .iwram, "ax", %progbits
-    .align 2
-    .arm
+    .func   __agbabi_ctx_start
     .global __agbabi_ctx_start
     .type   __agbabi_ctx_start STT_FUNC
 __agbabi_ctx_start:
@@ -30,5 +31,6 @@ __agbabi_ctx_start:
     movs    r0, r5
     bne     __agbabi_setcontext
     .extern _exit
-    ldr r1, =_exit
+    ldr     r1, =_exit
     bx      r1
+    .endfunc

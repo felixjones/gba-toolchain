@@ -36,8 +36,8 @@ function(gba_find_compilers)
             ${ARM_GNU_TOOLS}/arm-none-eabi/include/c++/9.3.1/arm-none-eabi
         )
 
-        set(CMAKE_C_FLAGS "-g --target=arm-arm-none-eabi ${CMAKE_C_FLAGS} ${C_HEADERS} -isystem \"${ARM_GNU_TOOLS}/arm-none-eabi/include\"" PARENT_SCOPE)
-        set(CMAKE_CXX_FLAGS "-g --target=arm-arm-none-eabi ${CMAKE_CXX_FLAGS} ${CXX_HEADERS} -isystem \"${ARM_GNU_TOOLS}/arm-none-eabi/include\"" PARENT_SCOPE)
+        set(CMAKE_C_FLAGS "--target=arm-arm-none-eabi ${CMAKE_C_FLAGS} ${C_HEADERS} -isystem \"${ARM_GNU_TOOLS}/arm-none-eabi/include\"" PARENT_SCOPE)
+        set(CMAKE_CXX_FLAGS "--target=arm-arm-none-eabi ${CMAKE_CXX_FLAGS} ${CXX_HEADERS} -isystem \"${ARM_GNU_TOOLS}/arm-none-eabi/include\"" PARENT_SCOPE)
 
         set(CMAKE_C_LINK_FLAGS "${CMAKE_C_LINK_FLAGS} -Xlinker -no-enum-size-warning" PARENT_SCOPE)
         set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -Xlinker -no-enum-size-warning" PARENT_SCOPE)
@@ -45,8 +45,8 @@ function(gba_find_compilers)
         set(CMAKE_C_COMPILER "${CLANG_C_COMPILER}" PARENT_SCOPE)
         set(CMAKE_CXX_COMPILER "${CLANG_CXX_COMPILER}" PARENT_SCOPE)
 
-        set(CMAKE_C_LINK_EXECUTABLE "\"${GNU_C_COMPILER}\" -g <CMAKE_C_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>" PARENT_SCOPE)
-        set(CMAKE_CXX_LINK_EXECUTABLE "\"${GNU_CXX_COMPILER}\" -g <CMAKE_CXX_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>" PARENT_SCOPE)
+        set(CMAKE_C_LINK_EXECUTABLE "\"${GNU_C_COMPILER}\" <CMAKE_C_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>" PARENT_SCOPE)
+        set(CMAKE_CXX_LINK_EXECUTABLE "\"${GNU_CXX_COMPILER}\" <CMAKE_CXX_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>" PARENT_SCOPE)
     else()
         if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows)
             set(CMAKE_C_COMPILER "${ARM_GNU_TOOLS}/bin/arm-none-eabi-gcc.exe" PARENT_SCOPE)

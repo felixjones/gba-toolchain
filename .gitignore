@@ -4,6 +4,9 @@ lib/tonc/
 lib/gba-plusplus/
 lib/maxmod/
 lib/gbfs/
+lib/.vscode/
 tools/
 devel/
 dependencies.txt
+.DS_Store
+.DS_Store?
