@@ -24,6 +24,7 @@ __agbabi_setcontext:
     .global __agbabi_ctx_start
     .type   __agbabi_ctx_start STT_FUNC
 __agbabi_ctx_start:
+    .fnstart
     push    {r5}
     mov     lr, pc
     bx      r4
@@ -33,4 +34,5 @@ __agbabi_ctx_start:
     .extern _exit
     ldr     r1, =_exit
     bx      r1
+    .fnend
     .endfunc
