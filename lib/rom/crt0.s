@@ -8,7 +8,7 @@
   .global _start
 _start:
   @ Immediately jump past header data to ROM code
-  b	.rom_start
+  b	.Lrom_start
 
   @ Header data
   .fill 156, 1, 0   @ Nintendo logo (0x8000004)
@@ -18,13 +18,13 @@ _start:
   .byte 0x00		    @ Main unit ID	(0x80000B3)
   .byte 0x00		    @ Device type		(0x80000B4)
   .fill	3, 1, 0x00	@ Unused byte x3
-.unused_header:
+  
   .fill	4, 1, 0x00	@ Unused byte x4
   .byte	0x00		    @ Game version		  (0x80000BC)
   .byte	0x00		    @ Complement check  (0x80000BD)
   .byte	0x00, 0x00  @ Checksum          (0x80000BE)
 
-.rom_start:
+.Lrom_start:
   @ r3 set to REG_BASE
   mov r3, #0x4000000
 
@@ -42,20 +42,20 @@ _start:
   ldr	sp, =__sp_usr
 
   @ Enter thumb mode (bit 0 is set to 1)
-  adr	r0, .thumb_start + 1
+  adr	r0, .Lthumb_start + 1
   bx	r0
 
   .thumb
-.thumb_start:
+.Lthumb_start:
   @ Slow copy IWRAM: __aeabi_memclr4 and __aeabi_memcpy4 might be in there
   ldr	r0, =__iwram_lma
   ldr	r1, =__iwram_start
   ldr	r2, =__iwram_end
-.iwram_copy:
+.Liwram_copy:
   ldm   r0!, {r3-r7}
   stm   r1!, {r3-r7}
   cmp   r1, r2
-  blt	.iwram_copy
+  blt	.Liwram_copy
 
   @ Clear bss
   ldr	r0, =__bss_start
@@ -79,25 +79,25 @@ _start:
 
   @ __libc_init_array
   ldr	r2, =__libc_init_array
-  bl	.bx_r2
+  bl	.Lbx_r2
 
   @ main
   mov	r0, #0		@ argc
   mov	r1, #0		@ argv
   ldr	r2, =main
-  bl	.bx_r2
+  bl	.Lbx_r2
 
   @ Store result of main
   push  {r0}
 
   @ __libc_fini_array
   ldr r2, =__libc_fini_array
-  bl	.bx_r2
+  bl	.Lbx_r2
 
   @ Restore result of main
   pop	{r0}
   ldr	r2, =_exit
   @ fallthrough
 
-.bx_r2:
+.Lbx_r2:
   bx  r2
