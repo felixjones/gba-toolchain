@@ -107,8 +107,6 @@ SECTIONS {
     . = ALIGN(4);
   } >rom
 
-  __rom_end = .;
-
   /*
   ====================
     iwram
@@ -165,6 +163,17 @@ SECTIONS {
   } >ewram
 
   __rom_end = __ewram_lma + SIZEOF(.ewram);
+
+  /*
+  ====================
+    crt0.s CpuSet
+  ====================
+  */
+
+  __iwram_cpuset_copy = ((__iwram_end - __iwram_start) / 4) | (1 << 26);
+  __bss_cpuset_fill = ((__bss_end - __bss_start) / 4) | (5 << 24);
+  __data_cpuset_copy = ((__data_end - __data_start) / 4) | (1 << 26);
+  __ewram_cpuset_copy = ((__ewram_end - __ewram_start) / 4) | (1 << 26);
 
   /*
   ====================

@@ -19,6 +19,7 @@ _start:
   .byte 0x00		    @ Device type		(0x80000B4)
   .fill	3, 1, 0x00	@ Unused byte x3
   
+.Lzero_word:
   .fill	4, 1, 0x00	@ Unused byte x4
   .byte	0x00		    @ Game version		  (0x80000BC)
   .byte	0x00		    @ Complement check  (0x80000BD)
@@ -47,35 +48,29 @@ _start:
 
   .thumb
 .Lthumb_start:
-  @ Slow copy IWRAM: __aeabi_memclr4 and __aeabi_memcpy4 might be in there
+  @ CpuSet copy ewram
+  ldr	r0, =__ewram_lma
+  ldr	r1, =__ewram_start
+  ldr	r2, =__ewram_cpuset_copy
+  swi #0xb
+
+  @ CpuSet copy iwram
   ldr	r0, =__iwram_lma
   ldr	r1, =__iwram_start
-  ldr	r2, =__iwram_end
-.Liwram_copy:
-  ldm   r0!, {r3-r7}
-  stm   r1!, {r3-r7}
-  cmp   r1, r2
-  blt	.Liwram_copy
+  ldr	r2, =__iwram_cpuset_copy
+  swi #0xb
 
-  @ Clear bss
-  ldr	r0, =__bss_start
-  ldr	r1, =__bss_end
-  sub	r1, r0
-  bl	__aeabi_memclr4
+  @ CpuSet fill bss
+  ldr	r0, =.Lzero_word
+  ldr	r1, =__bss_start
+  ldr	r2, =__bss_cpuset_fill
+  swi #0xb
 
-  @ Copy data
-  ldr	r0, =__data_start
-  ldr	r1, =__data_lma
-  ldr	r2, =__data_end
-  sub	r2, r0
-  bl	__aeabi_memcpy4
-
-  @ Copy EWRAM
-  ldr	r0, =__ewram_start
-  ldr	r1, =__ewram_lma
-  ldr	r2, =__ewram_end
-  sub	r2, r0
-  bl	__aeabi_memcpy4
+  @ CpuSet copy data
+  ldr	r0, =__data_lma
+  ldr	r1, =__data_start
+  ldr	r2, =__data_cpuset_copy
+  swi #0xb
 
   @ __libc_init_array
   ldr	r2, =__libc_init_array

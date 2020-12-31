@@ -19,6 +19,7 @@ _start:
   .byte 0x00        @ Device type   (0x20000B4)
   .fill 3, 1, 0x00  @ Unused byte x3
   
+.Lzero_word:
   .fill 4, 1, 0x00  @ Unused byte x4
   .byte 0x00        @ Game version      (0x20000BC)
   .byte 0x00        @ Complement check  (0x20000BD)
@@ -56,25 +57,23 @@ _start:
 
   .thumb
 .Lthumb_start:
-  @ Clear bss
-  ldr r0, =__bss_start
-  ldr r1, =__bss_end
-  sub r1, r0
-  bl  __aeabi_memclr4
+  @ CpuSet copy iwram
+  ldr	r0, =__iwram_lma
+  ldr	r1, =__iwram_start
+  ldr	r2, =__iwram_cpuset_copy
+  swi #0xb
 
-  @ Copy data
-  ldr r0, =__data_start
-  ldr r1, =__data_lma
-  ldr r2, =__data_end
-  sub r2, r0
-  bl  __aeabi_memcpy4
+  @ CpuSet fill bss
+  ldr	r0, =.Lzero_word
+  ldr	r1, =__bss_start
+  ldr	r2, =__bss_cpuset_fill
+  swi #0xb
 
-  @ Copy IWRAM
-  ldr r0, =__iwram_start
-  ldr r1, =__iwram_lma
-  ldr r2, =__iwram_end
-  sub r2, r0
-  bl  __aeabi_memcpy4
+  @ CpuSet copy data
+  ldr	r0, =__data_lma
+  ldr	r1, =__data_start
+  ldr	r2, =__data_cpuset_copy
+  swi #0xb
 
   @ __libc_init_array
   ldr r2, =__libc_init_array
