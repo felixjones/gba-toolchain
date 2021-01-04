@@ -1,5 +1,5 @@
 @--------------------------------------------------------------------------------
-@ memcpy4.s
+@ memcpy.s
 @--------------------------------------------------------------------------------
 @ Implementations of:
 @   __aeabi_memcpy8, __aeabi_memcpy4 and __aeabi_memcpy
@@ -55,8 +55,10 @@ __aeabi_memcpy:
     and     r12, r1, #3
     cmp     r3, r12
     bne     .Lunaligned
-.Lcopy_front:
+
+    rsb     r12, r12, #4
     sub     r2, r2, r12
+.Lcopy_front:
     subs    r12, r12, #1
     ldrhsb  r3, [r1], #1
     strhsb  r3, [r0], #1
