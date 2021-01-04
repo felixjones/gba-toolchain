@@ -8,6 +8,7 @@ add_library(agbabi STATIC
     source/idiv.s
     source/makecontext.c
     source/memcpy.s
+    source/memset.s
     source/setcontext.s
     source/swapcontext.s
     source/uidiv.s
