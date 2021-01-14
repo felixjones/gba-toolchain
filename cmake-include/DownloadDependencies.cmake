@@ -42,6 +42,9 @@ function(gba_download_dependencies manifestUrl)
 
         gba_key_value_get("${CMAKE_CURRENT_LIST_DIR}/urls.txt" "gbfs")
         set(URL_GBFS ${GBA_KEY_VALUE_OUT})
+
+        gba_key_value_get("${CMAKE_CURRENT_LIST_DIR}/urls.txt" "agbabi")
+        set(URL_AGBABI ${GBA_KEY_VALUE_OUT})
     endif()
 
     #====================
@@ -92,6 +95,13 @@ function(gba_download_dependencies manifestUrl)
         set(TMP_URL_GBFS ${GBA_KEY_VALUE_OUT})
         if(NOT "${TMP_URL_GBFS}" STREQUAL "${URL_GBFS}")
             set(URL_GBFS "${TMP_URL_GBFS}")
+        endif()
+
+        # Replace URL_AGBABI
+        gba_key_value_get("${CMAKE_CURRENT_LIST_DIR}/urls.tmp" "agbabi")
+        set(TMP_URL_AGBABI ${GBA_KEY_VALUE_OUT})
+        if(NOT "${TMP_URL_AGBABI}" STREQUAL "${URL_AGBABI}")
+            set(URL_AGBABI "${TMP_URL_AGBABI}")
         endif()
 
         file(RENAME "${CMAKE_CURRENT_LIST_DIR}/urls.tmp" "${CMAKE_CURRENT_LIST_DIR}/urls.txt")
@@ -175,6 +185,18 @@ function(gba_download_dependencies manifestUrl)
         else()
             # Already got it
             unset(URL_GBFS)
+        endif()
+    endif()
+
+    if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/lib/agbabi")
+        # Check URL_AGBABI
+        gba_github_get_commit("${URL_AGBABI}")
+        gba_key_value_get("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "agbabi")
+        if(NOT "${GBA_GITHUB_COMMIT_OUT}" STREQUAL "${GBA_KEY_VALUE_OUT}")
+            gba_key_value_set("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "agbabi" "${GBA_GITHUB_COMMIT_OUT}")
+        else()
+            # Already got it
+            unset(URL_AGBABI)
         endif()
     endif()
 
@@ -272,5 +294,18 @@ function(gba_download_dependencies manifestUrl)
 
             gba_key_value_set("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "gbfs" "${GBFS_FILE}")
         endif()
+    endif()
+
+    #====================
+    # Download agbabi
+    #====================
+
+    if(DEFINED URL_AGBABI)
+        gba_download_extract("${URL_AGBABI}" "${CMAKE_CURRENT_LIST_DIR}/lib/agbabi")
+        gba_github_get_commit("${URL_AGBABI}")
+        file(COPY "${CMAKE_CURRENT_LIST_DIR}/lib/agbabi/agbabi-${GBA_GITHUB_COMMIT_OUT}/" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/lib/agbabi/")
+        file(REMOVE_RECURSE "${CMAKE_CURRENT_LIST_DIR}/lib/agbabi/agbabi-${GBA_GITHUB_COMMIT_OUT}/")
+
+        gba_key_value_set("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "agbabi" "${GBA_GITHUB_COMMIT_OUT}")
     endif()
 endfunction()
