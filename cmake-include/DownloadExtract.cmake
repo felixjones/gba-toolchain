@@ -26,7 +26,7 @@ function(gba_download_extract url path)
         execute_process(
             COMMAND powershell.exe -nologo -noprofile -command "& { Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('${path}/${FILE_NAME}', '${path}/'); }"
         )
-    elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL Linux OR CMAKE_HOST_SYSTEM_NAME STREQUAL Darwin)
+    elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL Linux OR CMAKE_HOST_SYSTEM_NAME STREQUAL Darwin OR CMAKE_HOST_SYSTEM_NAME MATCHES "MING.*")
         get_filename_component(FILE_EXT "${path}/${FILE_NAME}" EXT)
         if(${FILE_EXT} STREQUAL ".zip")
             execute_process(

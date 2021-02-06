@@ -10,7 +10,7 @@ function(gba_compile_c source outPath)
 
     file(MAKE_DIRECTORY "${outPath}/bin/")
 
-    if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows)
+    if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows OR CMAKE_HOST_SYSTEM_NAME MATCHES "MING.*")
 
         #====================
         # Compile Windows

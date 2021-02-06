@@ -10,7 +10,7 @@ function(gba_download_dependencies manifestUrl)
     # Detect host
     #====================
 
-    if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows)
+    if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows OR CMAKE_HOST_SYSTEM_NAME MATCHES "MING.*")
         set(KEY_ARM "arm-win32")
     elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL Linux)
         if(CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL aarch64)
