@@ -6,5 +6,5 @@ gbafix=https://raw.githubusercontent.com/devkitPro/gba-tools/054d507f90d32784274
 tonc=https://github.com/devkitPro/libtonc/archive/ccc03fa321e56f51aed5e2ee1d6e3df3d1cbc803.zip
 maxmod=https://github.com/devkitPro/maxmod/archive/7983881f8f5eba7416470920bcc9bfcae47fae18.zip
 gbfs=http://www.pineight.com/gba/gbfs.zip
-gba-plusplus=https://github.com/felixjones/gba-plusplus/archive/master.zip
-agbabi=https://github.com/felixjones/agbabi/archive/master.zip
+gba-plusplus=https://github.com/felixjones/gba-plusplus/archive/84b9734aeb32111677665183f6015e41a24ee414.zip
+agbabi=https://github.com/felixjones/agbabi/archive/aced5b6b5361c1799328ed2872f8b0e3297a208c.zip
