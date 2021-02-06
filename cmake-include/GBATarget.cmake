@@ -69,17 +69,14 @@ function(gba_target_sources_instruction_set target default)
         string(REGEX MATCH "(.*\\.ewram\\..*)" SOURCE_EWRAM ${SOURCE})
 
         if(NOT "${SOURCE_IWRAM}" STREQUAL "")
-            message(STATUS "iwram ${SOURCE_IWRAM}")
             set_source_files_properties(${SOURCE} PROPERTIES COMPILE_FLAGS "-marm -mlong-calls")
         endif()
 
         if(NOT "${SOURCE_EWRAM}" STREQUAL "")
-            message(STATUS "ewram ${SOURCE_EWRAM}")
             set_source_files_properties(${SOURCE} PROPERTIES COMPILE_FLAGS "-mthumb -mlong-calls")
         endif()
 
         if("${SOURCE_IWRAM}" STREQUAL "" AND "${SOURCE_EWRAM}" STREQUAL "")
-            message(STATUS "default ${default}")
             set_source_files_properties(${SOURCE} PROPERTIES COMPILE_FLAGS "-m${default}")
         endif()
     endforeach()

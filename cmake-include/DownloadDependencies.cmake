@@ -214,6 +214,18 @@ function(gba_download_dependencies manifestUrl)
         gba_download_extract("${URL_ARM}" "${CMAKE_CURRENT_LIST_DIR}/arm-gnu-toolchain")
 
         get_filename_component(ARM_GNU_FILE "${URL_ARM}" NAME_WE)
+
+        #====================
+        # Move folders if needed
+        #====================
+
+        string(REGEX MATCH "(.*)(-win32|-x86_64-linux|-aarch64-linux|-mac)" _ "${ARM_GNU_FILE}")
+        if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/arm-gnu-toolchain/${CMAKE_MATCH_1}")
+            file(RENAME "${CMAKE_CURRENT_LIST_DIR}/arm-gnu-toolchain" "${CMAKE_CURRENT_LIST_DIR}/arm-gnu-toolchain-tmp")
+            file(RENAME "${CMAKE_CURRENT_LIST_DIR}/arm-gnu-toolchain-tmp/${CMAKE_MATCH_1}" "${CMAKE_CURRENT_LIST_DIR}/arm-gnu-toolchain")
+            file(REMOVE_RECURSE "${CMAKE_CURRENT_LIST_DIR}/arm-gnu-toolchain-tmp")
+        endif()
+
         gba_key_value_set("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "arm-gnu" "${ARM_GNU_FILE}")
     endif()
 

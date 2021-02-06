@@ -1,3 +1,5 @@
+include("${CMAKE_CURRENT_LIST_DIR}/Detail.cmake")
+
 function(gba_find_compilers)
     cmake_minimum_required(VERSION 3.0)
 
@@ -30,10 +32,19 @@ function(gba_find_compilers)
             find_program(GNU_CXX_COMPILER NAMES "${ARM_GNU_TOOLS}/bin/arm-none-eabi-g++")
         endif()
 
+        gba_list_directories("${ARM_GNU_TOOLS}/lib/gcc/arm-none-eabi/")
+        set(gccVersion 0.0.0)
+        foreach(version ${GBA_LIST_DIRECTORIES_OUT})
+            if(${version} VERSION_GREATER ${gccVersion})
+                set(gccVersion ${version})
+            endif()
+        endforeach()
+        message(STATUS "Found arm-gnu-toolchain GCC ${gccVersion}")
+
         include_directories(SYSTEM
-            ${ARM_GNU_TOOLS}/lib/gcc/arm-none-eabi/9.3.1/include
-            ${ARM_GNU_TOOLS}/arm-none-eabi/include/c++/9.3.1
-            ${ARM_GNU_TOOLS}/arm-none-eabi/include/c++/9.3.1/arm-none-eabi
+            ${ARM_GNU_TOOLS}/lib/gcc/arm-none-eabi/${gccVersion}/include
+            ${ARM_GNU_TOOLS}/arm-none-eabi/include/c++/${gccVersion}
+            ${ARM_GNU_TOOLS}/arm-none-eabi/include/c++/${gccVersion}/arm-none-eabi
         )
 
         set(CMAKE_C_FLAGS "--target=arm-arm-none-eabi ${CMAKE_C_FLAGS} ${C_HEADERS} -isystem \"${ARM_GNU_TOOLS}/arm-none-eabi/include\"" PARENT_SCOPE)
