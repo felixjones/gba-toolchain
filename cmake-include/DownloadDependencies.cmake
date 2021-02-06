@@ -4,7 +4,7 @@ include("${CMAKE_CURRENT_LIST_DIR}/DownloadCompile.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/Detail.cmake")
 
 function(gba_download_dependencies manifestUrl)
-    cmake_minimum_required(VERSION 3.1)
+    cmake_minimum_required(VERSION 3.0)
 
     #====================
     # Detect host

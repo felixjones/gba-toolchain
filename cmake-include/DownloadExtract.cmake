@@ -48,5 +48,4 @@ function(gba_download_extract url path)
     #====================
 
     file(REMOVE "${path}/${FILE_NAME}")
-
 endfunction()

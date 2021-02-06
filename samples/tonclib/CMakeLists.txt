@@ -1,7 +1,5 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.0)
 project(tonclib)
-
-set(CMAKE_CXX_STANDARD 14)
 
 add_executable(${CMAKE_PROJECT_NAME} main.c)
 set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES SUFFIX ".elf")

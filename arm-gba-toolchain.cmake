@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.0)
 
 include("${CMAKE_CURRENT_LIST_DIR}/cmake-include/DownloadDependencies.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/cmake-include/FindCompilers.cmake")

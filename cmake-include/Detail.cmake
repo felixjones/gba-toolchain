@@ -1,5 +1,5 @@
 function(gba_github_get_commit url)
-    cmake_minimum_required(VERSION 3.1)
+    cmake_minimum_required(VERSION 3.0)
 
     unset(GITHUB_COMMIT_OUT)
 

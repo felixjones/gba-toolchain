@@ -1,4 +1,6 @@
 function(gba_compile_c source outPath)
+    cmake_minimum_required(VERSION 3.0)
+
     get_filename_component(FILE_NAME_WE "${source}" NAME_WE)
 
     message(STATUS "Compiling ${source}")

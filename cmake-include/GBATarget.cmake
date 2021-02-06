@@ -60,6 +60,8 @@ function(gba_target_fix target inputOutput title gameCode makerCode version)
 endfunction()
 
 function(gba_target_sources_instruction_set target default)
+    cmake_minimum_required(VERSION 3.0)
+
     get_target_property(TARGET_SOURCES ${target} SOURCES)
 
     foreach(SOURCE ${TARGET_SOURCES})
@@ -84,24 +86,32 @@ function(gba_target_sources_instruction_set target default)
 endfunction()
 
 function(gba_target_link_tonc target)
+    cmake_minimum_required(VERSION 3.0)
+
     add_subdirectory("${GBA_TOOLCHAIN_LIB_TONC_DIR}" "./tonc")
     target_link_libraries(${target} PRIVATE tonc)
     target_include_directories(${target} PUBLIC "${GBA_TOOLCHAIN_LIB_TONC_DIR}/include")
 endfunction()
 
 function(gba_target_link_maxmod target)
+    cmake_minimum_required(VERSION 3.0)
+
     add_subdirectory("${GBA_TOOLCHAIN_LIB_MAXMOD_DIR}" "./maxmod")
     target_link_libraries(${target} PRIVATE maxmod)
     target_include_directories(${target} PUBLIC "${GBA_TOOLCHAIN_LIB_MAXMOD_DIR}/include")
 endfunction()
 
 function(gba_target_link_gbfs target)
+    cmake_minimum_required(VERSION 3.0)
+
     add_subdirectory("${GBA_TOOLCHAIN_LIB_GBFS_DIR}" "./gbfs")
     target_link_libraries(${target} PRIVATE gbfs)
     target_include_directories(${target} PUBLIC "${GBA_TOOLCHAIN_LIB_GBFS_DIR}/include")
 endfunction()
 
 function(gba_target_link_agb_abi target)
+    cmake_minimum_required(VERSION 3.0)
+
     add_subdirectory("${GBA_TOOLCHAIN_LIB_AGBABI_DIR}" "./agbabi")
     target_link_libraries(${target} PRIVATE agbabi)
     target_include_directories(${target} PUBLIC "${GBA_TOOLCHAIN_LIB_AGBABI_DIR}/include")
@@ -109,6 +119,8 @@ function(gba_target_link_agb_abi target)
 endfunction()
 
 function(gba_target_link_gba_plusplus target)
+    cmake_minimum_required(VERSION 3.0)
+
     target_include_directories(${target} PUBLIC "${GBA_TOOLCHAIN_LIB_GBA_PLUSPLUS_DIR}/include")
 endfunction()
 
