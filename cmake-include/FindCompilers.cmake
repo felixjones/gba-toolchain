@@ -10,7 +10,7 @@ function(gba_find_compilers)
     #====================
 
     if(${USE_CLANG})
-        if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows OR CMAKE_HOST_SYSTEM_NAME MATCHES "MING.*")
+        if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows OR CMAKE_HOST_SYSTEM_NAME MATCHES "MING.*" OR CMAKE_HOST_SYSTEM_NAME MATCHES "MSYS.*")
             find_program(CLANG_C_COMPILER NAMES "clang.exe")
             find_program(CLANG_CXX_COMPILER NAMES "clang++.exe")
         else()
@@ -24,7 +24,7 @@ function(gba_find_compilers)
     endif()
 
     if(CLANG_C_COMPILER AND CLANG_CXX_COMPILER)
-        if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows OR CMAKE_HOST_SYSTEM_NAME MATCHES "MING.*")
+        if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows OR CMAKE_HOST_SYSTEM_NAME MATCHES "MING.*" OR CMAKE_HOST_SYSTEM_NAME MATCHES "MSYS.*")
             find_program(GNU_C_COMPILER NAMES "${ARM_GNU_TOOLS}/bin/arm-none-eabi-gcc.exe")
             find_program(GNU_CXX_COMPILER NAMES "${ARM_GNU_TOOLS}/bin/arm-none-eabi-g++.exe")
         else()
@@ -59,7 +59,7 @@ function(gba_find_compilers)
         set(CMAKE_C_LINK_EXECUTABLE "\"${GNU_C_COMPILER}\" <CMAKE_C_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>" PARENT_SCOPE)
         set(CMAKE_CXX_LINK_EXECUTABLE "\"${GNU_CXX_COMPILER}\" <CMAKE_CXX_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>" PARENT_SCOPE)
     else()
-        if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows OR CMAKE_HOST_SYSTEM_NAME MATCHES "MING.*")
+        if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows OR CMAKE_HOST_SYSTEM_NAME MATCHES "MING.*" OR CMAKE_HOST_SYSTEM_NAME MATCHES "MSYS.*")
             set(CMAKE_C_COMPILER "${ARM_GNU_TOOLS}/bin/arm-none-eabi-gcc.exe" PARENT_SCOPE)
             set(CMAKE_CXX_COMPILER "${ARM_GNU_TOOLS}/bin/arm-none-eabi-g++.exe" PARENT_SCOPE)
         else()
@@ -72,7 +72,7 @@ function(gba_find_compilers)
     # objcopy ar ranlib nm objdump strip
     #====================
 
-    if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows OR CMAKE_HOST_SYSTEM_NAME MATCHES "MING.*")
+    if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows OR CMAKE_HOST_SYSTEM_NAME MATCHES "MING.*" OR CMAKE_HOST_SYSTEM_NAME MATCHES "MSYS.*")
         find_program(GNU_OBJCOPY NAMES "${ARM_GNU_TOOLS}/bin/arm-none-eabi-objcopy.exe")
         find_program(GNU_AR NAMES "${ARM_GNU_TOOLS}/bin/arm-none-eabi-ar.exe")
         find_program(GNU_RANLIB NAMES "${ARM_GNU_TOOLS}/bin/arm-none-eabi-ranlib.exe")
@@ -117,7 +117,7 @@ function(gba_find_compilers)
     # ASM
     #====================
 
-    if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows OR CMAKE_HOST_SYSTEM_NAME MATCHES "MING.*")
+    if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows OR CMAKE_HOST_SYSTEM_NAME MATCHES "MING.*" OR CMAKE_HOST_SYSTEM_NAME MATCHES "MSYS.*")
         set(CMAKE_ASM_COMPILER "${ARM_GNU_TOOLS}/bin/arm-none-eabi-gcc.exe" PARENT_SCOPE)
     else()
         set(CMAKE_ASM_COMPILER "${ARM_GNU_TOOLS}/bin/arm-none-eabi-gcc" PARENT_SCOPE)
