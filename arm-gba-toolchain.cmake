@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.0)
 
+get_filename_component(TOOLCHAIN_FILE "${CMAKE_TOOLCHAIN_FILE}" NAME)
+message(STATUS "Using toolchain: \"${TOOLCHAIN_FILE}\"")
+
 include("${CMAKE_CURRENT_LIST_DIR}/cmake-include/DownloadDependencies.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/cmake-include/FindCompilers.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/cmake-include/GBATarget.cmake")
