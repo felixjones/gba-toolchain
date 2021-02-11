@@ -14,20 +14,25 @@ Add the toolchain to your CMake project with `-DCMAKE_TOOLCHAIN_FILE=path/to/arm
 
 The `arm-gba-toolchain.cmake` script will attempt to download the following dependencies
 
-|Dependency|Source|Destination|Used for|
+|Dependency|Source|Destination||
 |---|---|---|---|
 |GNU Arm Embedded Toolchain|[ARM developer website](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads)|   gba-toolchain/arm-none-eabi|GNU toolchain used for compiling GBA projects|
-|gbafix|[gba-tools GitHub master](https://raw.githubusercontent.com/devkitPro/gba-tools/master/src/gbafix.c)|gba-toolchain/tools|Fixing GBA ROM headers for compatibility with real hardware|
+|gbafix*|[gba-tools GitHub master](https://raw.githubusercontent.com/devkitPro/gba-tools/master/src/gbafix.c)|gba-toolchain/tools|Fixes GBA ROM headers for compatibility with real hardware|
 |tonclib|[libtonc GitHub master](https://github.com/devkitPro/libtonc)|gba-toolchain/lib/tonc|C library for GBA development|
+|gba-plusplus**|[gba-plusplus GitHub master](https://github.com/felixjones/gba-plusplus)|gba-toolchain/lib/gba-plusplus|C++ library for GBA development|
+|maxmod|[maxmod GitHub master](https://github.com/devkitPro/maxmod)|gba-toolchain/lib/maxmod|C library for GBA sound playback|
+|gbfs*|[gbfs developer website](http://www.pineight.com/gba/#gbfs)|gba-toolchain/lib/gbfs|File system tools and library for GBA resource management|
+|agbabi|[agbabi GitHub master](https://github.com/felixjones/agbabi)|gba-toolchain/lib/agbabi|Optimized implementations for common GBA functions|
 
-gbafix requires a host compiler, such as Visual Studio's CL.exe, GCC or Clang.
+\* requires a host compiler, such as Visual Studio's CL.exe, GCC or Clang.    
+\** experimental, in-development project
 
 # Example CMake
 
 This example CMake has the source file `main.c` and builds `gba_example.elf` and `example_out.gba`.
 
 ```cmake
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.0)
 project(my_gba_project)
 
 add_executable(gba_example main.c)
@@ -51,21 +56,19 @@ gba_target_link_runtime(gba_example rom)
 # add objcopy command (elf to gba)
 gba_target_object_copy(gba_example "gba_example.elf" "example_out.gba")
 
-# gbafix settings (used with gba_target_fix)
-set(ROM_TITLE "Example")
-set(ROM_GAME_CODE "CEGE")
-set(ROM_MAKER_CODE "EG")
-set(ROM_VERSION 100)
+# gbafix
+if(EXISTS ${GBA_TOOLCHAIN_GBAFIX})
+    # gbafix settings (used with gba_target_fix)
+    set(ROM_TITLE "Example")
+    set(ROM_GAME_CODE "CEGE")
+    set(ROM_MAKER_CODE "EG")
+    set(ROM_VERSION 100)
 
-# add gbafix command (gba ROM header information)
-gba_target_fix(gba_example "example_out.gba" "${ROM_TITLE}" "${ROM_GAME_CODE}" "${ROM_MAKER_CODE}" ${ROM_VERSION})
+    # add gbafix command (gba ROM header information)
+    gba_target_fix(gba_example "example_out.gba" "${ROM_TITLE}" "${ROM_GAME_CODE}" "${ROM_MAKER_CODE}" ${ROM_VERSION})
+endif()
 ```
 
 # Enable Clang
 
 The CMake option `-DUSE_CLANG=ON` will enable searching for and activating Clang compilers.
-
-# libagbabi
-
-This library provides GBA optimized replacements for several default arm-eabi functions.
-For example, the integer division operator is up to almost 3 times faster with this library, at the cost of some IWRAM.
