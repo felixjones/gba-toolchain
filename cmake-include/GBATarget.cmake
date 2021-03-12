@@ -55,7 +55,6 @@ function(gba_target_fix target inputOutput title gameCode makerCode version)
         POST_BUILD
         COMMAND "${GBA_TOOLCHAIN_GBAFIX}" "${inputOutput}" "-t${title}" "-c${gameCode}" "-m${makerCode}" "-r${version}"
         COMMENT "GBA header-fix \"${title}\" ${gameCode}:${makerCode} version ${version}"
-        BYPRODUCTS "${inputOutput}"
     )
 endfunction()
 
