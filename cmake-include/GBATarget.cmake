@@ -64,8 +64,8 @@ function(gba_target_sources_instruction_set target default)
     get_target_property(TARGET_SOURCES ${target} SOURCES)
 
     foreach(SOURCE ${TARGET_SOURCES})
-        string(REGEX MATCH "(.*\\.iwram\\..*)" SOURCE_IWRAM ${SOURCE})
-        string(REGEX MATCH "(.*\\.ewram\\..*)" SOURCE_EWRAM ${SOURCE})
+        string(REGEX MATCH "(.*\\.iwram[0-9]?\\..*)" SOURCE_IWRAM ${SOURCE})
+        string(REGEX MATCH "(.*\\.ewram[0-9]?\\..*)" SOURCE_EWRAM ${SOURCE})
 
         if(NOT "${SOURCE_IWRAM}" STREQUAL "")
             set_source_files_properties(${SOURCE} PROPERTIES COMPILE_FLAGS "-marm -mlong-calls")

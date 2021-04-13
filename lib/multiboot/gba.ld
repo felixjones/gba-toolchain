@@ -90,7 +90,7 @@ SECTIONS {
   } >ewram
 
   .text : {
-    *(EXCLUDE_FILE (*.iwram.*) .text*)
+    *(EXCLUDE_FILE (*.iwram.* *.iwram[0-9].*) .text*)
     *(.stub)
     /* .gnu.warning sections are handled specially by elf32.em.  */
     *(.gnu.warning)
@@ -143,6 +143,81 @@ SECTIONS {
     . = ALIGN(4);
     __data_end = ABSOLUTE(.);
   } >iwram
+
+  /*
+  ====================
+    iwram overlays
+  ====================
+  */
+
+  __iwram_overlay_lma = __data_lma + SIZEOF(.data);
+
+  OVERLAY : NOCROSSREFS AT (__iwram_overlay_lma) {
+    .iwram0 {
+      __iwram_overlay = ABSOLUTE(.);
+      *(.iwram0 .iwram0*) *iwram0.*(.text* .data*) . = ALIGN(4);
+      __iwram0_end = ABSOLUTE(.);
+      __iwram0_cpuset_copy = ((__iwram0_end - __iwram_overlay) / 4) | (1 << 26);
+    }
+    .iwram1 {
+      *(.iwram1 .iwram1*) *iwram1.*(.text* .data*) . = ALIGN(4);
+      __iwram1_end = ABSOLUTE(.);
+      __iwram1_cpuset_copy = ((__iwram0_end - __iwram_overlay) / 4) | (1 << 26);
+    }
+    .iwram2 {
+      *(.iwram2 .iwram2*) *iwram2.*(.text* .data*) . = ALIGN(4);
+      __iwram2_end = ABSOLUTE(.);
+      __iwram2_cpuset_copy = ((__iwram0_end - __iwram_overlay) / 4) | (1 << 26);
+    }
+    .iwram3 {
+      *(.iwram3 .iwram3*) *iwram3.*(.text* .data*) . = ALIGN(4);
+      __iwram3_end = ABSOLUTE(.);
+      __iwram3_cpuset_copy = ((__iwram0_end - __iwram_overlay) / 4) | (1 << 26);
+    }
+    .iwram4 {
+      *(.iwram4 .iwram4*) *iwram4.*(.text* .data*) . = ALIGN(4);
+      __iwram4_end = ABSOLUTE(.);
+      __iwram4_cpuset_copy = ((__iwram0_end - __iwram_overlay) / 4) | (1 << 26);
+    }
+    .iwram5 {
+      *(.iwram5 .iwram5*) *iwram5.*(.text* .data*) . = ALIGN(4);
+      __iwram5_end = ABSOLUTE(.);
+      __iwram5_cpuset_copy = ((__iwram0_end - __iwram_overlay) / 4) | (1 << 26);
+    }
+    .iwram6 {
+      *(.iwram6 .iwram6*) *iwram6.*(.text* .data*) . = ALIGN(4);
+      __iwram6_end = ABSOLUTE(.);
+      __iwram6_cpuset_copy = ((__iwram0_end - __iwram_overlay) / 4) | (1 << 26);
+    }
+    .iwram7 {
+      *(.iwram7 .iwram7*) *iwram7.*(.text* .data*) . = ALIGN(4);
+      __iwram7_end = ABSOLUTE(.);
+      __iwram7_cpuset_copy = ((__iwram0_end - __iwram_overlay) / 4) | (1 << 26);
+    }
+    .iwram8 {
+      *(.iwram8 .iwram8*) *iwram8.*(.text* .data*) . = ALIGN(4);
+      __iwram8_end = ABSOLUTE(.);
+      __iwram8_cpuset_copy = ((__iwram0_end - __iwram_overlay) / 4) | (1 << 26);
+    }
+    .iwram9 {
+      *(.iwram9 .iwram9*) *iwram9.*(.text* .data*) . = ALIGN(4);
+      __iwram9_end = ABSOLUTE(.);
+      __iwram9_cpuset_copy = ((__iwram0_end - __iwram_overlay) / 4) | (1 << 26);
+    }
+  } >iwram
+
+  __iwram_overlay_size = __load_stop_iwram0 - __load_start_iwram0 +
+    __load_stop_iwram1 - __load_start_iwram1 +
+    __load_stop_iwram2 - __load_start_iwram2 +
+    __load_stop_iwram3 - __load_start_iwram3 +
+    __load_stop_iwram4 - __load_start_iwram4 +
+    __load_stop_iwram5 - __load_start_iwram5 +
+    __load_stop_iwram6 - __load_start_iwram6 +
+    __load_stop_iwram7 - __load_start_iwram7 +
+    __load_stop_iwram8 - __load_start_iwram8 +
+    __load_stop_iwram9 - __load_start_iwram9;
+
+  __iwram_overlay_end = __iwram_overlay + __iwram_overlay_size;
 
   __ewram_end = .;
 
