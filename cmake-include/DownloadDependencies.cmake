@@ -178,6 +178,11 @@ function(gba_download_dependencies manifestUrl)
             # Already got it
             unset(URL_GBA_PLUSPLUS)
         endif()
+
+        if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/lib/gba-plusplus/.git/")
+            message(STATUS "gba-plusplus developer mode")
+            unset(URL_GBA_PLUSPLUS)
+        endif()
     endif()
 
     if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/lib/maxmod")
@@ -213,6 +218,11 @@ function(gba_download_dependencies manifestUrl)
             gba_key_value_set("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "agbabi" "${GBA_GITHUB_COMMIT_OUT}")
         else()
             # Already got it
+            unset(URL_AGBABI)
+        endif()
+
+        if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/lib/agbabi/.git/")
+            message(STATUS "agbabi developer mode")
             unset(URL_AGBABI)
         endif()
     endif()
@@ -271,9 +281,7 @@ function(gba_download_dependencies manifestUrl)
     # Download gba-plusplus
     #====================
 
-    if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/lib/gba-plusplus/.git/")
-        message(STATUS "gba-plusplus developer mode")
-    elseif(DEFINED URL_GBA_PLUSPLUS)
+    if(DEFINED URL_GBA_PLUSPLUS)
         gba_download_extract("${URL_GBA_PLUSPLUS}" "${CMAKE_CURRENT_LIST_DIR}/lib/gba-plusplus")
         gba_github_get_commit("${URL_GBA_PLUSPLUS}")
         file(COPY "${CMAKE_CURRENT_LIST_DIR}/lib/gba-plusplus/gba-plusplus-${GBA_GITHUB_COMMIT_OUT}/" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/lib/gba-plusplus/")
@@ -331,9 +339,7 @@ function(gba_download_dependencies manifestUrl)
     # Download agbabi
     #====================
 
-    if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/lib/agbabi/.git/")
-        message(STATUS "agbabi developer mode")
-    elseif(DEFINED URL_AGBABI)
+    if(DEFINED URL_AGBABI)
         gba_download_extract("${URL_AGBABI}" "${CMAKE_CURRENT_LIST_DIR}/lib/agbabi")
         gba_github_get_commit("${URL_AGBABI}")
         file(COPY "${CMAKE_CURRENT_LIST_DIR}/lib/agbabi/agbabi-${GBA_GITHUB_COMMIT_OUT}/" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/lib/agbabi/")
