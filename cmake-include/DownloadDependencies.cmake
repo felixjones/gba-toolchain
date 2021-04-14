@@ -27,6 +27,17 @@ function(gba_download_dependencies manifestUrl)
     endif()
 
     #====================
+    # Lock guard acquire
+    #====================
+
+    if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.2.0")
+        if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/cmake.lock")
+            message(STATUS "Waiting for CMake instances to complete")
+        endif()
+        file(LOCK "${CMAKE_CURRENT_LIST_DIR}/cmake.lock" GUARD FUNCTION)
+    endif()
+
+    #====================
     # Parse URLs
     #====================
 
@@ -326,4 +337,14 @@ function(gba_download_dependencies manifestUrl)
 
         gba_key_value_set("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "agbabi" "${GBA_GITHUB_COMMIT_OUT}")
     endif()
+
+    #====================
+    # Lock guard release
+    #====================
+
+    if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.2.0")
+        file(LOCK "${CMAKE_CURRENT_LIST_DIR}/cmake.lock" RELEASE)
+        file(REMOVE "${CMAKE_CURRENT_LIST_DIR}/cmake.lock")
+    endif()
+
 endfunction()
