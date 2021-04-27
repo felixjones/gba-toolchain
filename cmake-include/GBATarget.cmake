@@ -1,3 +1,5 @@
+include(ExternalProject OPTIONAL RESULT_VARIABLE GBA_TOOLCHAIN_HAS_MODULE_EXTERNALPROJECT)
+
 function(gba_target_link_runtime target library)
     cmake_minimum_required(VERSION 3.0)
 
@@ -26,6 +28,17 @@ endfunction()
 
 function(gba_target_fix target inputOutput title gameCode makerCode version)
     cmake_minimum_required(VERSION 3.0)
+
+    if(NOT ${GBA_TOOLCHAIN_HAS_MODULE_EXTERNALPROJECT} STREQUAL "NOTFOUND")
+        ExternalProject_Add(gbafix
+            SOURCE_DIR "${GBA_TOOLCHAIN_TOOLS}/gbafix"
+            BINARY_DIR "${GBA_TOOLCHAIN_TOOLS}/gbafix"
+            PREFIX "${GBA_TOOLCHAIN_TOOLS}/gbafix"
+            INSTALL_COMMAND ""
+        )
+
+        add_dependencies(${target} gbafix)
+    endif()
 
     string(LENGTH "${title}" TITLE_LENGTH)
     if (${TITLE_LENGTH} GREATER 12)
@@ -100,8 +113,19 @@ endfunction()
 function(gba_target_link_gbfs target)
     cmake_minimum_required(VERSION 3.0)
 
+    if(NOT ${GBA_TOOLCHAIN_HAS_MODULE_EXTERNALPROJECT} STREQUAL "NOTFOUND")
+        ExternalProject_Add(gbfs
+            SOURCE_DIR "${GBA_TOOLCHAIN_TOOLS}/gbfs"
+            BINARY_DIR "${GBA_TOOLCHAIN_TOOLS}/gbfs"
+            PREFIX "${GBA_TOOLCHAIN_TOOLS}/gbfs"
+            INSTALL_COMMAND ""
+        )
+
+        add_dependencies(${target} gbfs)
+    endif()
+
     add_subdirectory("${GBA_TOOLCHAIN_LIB_GBFS_DIR}" "./gbfs")
-    target_link_libraries(${target} PRIVATE gbfs)
+    target_link_libraries(${target} PRIVATE libgbfs)
     target_include_directories(${target} PUBLIC "${GBA_TOOLCHAIN_LIB_GBFS_DIR}/include")
 endfunction()
 

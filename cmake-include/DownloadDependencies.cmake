@@ -1,6 +1,5 @@
 include("${CMAKE_CURRENT_LIST_DIR}/KeyValue.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/DownloadExtract.cmake")
-include("${CMAKE_CURRENT_LIST_DIR}/DownloadCompile.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/Detail.cmake")
 
 function(gba_download_dependencies manifestUrl)
@@ -255,11 +254,13 @@ function(gba_download_dependencies manifestUrl)
     #====================
 
     if(DEFINED URL_GBAFIX)
-        gba_download_compile("${URL_GBAFIX}" "${CMAKE_CURRENT_LIST_DIR}/tools")
-        if (NOT "${GBA_COMPILE_C_OUT}" STREQUAL "")
-            gba_github_get_commit("${URL_GBAFIX}")
-            gba_key_value_set("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "gbafix" "${GBA_GITHUB_COMMIT_OUT}")
-        endif()
+        gba_download("${URL_GBAFIX}" "${CMAKE_CURRENT_LIST_DIR}/tools")
+
+        file(COPY "${CMAKE_CURRENT_LIST_DIR}/cmake-include/GbaFixCMakeLists.cmake" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/tools/gbafix")
+        file(RENAME "${CMAKE_CURRENT_LIST_DIR}/tools/gbafix/GbaFixCMakeLists.cmake" "${CMAKE_CURRENT_LIST_DIR}/tools/gbafix/CMakeLists.txt")
+
+        gba_github_get_commit("${URL_GBAFIX}")
+        gba_key_value_set("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "gbafix" "${GBA_GITHUB_COMMIT_OUT}")
     endif()
 
     #====================
@@ -314,25 +315,16 @@ function(gba_download_dependencies manifestUrl)
         get_filename_component(GBFS_FILE "${URL_GBFS}" NAME_WE)
         gba_download_extract("${URL_GBFS}" "${CMAKE_CURRENT_LIST_DIR}/tools/${GBFS_FILE}")
 
-        gba_compile_c("${CMAKE_CURRENT_LIST_DIR}/tools/${GBFS_FILE}/tools/gbfs.c" "${CMAKE_CURRENT_LIST_DIR}/tools")
-        if ("${GBA_COMPILE_C_OUT}" STREQUAL "")
-            set(GBFS_COMPILE_SUCCESS OFF)
-        endif()
+        file(COPY "${CMAKE_CURRENT_LIST_DIR}/cmake-include/GbfsCMakeLists.cmake" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/tools/gbfs")
+        file(RENAME "${CMAKE_CURRENT_LIST_DIR}/tools/gbfs/GbfsCMakeLists.cmake" "${CMAKE_CURRENT_LIST_DIR}/tools/gbfs/CMakeLists.txt")
 
-        gba_compile_c("${CMAKE_CURRENT_LIST_DIR}/tools/${GBFS_FILE}/tools/bin2s.c" "${CMAKE_CURRENT_LIST_DIR}/tools")
-        if ("${GBA_COMPILE_C_OUT}" STREQUAL "")
-            set(GBFS_COMPILE_SUCCESS OFF)
-        endif()
+        # Copy gbfs library to lib/
+        file(COPY "${CMAKE_CURRENT_LIST_DIR}/tools/${GBFS_FILE}/gbfs.h" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/lib/gbfs/include/")
+        file(COPY "${CMAKE_CURRENT_LIST_DIR}/tools/${GBFS_FILE}/libgbfs.c" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/lib/gbfs/source/")
+        file(COPY "${CMAKE_CURRENT_LIST_DIR}/cmake-include/GbfsCMakeLists.cmake" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/lib/gbfs")
+        file(RENAME "${CMAKE_CURRENT_LIST_DIR}/lib/gbfs/GbfsCMakeLists.cmake" "${CMAKE_CURRENT_LIST_DIR}/lib/gbfs/CMakeLists.txt")
 
-        if (${GBFS_COMPILE_SUCCESS})
-            # Copy gbfs library to lib/
-            file(COPY "${CMAKE_CURRENT_LIST_DIR}/tools/${GBFS_FILE}/gbfs.h" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/lib/gbfs/include/")
-            file(COPY "${CMAKE_CURRENT_LIST_DIR}/tools/${GBFS_FILE}/libgbfs.c" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/lib/gbfs/source/")
-            file(COPY "${CMAKE_CURRENT_LIST_DIR}/cmake-include/GbfsCMakeLists.cmake" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/lib/gbfs")
-            file(RENAME "${CMAKE_CURRENT_LIST_DIR}/lib/gbfs/GbfsCMakeLists.cmake" "${CMAKE_CURRENT_LIST_DIR}/lib/gbfs/CMakeLists.txt")
-
-            gba_key_value_set("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "gbfs" "${GBFS_FILE}")
-        endif()
+        gba_key_value_set("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "gbfs" "${GBFS_FILE}")
     endif()
 
     #====================

@@ -1,3 +1,23 @@
+function(gba_download url path)
+    cmake_minimum_required(VERSION 3.0)
+
+    get_filename_component(FILE_NAME "${url}" NAME)
+    get_filename_component(FILE_NAME_WE "${url}" NAME_WE)
+
+    #====================
+    # Check path is empty
+    #====================
+
+    file(REMOVE_RECURSE "${path}/${FILE_NAME_WE}")
+
+    #====================
+    # Download file
+    #====================
+
+    message(STATUS "Downloading ${url}")
+    file(DOWNLOAD "${url}" "${path}/${FILE_NAME_WE}/${FILE_NAME}" SHOW_PROGRESS)
+endfunction()
+
 function(gba_download_extract url path)
     cmake_minimum_required(VERSION 3.0)
 
