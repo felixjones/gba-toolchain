@@ -61,68 +61,80 @@ function(gba_download_dependencies manifestUrl)
 
         gba_key_value_get("${CMAKE_CURRENT_LIST_DIR}/urls.txt" "agbabi")
         set(URL_AGBABI ${GBA_KEY_VALUE_OUT})
+
+        gba_key_value_get("${CMAKE_CURRENT_LIST_DIR}/urls.txt" "posprintf")
+        set(URL_POSPRINTF ${GBA_KEY_VALUE_OUT})
     endif()
 
     #====================
     # Update URLs
     #====================
 
-    file(DOWNLOAD "${manifestUrl}" "${CMAKE_CURRENT_LIST_DIR}/urls.tmp")
-    file(READ "${CMAKE_CURRENT_LIST_DIR}/urls.tmp" URLS)
+    if (GBA_TOOLCHAIN_UPDATE_URLS)
+        file(DOWNLOAD "${manifestUrl}" "${CMAKE_CURRENT_LIST_DIR}/urls.tmp")
+        file(READ "${CMAKE_CURRENT_LIST_DIR}/urls.tmp" URLS)
 
-    if(NOT "${URLS}" STREQUAL "")
-        # Replace URL_ARM
-        gba_key_value_get("${CMAKE_CURRENT_LIST_DIR}/urls.tmp" "${KEY_ARM}")
-        set(TMP_URL_ARM ${GBA_KEY_VALUE_OUT})
-        if(NOT "${TMP_URL_ARM}" STREQUAL "${URL_ARM}")
-            set(URL_ARM "${TMP_URL_ARM}")
+        if(NOT "${URLS}" STREQUAL "")
+            # Replace URL_ARM
+            gba_key_value_get("${CMAKE_CURRENT_LIST_DIR}/urls.tmp" "${KEY_ARM}")
+            set(TMP_URL_ARM ${GBA_KEY_VALUE_OUT})
+            if(NOT "${TMP_URL_ARM}" STREQUAL "${URL_ARM}")
+                set(URL_ARM "${TMP_URL_ARM}")
+            endif()
+
+            # Replace URL_GBAFIX
+            gba_key_value_get("${CMAKE_CURRENT_LIST_DIR}/urls.tmp" "gbafix")
+            set(TMP_URL_GBAFIX ${GBA_KEY_VALUE_OUT})
+            if(NOT "${TMP_URL_GBAFIX}" STREQUAL "${URL_GBAFIX}")
+                set(URL_GBAFIX "${TMP_URL_GBAFIX}")
+            endif()
+
+            # Replace URL_TONC
+            gba_key_value_get("${CMAKE_CURRENT_LIST_DIR}/urls.tmp" "tonc")
+            set(TMP_URL_TONC ${GBA_KEY_VALUE_OUT})
+            if(NOT "${TMP_URL_TONC}" STREQUAL "${URL_TONC}")
+                set(URL_TONC "${TMP_URL_TONC}")
+            endif()
+
+            # Replace URL_GBA_PLUSPLUS
+            gba_key_value_get("${CMAKE_CURRENT_LIST_DIR}/urls.tmp" "gba-plusplus")
+            set(TMP_URL_GBA_PLUSPLUS ${GBA_KEY_VALUE_OUT})
+            if(NOT "${TMP_URL_GBA_PLUSPLUS}" STREQUAL "${URL_GBA_PLUSPLUS}")
+                set(URL_GBA_PLUSPLUS "${TMP_URL_GBA_PLUSPLUS}")
+            endif()
+
+            # Replace URL_MAXMOD
+            gba_key_value_get("${CMAKE_CURRENT_LIST_DIR}/urls.tmp" "maxmod")
+            set(TMP_URL_MAXMOD ${GBA_KEY_VALUE_OUT})
+            if(NOT "${TMP_URL_MAXMOD}" STREQUAL "${URL_MAXMOD}")
+                set(URL_MAXMOD "${TMP_URL_MAXMOD}")
+            endif()
+
+            # Replace URL_GBFS
+            gba_key_value_get("${CMAKE_CURRENT_LIST_DIR}/urls.tmp" "gbfs")
+            set(TMP_URL_GBFS ${GBA_KEY_VALUE_OUT})
+            if(NOT "${TMP_URL_GBFS}" STREQUAL "${URL_GBFS}")
+                set(URL_GBFS "${TMP_URL_GBFS}")
+            endif()
+
+            # Replace URL_AGBABI
+            gba_key_value_get("${CMAKE_CURRENT_LIST_DIR}/urls.tmp" "agbabi")
+            set(TMP_URL_AGBABI ${GBA_KEY_VALUE_OUT})
+            if(NOT "${TMP_URL_AGBABI}" STREQUAL "${URL_AGBABI}")
+                set(URL_AGBABI "${TMP_URL_AGBABI}")
+            endif()
+
+            # Replace URL_POSPRINTF
+            gba_key_value_get("${CMAKE_CURRENT_LIST_DIR}/urls.tmp" "posprintf")
+            set(TMP_URL_POSPRINTF ${GBA_KEY_VALUE_OUT})
+            if(NOT "${TMP_URL_POSPRINTF}" STREQUAL "${URL_POSPRINTF}")
+                set(URL_POSPRINTF "${TMP_URL_POSPRINTF}")
+            endif()
+
+            file(RENAME "${CMAKE_CURRENT_LIST_DIR}/urls.tmp" "${CMAKE_CURRENT_LIST_DIR}/urls.txt")
         endif()
-
-        # Replace URL_GBAFIX
-        gba_key_value_get("${CMAKE_CURRENT_LIST_DIR}/urls.tmp" "gbafix")
-        set(TMP_URL_GBAFIX ${GBA_KEY_VALUE_OUT})
-        if(NOT "${TMP_URL_GBAFIX}" STREQUAL "${URL_GBAFIX}")
-            set(URL_GBAFIX "${TMP_URL_GBAFIX}")
-        endif()
-
-        # Replace URL_TONC
-        gba_key_value_get("${CMAKE_CURRENT_LIST_DIR}/urls.tmp" "tonc")
-        set(TMP_URL_TONC ${GBA_KEY_VALUE_OUT})
-        if(NOT "${TMP_URL_TONC}" STREQUAL "${URL_TONC}")
-            set(URL_TONC "${TMP_URL_TONC}")
-        endif()
-
-        # Replace URL_GBA_PLUSPLUS
-        gba_key_value_get("${CMAKE_CURRENT_LIST_DIR}/urls.tmp" "gba-plusplus")
-        set(TMP_URL_GBA_PLUSPLUS ${GBA_KEY_VALUE_OUT})
-        if(NOT "${TMP_URL_GBA_PLUSPLUS}" STREQUAL "${URL_GBA_PLUSPLUS}")
-            set(URL_GBA_PLUSPLUS "${TMP_URL_GBA_PLUSPLUS}")
-        endif()
-
-        # Replace URL_MAXMOD
-        gba_key_value_get("${CMAKE_CURRENT_LIST_DIR}/urls.tmp" "maxmod")
-        set(TMP_URL_MAXMOD ${GBA_KEY_VALUE_OUT})
-        if(NOT "${TMP_URL_MAXMOD}" STREQUAL "${URL_MAXMOD}")
-            set(URL_MAXMOD "${TMP_URL_MAXMOD}")
-        endif()
-
-        # Replace URL_GBFS
-        gba_key_value_get("${CMAKE_CURRENT_LIST_DIR}/urls.tmp" "gbfs")
-        set(TMP_URL_GBFS ${GBA_KEY_VALUE_OUT})
-        if(NOT "${TMP_URL_GBFS}" STREQUAL "${URL_GBFS}")
-            set(URL_GBFS "${TMP_URL_GBFS}")
-        endif()
-
-        # Replace URL_AGBABI
-        gba_key_value_get("${CMAKE_CURRENT_LIST_DIR}/urls.tmp" "agbabi")
-        set(TMP_URL_AGBABI ${GBA_KEY_VALUE_OUT})
-        if(NOT "${TMP_URL_AGBABI}" STREQUAL "${URL_AGBABI}")
-            set(URL_AGBABI "${TMP_URL_AGBABI}")
-        endif()
-
-        file(RENAME "${CMAKE_CURRENT_LIST_DIR}/urls.tmp" "${CMAKE_CURRENT_LIST_DIR}/urls.txt")
+        file(REMOVE "${CMAKE_CURRENT_LIST_DIR}/urls.tmp")
     endif()
-    file(REMOVE "${CMAKE_CURRENT_LIST_DIR}/urls.tmp")
 
     #====================
     # Check dependency manifest
@@ -226,6 +238,19 @@ function(gba_download_dependencies manifestUrl)
         endif()
     endif()
 
+    get_filename_component(POSPRINTF_NAME_WE "${URL_POSPRINTF}" NAME_WE)
+    if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/lib/posprintf")
+        # Check URL_POSPRINTF
+        get_filename_component(POSPRINTF_FILE "${URL_POSPRINTF}" NAME_WE)
+        gba_key_value_get("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "posprintf")
+        if(NOT "${POSPRINTF_FILE}" STREQUAL "${GBA_KEY_VALUE_OUT}")
+            gba_key_value_set("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "posprintf" "${POSPRINTF_FILE}")
+        else()
+            # Already got it
+            unset(URL_POSPRINTF)
+        endif()
+    endif()
+
     #====================
     # Download arm-gnu-toolchain
     #====================
@@ -311,7 +336,6 @@ function(gba_download_dependencies manifestUrl)
     #====================
 
     if(DEFINED URL_GBFS)
-        set(GBFS_COMPILE_SUCCESS ON)
         get_filename_component(GBFS_FILE "${URL_GBFS}" NAME_WE)
         gba_download_extract("${URL_GBFS}" "${CMAKE_CURRENT_LIST_DIR}/tools/${GBFS_FILE}")
 
@@ -338,6 +362,27 @@ function(gba_download_dependencies manifestUrl)
         file(REMOVE_RECURSE "${CMAKE_CURRENT_LIST_DIR}/lib/agbabi/agbabi-${GBA_GITHUB_COMMIT_OUT}/")
 
         gba_key_value_set("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "agbabi" "${GBA_GITHUB_COMMIT_OUT}")
+    endif()
+
+    #====================
+    # Download posprintf
+    #====================
+
+    if(DEFINED URL_POSPRINTF)
+        get_filename_component(POSPRINTF_FILE "${URL_POSPRINTF}" NAME_WE)
+        gba_download_extract("${URL_POSPRINTF}" "${CMAKE_CURRENT_LIST_DIR}/lib/posprintf")
+
+        file(RENAME "${CMAKE_CURRENT_LIST_DIR}/lib/posprintf" "${CMAKE_CURRENT_LIST_DIR}/lib/posprintf_tmp")
+        file(COPY "${CMAKE_CURRENT_LIST_DIR}/lib/posprintf_tmp/posprintf/" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/lib/posprintf")
+        file(REMOVE_RECURSE "${CMAKE_CURRENT_LIST_DIR}/lib/posprintf_tmp/")
+
+        # Move header into include dir
+        file(COPY "${CMAKE_CURRENT_LIST_DIR}/lib/posprintf/posprintf.h" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/lib/posprintf/include/")
+
+        file(COPY "${CMAKE_CURRENT_LIST_DIR}/cmake-include/PosprintfCMakeLists.cmake" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/lib/posprintf")
+        file(RENAME "${CMAKE_CURRENT_LIST_DIR}/lib/posprintf/PosprintfCMakeLists.cmake" "${CMAKE_CURRENT_LIST_DIR}/lib/posprintf/CMakeLists.txt")
+
+        gba_key_value_set("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "posprintf" "${POSPRINTF_FILE}")
     endif()
 
     #====================

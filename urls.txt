@@ -8,3 +8,4 @@ maxmod=https://github.com/devkitPro/maxmod/archive/7983881f8f5eba7416470920bcc9b
 gbfs=http://www.pineight.com/gba/gbfs.zip
 gba-plusplus=https://github.com/felixjones/gba-plusplus/archive/3d9885ee69ac9644e37775dbac4141c0fa52c985.zip
 agbabi=https://github.com/felixjones/agbabi/archive/c152bc75298f4344c5578a3bab0076abb377a9b6.zip
+posprintf=http://danposluns.com/danposluns/gbadev/posprintf/posprintf.zip

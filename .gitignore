@@ -10,6 +10,7 @@ lib/gba-plusplus/
 lib/gbfs/
 lib/maxmod/
 lib/tonc/
+lib/posprintf/
 tools/
 urls.tmp
 cmake.lock

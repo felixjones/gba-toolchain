@@ -176,3 +176,12 @@ function(gba_target_add_gbfs_dependency target dependency)
     add_dependencies(${target} "${dependency}.s")
     target_sources(${target} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/${GBFS_FILE_WE}.s")
 endfunction()
+
+function(gba_target_link_posprintf target)
+    cmake_minimum_required(VERSION 3.0)
+
+    add_subdirectory("${GBA_TOOLCHAIN_LIB_POSPRINTF_DIR}" "./posprintf")
+    target_link_libraries(${target} PRIVATE posprintf)
+    target_include_directories(${target} PUBLIC "${GBA_TOOLCHAIN_LIB_POSPRINTF_DIR}")
+    target_compile_definitions(${target} PRIVATE __posprintf=1)
+endfunction()
