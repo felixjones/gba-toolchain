@@ -11,3 +11,5 @@ lib/gbfs/
 lib/maxmod/
 lib/tonc/
 tools/
+urls.tmp
+cmake.lock
