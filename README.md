@@ -23,6 +23,7 @@ The `arm-gba-toolchain.cmake` script will attempt to download the following depe
 |maxmod|[maxmod GitHub master](https://github.com/devkitPro/maxmod)|gba-toolchain/lib/maxmod|C library for GBA sound playback|
 |gbfs*|[gbfs developer website](http://www.pineight.com/gba/#gbfs)|gba-toolchain/lib/gbfs|File system tools and library for GBA resource management|
 |agbabi|[agbabi GitHub master](https://github.com/felixjones/agbabi)|gba-toolchain/lib/agbabi|Optimized implementations for common GBA functions|
+|posprintf|[posprintf developer website](http://danposluns.com/danposluns/gbadev/posprintf/index.html)|gba-toolchain/lib/posprintf|Partial implementation of sprintf for the GBA|
 
 \* requires a host compiler, such as Visual Studio's CL.exe, GCC or Clang.    
 \** experimental, in-development project
@@ -72,3 +73,7 @@ endif()
 # Enable Clang
 
 The CMake option `-DUSE_CLANG=ON` will enable searching for and activating Clang compilers.
+
+# Enable urls.txt update
+
+The CMake option `-DUPDATE_URLS_TXT=ON` will enable downloading and updating urls.txt from [github.com/felixjones/gba-toolchain/blob/master/urls.txt](https://github.com/felixjones/gba-toolchain/blob/master/urls.txt)

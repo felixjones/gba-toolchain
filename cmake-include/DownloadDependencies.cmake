@@ -70,7 +70,7 @@ function(gba_download_dependencies manifestUrl)
     # Update URLs
     #====================
 
-    if (GBA_TOOLCHAIN_UPDATE_URLS)
+    if (UPDATE_URLS_TXT)
         file(DOWNLOAD "${manifestUrl}" "${CMAKE_CURRENT_LIST_DIR}/urls.tmp")
         file(READ "${CMAKE_CURRENT_LIST_DIR}/urls.tmp" URLS)
 
