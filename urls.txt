@@ -7,5 +7,5 @@ tonc=https://github.com/devkitPro/libtonc/archive/ccc03fa321e56f51aed5e2ee1d6e3d
 maxmod=https://github.com/devkitPro/maxmod/archive/7983881f8f5eba7416470920bcc9bfcae47fae18.zip
 gbfs=http://www.pineight.com/gba/gbfs.zip
 gba-plusplus=https://github.com/felixjones/gba-plusplus/archive/32a217fff620f7cc217e38add7517718018dcea5.zip
-agbabi=https://github.com/felixjones/agbabi/archive/1ef49f75d5c638ed8274b2f2bc224faadfbc280a.zip
+agbabi=https://github.com/felixjones/agbabi/archive/16a86e63305957590acfb0ce803527d63df50a56.zip
 posprintf=http://danposluns.com/danposluns/gbadev/posprintf/posprintf.zip
