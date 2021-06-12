@@ -294,12 +294,12 @@ function(gba_download_dependencies manifestUrl)
 
     if(DEFINED URL_TONC)
         gba_download_extract("${URL_TONC}" "${CMAKE_CURRENT_LIST_DIR}/lib/tonc")
-        gba_github_get_commit("${URL_TONC}")
-        file(COPY "${CMAKE_CURRENT_LIST_DIR}/lib/tonc/libtonc-${GBA_GITHUB_COMMIT_OUT}/" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/lib/tonc/")
-        file(REMOVE_RECURSE "${CMAKE_CURRENT_LIST_DIR}/lib/tonc/libtonc-${GBA_GITHUB_COMMIT_OUT}/")
+        gba_move_inner_path("${CMAKE_CURRENT_LIST_DIR}/lib/tonc")
+
         file(COPY "${CMAKE_CURRENT_LIST_DIR}/cmake-include/ToncCMakeLists.cmake" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/lib/tonc")
         file(RENAME "${CMAKE_CURRENT_LIST_DIR}/lib/tonc/ToncCMakeLists.cmake" "${CMAKE_CURRENT_LIST_DIR}/lib/tonc/CMakeLists.txt")
 
+        gba_github_get_commit("${URL_TONC}")
         gba_key_value_set("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "tonc" "${GBA_GITHUB_COMMIT_OUT}")
     endif()
 
@@ -309,10 +309,9 @@ function(gba_download_dependencies manifestUrl)
 
     if(DEFINED URL_GBA_PLUSPLUS)
         gba_download_extract("${URL_GBA_PLUSPLUS}" "${CMAKE_CURRENT_LIST_DIR}/lib/gba-plusplus")
-        gba_github_get_commit("${URL_GBA_PLUSPLUS}")
-        file(COPY "${CMAKE_CURRENT_LIST_DIR}/lib/gba-plusplus/gba-plusplus-${GBA_GITHUB_COMMIT_OUT}/" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/lib/gba-plusplus/")
-        file(REMOVE_RECURSE "${CMAKE_CURRENT_LIST_DIR}/lib/gba-plusplus/gba-plusplus-${GBA_GITHUB_COMMIT_OUT}/")
+        gba_move_inner_path("${CMAKE_CURRENT_LIST_DIR}/lib/gba-plusplus")
 
+        gba_github_get_commit("${URL_GBA_PLUSPLUS}")
         gba_key_value_set("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "gba-plusplus" "${GBA_GITHUB_COMMIT_OUT}")
     endif()
 
@@ -322,12 +321,12 @@ function(gba_download_dependencies manifestUrl)
 
     if(DEFINED URL_MAXMOD)
         gba_download_extract("${URL_MAXMOD}" "${CMAKE_CURRENT_LIST_DIR}/lib/maxmod")
-        gba_github_get_commit("${URL_MAXMOD}")
-        file(COPY "${CMAKE_CURRENT_LIST_DIR}/lib/maxmod/maxmod-${GBA_GITHUB_COMMIT_OUT}/" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/lib/maxmod/")
-        file(REMOVE_RECURSE "${CMAKE_CURRENT_LIST_DIR}/lib/maxmod/maxmod-${GBA_GITHUB_COMMIT_OUT}/")
+        gba_move_inner_path("${CMAKE_CURRENT_LIST_DIR}/lib/maxmod")
+
         file(COPY "${CMAKE_CURRENT_LIST_DIR}/cmake-include/MaxmodCMakeLists.cmake" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/lib/maxmod")
         file(RENAME "${CMAKE_CURRENT_LIST_DIR}/lib/maxmod/MaxmodCMakeLists.cmake" "${CMAKE_CURRENT_LIST_DIR}/lib/maxmod/CMakeLists.txt")
 
+        gba_github_get_commit("${URL_MAXMOD}")
         gba_key_value_set("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "maxmod" "${GBA_GITHUB_COMMIT_OUT}")
     endif()
 
@@ -357,10 +356,9 @@ function(gba_download_dependencies manifestUrl)
 
     if(DEFINED URL_AGBABI)
         gba_download_extract("${URL_AGBABI}" "${CMAKE_CURRENT_LIST_DIR}/lib/agbabi")
-        gba_github_get_commit("${URL_AGBABI}")
-        file(COPY "${CMAKE_CURRENT_LIST_DIR}/lib/agbabi/agbabi-${GBA_GITHUB_COMMIT_OUT}/" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/lib/agbabi/")
-        file(REMOVE_RECURSE "${CMAKE_CURRENT_LIST_DIR}/lib/agbabi/agbabi-${GBA_GITHUB_COMMIT_OUT}/")
+        gba_move_inner_path("${CMAKE_CURRENT_LIST_DIR}/lib/agbabi")
 
+        gba_github_get_commit("${URL_AGBABI}")
         gba_key_value_set("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "agbabi" "${GBA_GITHUB_COMMIT_OUT}")
     endif()
 

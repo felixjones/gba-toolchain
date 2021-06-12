@@ -34,3 +34,26 @@ function(gba_list_directories path)
 
     set(GBA_LIST_DIRECTORIES_OUT ${dirlist} PARENT_SCOPE)
 endfunction()
+
+function(gba_move_inner_path path)
+    cmake_minimum_required(VERSION 3.0)
+
+    set(dirlist "")
+
+    file(GLOB children RELATIVE ${path} ${path}/*)
+    foreach(child ${children})
+        if(IS_DIRECTORY ${path}/${child})
+            list(APPEND dirlist ${path}/${child})
+        endif()
+    endforeach()
+
+    list(LENGTH dirlist dirlength)
+    if(${dirlength} GREATER 1)
+        message(FATAL_ERROR "Too many directories in ${path}")
+    elseif(${dirlength} EQUAL 1)
+        list(GET dirlist 0 innerpath)
+        file(RENAME ${innerpath} "${path}-tmp")
+        file(REMOVE_RECURSE "${path}")
+        file(RENAME "${path}-tmp" ${path})
+    endif()
+endfunction()
