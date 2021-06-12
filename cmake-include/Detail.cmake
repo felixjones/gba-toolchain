@@ -11,7 +11,7 @@ function(gba_github_get_commit url)
     endif()
 
     if("${GITHUB_COMMIT_OUT}" STREQUAL "")
-        string(REGEX MATCH "github\\.com+\\/+[^\\/]+\\/+[^\\/]+\\/+archive+\\/+([a-z0-9]*)[^\\s]+" _ "${url}")
+        string(REGEX MATCH "[a-zA-Z0-9.:\\/-]+\\/(.*)\\." _ "${url}")
         if(NOT "${CMAKE_MATCH_1}" STREQUAL "")
             set(GITHUB_COMMIT_OUT "${CMAKE_MATCH_1}")
         endif()
