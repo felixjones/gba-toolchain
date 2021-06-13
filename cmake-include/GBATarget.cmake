@@ -179,6 +179,34 @@ function(gba_add_gbfs_target target)
     )
 endfunction()
 
+function(gba_target_append_gbfs target gbfs input)
+    cmake_minimum_required(VERSION 3.0)
+
+    if (NOT TARGET gbfs)
+        message(FATAL_ERROR "${gbfs} is not a target")
+    endif()
+
+    add_dependencies(${target} ${gbfs})
+
+    if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows)
+        add_custom_command(TARGET ${target}
+            POST_BUILD
+            COMMAND copy /B "${input}" + "${gbfs}" "${input}"
+            COMMENT "File cat \"${gbfs}\" -> \"${input}\""
+            BYPRODUCTS "${input}"
+        )
+    elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL Linux OR CMAKE_HOST_SYSTEM_NAME STREQUAL Darwin OR CMAKE_HOST_SYSTEM_NAME MATCHES "MING.*" OR CMAKE_HOST_SYSTEM_NAME MATCHES "MSYS.*")
+        add_custom_command(TARGET ${target}
+            POST_BUILD
+            COMMAND cat "${gbfs}" >> "${input}"
+            COMMENT "File cat \"${gbfs}\" -> \"${input}\""
+            BYPRODUCTS "${input}"
+        )
+    else()
+        message(FATAL_ERROR "Failed to recognise host operating system (${CMAKE_HOST_SYSTEM_NAME})")
+    endif()
+endfunction()
+
 function(gba_target_add_gbfs_dependency target dependency)
     cmake_minimum_required(VERSION 3.0)
 
