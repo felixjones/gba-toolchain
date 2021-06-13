@@ -15,4 +15,6 @@ else()
     add_executable(gbfs "tools/gbfs.c")
 
     add_executable(bin2s "tools/bin2s.c")
+
+    add_executable(padbin "tools/padbin.c")
 endif()

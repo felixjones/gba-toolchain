@@ -66,9 +66,11 @@ endif()
 if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows)
     set(GBA_TOOLCHAIN_GBFS "${GBA_TOOLCHAIN_TOOLS}/gbfs/gbfs.exe")
     set(GBA_TOOLCHAIN_BIN2S "${GBA_TOOLCHAIN_TOOLS}/gbfs/bin2s.exe")
+    set(GBA_TOOLCHAIN_PADBIN "${GBA_TOOLCHAIN_TOOLS}/gbfs/padbin.exe")
 else()
     set(GBA_TOOLCHAIN_GBFS "${GBA_TOOLCHAIN_TOOLS}/gbfs/gbfs")
     set(GBA_TOOLCHAIN_BIN2S "${GBA_TOOLCHAIN_TOOLS}/gbfs/bin2s")
+    set(GBA_TOOLCHAIN_PADBIN "${GBA_TOOLCHAIN_TOOLS}/gbfs/padbin")
 endif()
 
 #====================

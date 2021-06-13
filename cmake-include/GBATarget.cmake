@@ -24,6 +24,36 @@ function(gba_target_object_copy target input output)
         COMMENT "Object copy -> \"${output}\""
         BYPRODUCTS "${output}"
     )
+
+    # Padding using gbfs padbin
+    if(${ARGN})
+        gba_target_add_gbfs_external_project(${target})
+
+        list(GET ARGN 0 padding)
+
+        add_custom_command(TARGET ${target}
+            POST_BUILD
+            COMMAND "${GBA_TOOLCHAIN_PADBIN}" ${padding} "${output}"
+            COMMENT "Padding ${padding} -> \"${output}\""
+        )
+    endif()
+endfunction()
+
+function(gba_target_add_gbfs_external_project target)
+    cmake_minimum_required(VERSION 3.0)
+
+    if (NOT TARGET gbfs)
+        if(NOT ${GBA_TOOLCHAIN_HAS_MODULE_EXTERNALPROJECT} STREQUAL "NOTFOUND")
+            ExternalProject_Add(gbfs
+                SOURCE_DIR "${GBA_TOOLCHAIN_TOOLS}/gbfs"
+                BINARY_DIR "${GBA_TOOLCHAIN_TOOLS}/gbfs"
+                PREFIX "${GBA_TOOLCHAIN_TOOLS}/gbfs"
+                INSTALL_COMMAND ""
+            )
+        endif()
+    endif()
+
+    add_dependencies(${target} gbfs)
 endfunction()
 
 function(gba_target_fix target inputOutput title gameCode makerCode version)
@@ -113,16 +143,7 @@ endfunction()
 function(gba_target_link_gbfs target)
     cmake_minimum_required(VERSION 3.0)
 
-    if(NOT ${GBA_TOOLCHAIN_HAS_MODULE_EXTERNALPROJECT} STREQUAL "NOTFOUND")
-        ExternalProject_Add(gbfs
-            SOURCE_DIR "${GBA_TOOLCHAIN_TOOLS}/gbfs"
-            BINARY_DIR "${GBA_TOOLCHAIN_TOOLS}/gbfs"
-            PREFIX "${GBA_TOOLCHAIN_TOOLS}/gbfs"
-            INSTALL_COMMAND ""
-        )
-
-        add_dependencies(${target} gbfs)
-    endif()
+    gba_target_add_gbfs_external_project(${target})
 
     add_subdirectory("${GBA_TOOLCHAIN_LIB_GBFS_DIR}" "./gbfs")
     target_link_libraries(${target} PRIVATE libgbfs)
@@ -148,7 +169,6 @@ function(gba_add_gbfs_target target)
     cmake_minimum_required(VERSION 3.0)
 
     list(TRANSFORM ARGN PREPEND "${CMAKE_CURRENT_SOURCE_DIR}/")
-    get_filename_component(GBFS_FILE_WE "${target}" NAME_WE)
 
     add_custom_target(${target}
         COMMAND "${GBA_TOOLCHAIN_GBFS}" "${target}" ${ARGN}
