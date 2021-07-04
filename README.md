@@ -10,6 +10,10 @@ Tutorials for getting started can be found [on the project Wiki](https://github.
 
 A list of gba-toolchain CMake functions can be found [on the project Wiki](https://github.com/felixjones/gba-toolchain/wiki/CMake-Functions-(2.0.0)).
 
+## Samples
+
+Samples can be found in the `samples/` directory. They can be built from within their directories with: `cmake -DCMAKE_TOOLCHAIN_FILE=../../arm-gba-toolchain.cmake . && make`
+
 # Requirements
 
 ## CMake environment
