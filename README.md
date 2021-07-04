@@ -2,6 +2,14 @@
 
 CMake based toolchain for GBA homebrew development.
 
+# Getting Started
+
+Tutorials for getting started can be found [on the project Wiki](https://github.com/felixjones/gba-toolchain/wiki).
+
+## CMake functions
+
+A list of gba-toolchain CMake functions can be found [on the project Wiki](https://github.com/felixjones/gba-toolchain/wiki/CMake-Functions-(2.0.0)).
+
 # Requirements
 
 ## CMake environment
@@ -38,26 +46,16 @@ project(my_gba_project)
 add_executable(gba_example main.c)
 set_target_properties(gba_example PROPERTIES SUFFIX ".elf") # Building gba_example.elf
 
-# activate & link GBA optimized ABI library
-gba_target_link_agb_abi(gba_example)
+if(GBA_TOOLCHAIN)
+    # setup IWRAM/EWRAM instruction sets and set default ROM instruction set to thumb
+    gba_target_sources_instruction_set(gba_example thumb)
 
-# activate & link tonc dependency
-gba_target_link_tonc(gba_example)
+    # link with rom runtime (alternative is multiboot)
+    gba_target_link_runtime(gba_example rom)
 
-# activate & link maxmod dependency
-gba_target_link_maxmod(gba_example)
+    # add objcopy command (elf to gba)
+    gba_target_object_copy(gba_example "gba_example.elf" "example_out.gba")
 
-# setup IWRAM/EWRAM instruction sets and set default ROM instruction set to thumb
-gba_target_sources_instruction_set(gba_example thumb)
-
-# link with rom runtime (alternative is multiboot)
-gba_target_link_runtime(gba_example rom)
-
-# add objcopy command (elf to gba)
-gba_target_object_copy(gba_example "gba_example.elf" "example_out.gba")
-
-# gbafix
-if(EXISTS ${GBA_TOOLCHAIN_GBAFIX})
     # gbafix settings (used with gba_target_fix)
     set(ROM_TITLE "Example")
     set(ROM_GAME_CODE "CEGE")
@@ -66,6 +64,8 @@ if(EXISTS ${GBA_TOOLCHAIN_GBAFIX})
 
     # add gbafix command (gba ROM header information)
     gba_target_fix(gba_example "example_out.gba" "${ROM_TITLE}" "${ROM_GAME_CODE}" "${ROM_MAKER_CODE}" ${ROM_VERSION})
+else()
+    message(FATAL_ERROR "gba-toolchain not set (did you remember CMAKE_TOOLCHAIN_FILE?)")
 endif()
 ```
 
