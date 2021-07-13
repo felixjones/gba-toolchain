@@ -31,6 +31,8 @@ static int _gba_nosys() {
     return -1;
 }
 
+int _gba_syscalls_keep() __attribute__((alias("_gba_nosys")));
+
 int _close( int file ) __attribute__((alias("_gba_nosys")));
 
 int _execve( char * name, char ** argv, char ** env ) __attribute__((alias("_gba_nosys")));

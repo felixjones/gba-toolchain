@@ -7,7 +7,7 @@
     .arm
     .global _start
 _start:
-    @ Immediately jump past header data to Multiboot code
+    @ Immediately jump past header data to e-reader code
     b       .Lereader_start
 
     @ Header data
@@ -22,16 +22,14 @@ _start:
 
     .thumb
 .Lthumb_start:
+    @ Reset memory regions
+    mov     r0, #0xfe
+    swi     #0x1
+
     @ CpuSet copy iwram
     ldr	    r0, =__iwram_lma
     ldr	    r1, =__iwram_start
     ldr	    r2, =__iwram_cpuset_copy
-    swi     #0xb
-
-    @ CpuSet fill bss
-    ldr	    r0, =.Lzero_word
-    ldr	    r1, =__bss_start
-    ldr	    r2, =__bss_cpuset_fill
     swi     #0xb
 
     @ CpuSet copy data
@@ -42,10 +40,6 @@ _start:
 
     @ Store e-reader return address
     push    {lr}
-
-    @ Reset memory regions
-    mov     r0, #0xfe
-    swi     #0x1
 
     @ __libc_init_array
     ldr     r2, =__libc_init_array
@@ -67,6 +61,7 @@ _start:
     @ Restore result of main
     pop     {r0}
 
+    .global _exit
 _exit:
     @ Restore e-reader return address
     pop     {r2}
@@ -74,3 +69,6 @@ _exit:
 
 .Lbx_r2:
     bx      r2
+
+    @ Prevent gba-syscalls from being removed
+    .global _gba_syscalls_keep
