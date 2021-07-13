@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="mGBA Debug" type="com.jetbrains.cidr.embedded.customgdbserver.type" factoryName="com.jetbrains.cidr.embedded.customgdbserver.factory" PROGRAM_PARAMS="-g gbapp.elf" REDIRECT_INPUT="false" ELEVATE="false" WORKING_DIR="file://$PROJECT_DIR$/cmake-build-debug" PASS_PARENT_ENVS_2="true" PROJECT_NAME="gbapp" TARGET_NAME="gbapp" CONFIG_NAME="Debug" version="1" RUN_TARGET_PROJECT_NAME="gbapp" RUN_TARGET_NAME="gbapp">
+    <custom-gdb-server version="1" gdb-connect="localhost:2345" executable="E:/mGBA/mGBA.exe" warmup-ms="0" download-type="NONE" reset-cmd="monitor reset" reset-after-download="true">
+      <debugger kind="GDB" isBundled="true" />
+    </custom-gdb-server>
+    <method v="2">
+      <option name="CLION.COMPOUND.BUILD" enabled="true" />
+    </method>
+  </configuration>
+</component>

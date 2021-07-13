@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="BranchesTreeState">
+    <expand>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </expand>
+    <select />
+  </component>
+  <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
+    <generated>
+      <config projectName="gbapp" targetName="gbafix" />
+      <config projectName="gbapp" targetName="agbabi" />
+      <config projectName="gbapp" targetName="rom" />
+      <config projectName="gbapp" targetName="gbapp" />
+    </generated>
+  </component>
+  <component name="CMakeSettings">
+    <configurations>
+      <configuration PROFILE_NAME="Debug" CONFIG_NAME="Debug" TOOLCHAIN_NAME="Default" GENERATION_OPTIONS="-DCMAKE_TOOLCHAIN_FILE=../../arm-gba-toolchain.cmake" ENABLED="true" />
+      <configuration PROFILE_NAME="Debug Clang" CONFIG_NAME="Debug" TOOLCHAIN_NAME="Default" GENERATION_OPTIONS="-DCMAKE_TOOLCHAIN_FILE=../../arm-gba-toolchain.cmake -DUSE_CLANG=ON" ENABLED="true" />
+      <configuration PROFILE_NAME="Release" CONFIG_NAME="Release" TOOLCHAIN_NAME="Default" GENERATION_OPTIONS="-DCMAKE_TOOLCHAIN_FILE=../../arm-gba-toolchain.cmake" ENABLED="true" />
+      <configuration PROFILE_NAME="Release Clang" CONFIG_NAME="Release" TOOLCHAIN_NAME="Default" GENERATION_OPTIONS="-DCMAKE_TOOLCHAIN_FILE=../../arm-gba-toolchain.cmake -DUSE_CLANG=ON" ENABLED="true" />
+    </configurations>
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="6a79b511-16fb-4f54-b4c1-3e9b277a6881" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/../../lib/ereader/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../lib/ereader/CMakeLists.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../lib/ereader/crt0.s" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../lib/ereader/gba-syscalls.c" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../lib/ereader/gba.ld" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../arm-gba-toolchain.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/../../arm-gba-toolchain.cmake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../cmake-include/GBATarget.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/../../cmake-include/GBATarget.cmake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../cplusplus/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../cplusplus/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/runConfigurations/mGBA_Debug.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/runConfigurations/mGBA_Debug.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/runConfigurations/mGBA_Debug_Clang.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/runConfigurations/mGBA_Debug_Clang.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
+  </component>
+  <component name="ProjectId" id="1kIsGVGVQxTacAkzt1QEr9OiqMO" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="cf.first.check.clang-format" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="nodejs_package_manager_path" value="npm" />
+    <property name="settings.editor.selected.configurable" value="CLionExternalConfigurable" />
+  </component>
+  <component name="RunAnythingCache">
+    <option name="myCommands">
+      <command value="mGBA Debug Clang" />
+    </option>
+  </component>
+  <component name="RunManager" selected="Embedded GDB Server.mGBA Debug">
+    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="agbabi" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="gbapp" TARGET_NAME="agbabi" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="gbafix" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="gbapp" TARGET_NAME="gbafix" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="gbapp" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="gbapp" TARGET_NAME="gbapp" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="gbapp" RUN_TARGET_NAME="gbapp">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="GradleAppRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="com.jetbrains.cidr.cpp.gradle.execution.GradleNativeBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <list>
+      <item itemvalue="CMake Application.gbafix" />
+      <item itemvalue="CMake Application.gbapp" />
+      <item itemvalue="CMake Application.agbabi" />
+      <item itemvalue="Embedded GDB Server.mGBA Debug" />
+      <item itemvalue="Embedded GDB Server.mGBA Debug Clang" />
+    </list>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="6a79b511-16fb-4f54-b4c1-3e9b277a6881" name="Default Changelist" comment="" />
+      <created>1605399346383</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1605399346383</updated>
+      <workItem from="1605399347702" duration="221000" />
+      <workItem from="1605399578646" duration="115000" />
+      <workItem from="1605399990513" duration="8000" />
+      <workItem from="1605400041922" duration="58000" />
+      <workItem from="1626180142518" duration="138000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+</project>
