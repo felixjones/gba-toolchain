@@ -36,6 +36,7 @@ The `arm-gba-toolchain.cmake` script will attempt to download the following depe
 |gbfs*|[gbfs developer website](http://www.pineight.com/gba/#gbfs)|gba-toolchain/lib/gbfs|File system tools and library for GBA resource management|
 |agbabi|[agbabi GitHub master](https://github.com/felixjones/agbabi)|gba-toolchain/lib/agbabi|Optimized implementations for common GBA functions|
 |posprintf|[posprintf developer website](http://danposluns.com/danposluns/gbadev/posprintf/index.html)|gba-toolchain/lib/posprintf|Partial implementation of sprintf for the GBA|
+|nedclib*|[nedclib GitHub master](https://github.com/Lymia/nedclib)|e-reader dot code generator|
 
 \* requires a host compiler, such as Visual Studio's CL.exe, GCC or Clang.
 

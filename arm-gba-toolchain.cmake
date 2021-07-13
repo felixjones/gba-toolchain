@@ -74,11 +74,22 @@ else()
 endif()
 
 #====================
+# NEDENC
+#====================
+
+if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows)
+    set(GBA_TOOLCHAIN_NEDCMAKE "${GBA_TOOLCHAIN_TOOLS}/nedclib/nedcmake.exe")
+else()
+    set(GBA_TOOLCHAIN_NEDCMAKE "${GBA_TOOLCHAIN_TOOLS}/nedclib/nedcmake")
+endif()
+
+#====================
 # Library projects
 #====================
 
 set(GBA_TOOLCHAIN_LIB_ROM_DIR "${CMAKE_CURRENT_LIST_DIR}/lib/rom")
 set(GBA_TOOLCHAIN_LIB_MULTIBOOT_DIR "${CMAKE_CURRENT_LIST_DIR}/lib/multiboot")
+set(GBA_TOOLCHAIN_LIB_EREADER_DIR "${CMAKE_CURRENT_LIST_DIR}/lib/ereader")
 set(GBA_TOOLCHAIN_LIB_TONC_DIR "${CMAKE_CURRENT_LIST_DIR}/lib/tonc")
 set(GBA_TOOLCHAIN_LIB_AGBABI_DIR "${CMAKE_CURRENT_LIST_DIR}/lib/agbabi")
 set(GBA_TOOLCHAIN_LIB_GBA_PLUSPLUS_DIR "${CMAKE_CURRENT_LIST_DIR}/lib/gba-plusplus")

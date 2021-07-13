@@ -9,3 +9,4 @@ gbfs=http://www.pineight.com/gba/gbfs.zip
 gba-plusplus=https://github.com/felixjones/gba-plusplus/archive/refs/tags/0.0.4.zip
 agbabi=https://github.com/felixjones/agbabi/archive/676c48d189b5828a3ec2e99b2383bdc03098d097.zip
 posprintf=http://danposluns.com/danposluns/gbadev/posprintf/posprintf.zip
+nedclib=https://github.com/Lymia/nedclib/archive/a8d8d158465250bb1e643cbcf152c73f08e8fc18.zip

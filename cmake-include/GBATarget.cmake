@@ -7,6 +7,8 @@ function(gba_target_link_runtime target library)
         add_subdirectory("${GBA_TOOLCHAIN_LIB_ROM_DIR}" "./${library}")
     elseif("${library}" STREQUAL "multiboot")
         add_subdirectory("${GBA_TOOLCHAIN_LIB_MULTIBOOT_DIR}" "./${library}")
+    elseif("${library}" STREQUAL "ereader")
+        add_subdirectory("${GBA_TOOLCHAIN_LIB_EREADER_DIR}" "./${library}")
     else()
         message(FATAL_ERROR "gba_target_link_runtime unknown library \"${library}\"")
     endif()
@@ -26,7 +28,7 @@ function(gba_target_object_copy target input output)
     )
 
     # Padding using gbfs padbin
-    if(${ARGN})
+    if(ARGN)
         gba_target_add_gbfs_external_project(${target})
 
         list(GET ARGN 0 padding)
@@ -232,4 +234,36 @@ function(gba_target_link_posprintf target)
     target_link_libraries(${target} PRIVATE posprintf)
     target_include_directories(${target} PUBLIC "${GBA_TOOLCHAIN_LIB_POSPRINTF_DIR}")
     target_compile_definitions(${target} PRIVATE __posprintf=1)
+endfunction()
+
+function(gba_target_archive_dotcode target inputOutput)
+    cmake_minimum_required(VERSION 3.0)
+
+    if(NOT ${GBA_TOOLCHAIN_HAS_MODULE_EXTERNALPROJECT} STREQUAL "NOTFOUND")
+        ExternalProject_Add(nedclib
+            SOURCE_DIR "${GBA_TOOLCHAIN_TOOLS}/nedclib"
+            BINARY_DIR "${GBA_TOOLCHAIN_TOOLS}/nedclib"
+            PREFIX "${GBA_TOOLCHAIN_TOOLS}/nedclib"
+            INSTALL_COMMAND ""
+        )
+
+        add_dependencies(${target} nedclib)
+    endif()
+
+    get_filename_component(OUTPUT_FILE_WLE ${inputOutput} NAME_WLE)
+
+    # Additional arguments
+    if(ARGN)
+        list(GET ARGN 0 NEDCMAKE_NAME)
+        set(NEDCMAKE_ARGS "-type" "2" "-bmp" "-name" "${NEDCMAKE_NAME}")
+    else()
+        set(NEDCMAKE_ARGS "-type" "2" "-bmp")
+    endif()
+
+    add_custom_command(TARGET ${target}
+        POST_BUILD
+        COMMAND "${GBA_TOOLCHAIN_NEDCMAKE}" -i "${inputOutput}" -o "${OUTPUT_FILE_WLE}.u" -region 1 ${NEDCMAKE_ARGS}
+        COMMAND "${GBA_TOOLCHAIN_NEDCMAKE}" -i "${inputOutput}" -o "${OUTPUT_FILE_WLE}.j" -region 2 ${NEDCMAKE_ARGS}
+        COMMENT "dotcode \"${inputOutput}\" -> \"${OUTPUT_FILE_WLE}.u-01.bmp\" | \"${OUTPUT_FILE_WLE}.j-01.bmp\""
+    )
 endfunction()

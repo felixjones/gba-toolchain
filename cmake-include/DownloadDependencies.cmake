@@ -64,6 +64,9 @@ function(gba_download_dependencies manifestUrl)
 
         gba_key_value_get("${CMAKE_CURRENT_LIST_DIR}/urls.txt" "posprintf")
         set(URL_POSPRINTF ${GBA_KEY_VALUE_OUT})
+
+        gba_key_value_get("${CMAKE_CURRENT_LIST_DIR}/urls.txt" "nedclib")
+        set(URL_NEDCLIB ${GBA_KEY_VALUE_OUT})
     endif()
 
     #====================
@@ -129,6 +132,13 @@ function(gba_download_dependencies manifestUrl)
             set(TMP_URL_POSPRINTF ${GBA_KEY_VALUE_OUT})
             if(NOT "${TMP_URL_POSPRINTF}" STREQUAL "${URL_POSPRINTF}")
                 set(URL_POSPRINTF "${TMP_URL_POSPRINTF}")
+            endif()
+
+            # Replace URL_NEDCLIB
+            gba_key_value_get("${CMAKE_CURRENT_LIST_DIR}/urls.tmp" "nedclib")
+            set(TMP_URL_NEDCLIB ${GBA_KEY_VALUE_OUT})
+            if(NOT "${TMP_URL_NEDCLIB}" STREQUAL "${URL_NEDCLIB}")
+                set(URL_NEDCLIB "${TMP_URL_NEDCLIB}")
             endif()
 
             file(RENAME "${CMAKE_CURRENT_LIST_DIR}/urls.tmp" "${CMAKE_CURRENT_LIST_DIR}/urls.txt")
@@ -248,6 +258,20 @@ function(gba_download_dependencies manifestUrl)
         else()
             # Already got it
             unset(URL_POSPRINTF)
+        endif()
+    endif()
+
+    if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/tools/nedclib")
+        # Check URL_NEDCLIB
+        gba_github_get_commit("${URL_NEDCLIB}")
+        gba_key_value_get("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "nedclib")
+        if(NOT "${GBA_GITHUB_COMMIT_OUT}" STREQUAL "${GBA_KEY_VALUE_OUT}")
+            if (NOT "${GBA_KEY_VALUE_OUT}" STREQUAL "")
+                gba_key_value_set("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "nedclib" "${GBA_GITHUB_COMMIT_OUT}")
+            endif()
+        else()
+            # Already got it
+            unset(URL_NEDCLIB)
         endif()
     endif()
 
@@ -381,6 +405,21 @@ function(gba_download_dependencies manifestUrl)
         file(RENAME "${CMAKE_CURRENT_LIST_DIR}/lib/posprintf/PosprintfCMakeLists.cmake" "${CMAKE_CURRENT_LIST_DIR}/lib/posprintf/CMakeLists.txt")
 
         gba_key_value_set("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "posprintf" "${POSPRINTF_FILE}")
+    endif()
+
+    #====================
+    # Download nedclib
+    #====================
+
+    if(DEFINED URL_NEDCLIB)
+        gba_download_extract("${URL_NEDCLIB}" "${CMAKE_CURRENT_LIST_DIR}/tools/nedclib")
+        gba_move_inner_path("${CMAKE_CURRENT_LIST_DIR}/tools/nedclib")
+
+        file(COPY "${CMAKE_CURRENT_LIST_DIR}/cmake-include/NedclibCMakeLists.cmake" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/tools/nedclib")
+        file(RENAME "${CMAKE_CURRENT_LIST_DIR}/tools/nedclib/NedclibCMakeLists.cmake" "${CMAKE_CURRENT_LIST_DIR}/tools/nedclib/CMakeLists.txt")
+
+        gba_github_get_commit("${URL_NEDCLIB}")
+        gba_key_value_set("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "nedclib" "${GBA_GITHUB_COMMIT_OUT}")
     endif()
 
     #====================
