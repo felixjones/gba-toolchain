@@ -29,14 +29,14 @@ The `arm-gba-toolchain.cmake` script will attempt to download the following depe
 |Dependency|Source|Destination||
 |---|---|---|---|
 |GNU Arm Embedded Toolchain|[ARM developer website](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads)|   gba-toolchain/arm-none-eabi|GNU toolchain used for compiling GBA projects|
-|gbafix*|[gba-tools GitHub master](https://raw.githubusercontent.com/devkitPro/gba-tools/master/src/gbafix.c)|gba-toolchain/tools|Fixes GBA ROM headers for compatibility with real hardware|
+|gbafix*|[gba-tools GitHub master](https://raw.githubusercontent.com/devkitPro/gba-tools/master/src/gbafix.c)|gba-toolchain/tools/gbafix|Fixes GBA ROM headers for compatibility with real hardware|
 |tonclib|[libtonc GitHub master](https://github.com/devkitPro/libtonc)|gba-toolchain/lib/tonc|C library for GBA development|
 |gba-plusplus|[gba-plusplus GitHub master](https://github.com/felixjones/gba-plusplus)|gba-toolchain/lib/gba-plusplus|C++ library for GBA development|
 |maxmod|[maxmod GitHub master](https://github.com/devkitPro/maxmod)|gba-toolchain/lib/maxmod|C library for GBA sound playback|
-|gbfs*|[gbfs developer website](http://www.pineight.com/gba/#gbfs)|gba-toolchain/lib/gbfs|File system tools and library for GBA resource management|
+|gbfs*|[gbfs developer website](http://www.pineight.com/gba/#gbfs)|gba-toolchain/lib/gbfs, gba-toolchain/tools/gfbs|File system tools and library for GBA resource management
 |agbabi|[agbabi GitHub master](https://github.com/felixjones/agbabi)|gba-toolchain/lib/agbabi|Optimized implementations for common GBA functions|
 |posprintf|[posprintf developer website](http://danposluns.com/danposluns/gbadev/posprintf/index.html)|gba-toolchain/lib/posprintf|Partial implementation of sprintf for the GBA|
-|nedclib*|[nedclib GitHub master](https://github.com/Lymia/nedclib)|e-reader dot code generator|
+|nedclib*|[nedclib GitHub master](https://github.com/Lymia/nedclib)|gba-toolchain/tools/nedclib|e-reader dot code generator|
 
 \* requires a host compiler, such as Visual Studio's CL.exe, GCC or Clang.
 
