@@ -236,7 +236,7 @@ function(gba_target_link_posprintf target)
     target_compile_definitions(${target} PRIVATE __posprintf=1)
 endfunction()
 
-function(gba_target_archive_dotcode target inputOutput)
+function(gba_target_archive_dotcode target input output region)
     cmake_minimum_required(VERSION 3.0)
 
     if(NOT ${GBA_TOOLCHAIN_HAS_MODULE_EXTERNALPROJECT} STREQUAL "NOTFOUND")
@@ -250,20 +250,37 @@ function(gba_target_archive_dotcode target inputOutput)
         add_dependencies(${target} nedclib)
     endif()
 
-    get_filename_component(OUTPUT_FILE_WLE ${inputOutput} NAME_WLE)
+    get_filename_component(OUTPUT_FILE_WLE ${output} NAME_WLE)
+
+    if("${region}" STREQUAL "original")
+        set(NEDCMAKE_TYPE "1")
+        set(NEDCMAKE_REGION "0")
+
+        message(FATAL_ERROR "gba_target_archive_dotcode \"original\" region not yet implemented")
+    elseif("${region}" STREQUAL "non-japan")
+        set(NEDCMAKE_TYPE "2")
+        set(NEDCMAKE_REGION "1")
+    elseif("${region}" STREQUAL "japan-plus")
+        set(NEDCMAKE_TYPE "2")
+        set(NEDCMAKE_REGION "2")
+    elseif("${region}" STREQUAL "raw")
+        set(NEDCMAKE_TYPE "3")
+        set(NEDCMAKE_REGION "0")
+    else()
+        message(FATAL_ERROR "gba_target_archive_dotcode unknown region \"${region}\": valid regions are \"original\", \"non-japan\", \"japan-plus\" and \"raw\")")
+    endif()
 
     # Additional arguments
     if(ARGN)
         list(GET ARGN 0 NEDCMAKE_NAME)
-        set(NEDCMAKE_ARGS "-type" "2" "-bmp" "-name" "${NEDCMAKE_NAME}")
+        set(NEDCMAKE_ARGS "-region" "${NEDCMAKE_REGION}" "-type" "${NEDCMAKE_TYPE}" "-bmp" "-name" "${NEDCMAKE_NAME}")
     else()
-        set(NEDCMAKE_ARGS "-type" "2" "-bmp")
+        set(NEDCMAKE_ARGS "-region" "${NEDCMAKE_REGION}" "-type" "${NEDCMAKE_TYPE}" "-bmp")
     endif()
 
     add_custom_command(TARGET ${target}
         POST_BUILD
-        COMMAND "${GBA_TOOLCHAIN_NEDCMAKE}" -i "${inputOutput}" -o "${OUTPUT_FILE_WLE}.u" -region 1 ${NEDCMAKE_ARGS}
-        COMMAND "${GBA_TOOLCHAIN_NEDCMAKE}" -i "${inputOutput}" -o "${OUTPUT_FILE_WLE}.j" -region 2 ${NEDCMAKE_ARGS}
-        COMMENT "dotcode \"${inputOutput}\" -> \"${OUTPUT_FILE_WLE}.u-01.bmp\" | \"${OUTPUT_FILE_WLE}.j-01.bmp\""
+        COMMAND "${GBA_TOOLCHAIN_NEDCMAKE}" -i "${input}" -o "${OUTPUT_FILE_WLE}" ${NEDCMAKE_ARGS}
+        COMMENT "dotcode \"${input}\" -> \"${OUTPUT_FILE_WLE}-##.bmp\""
     )
 endfunction()
