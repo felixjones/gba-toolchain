@@ -282,5 +282,9 @@ function(gba_target_archive_dotcode target input output region)
         POST_BUILD
         COMMAND "${GBA_TOOLCHAIN_NEDCMAKE}" -i "${input}" -o "${OUTPUT_FILE_WLE}" ${NEDCMAKE_ARGS}
         COMMENT "dotcode \"${input}\" -> \"${OUTPUT_FILE_WLE}-##.bmp\""
+        BYPRODUCTS "${OUTPUT_FILE_WLE}-01.bmp" "${OUTPUT_FILE_WLE}-02.bmp" "${OUTPUT_FILE_WLE}-03.bmp"
+            "${OUTPUT_FILE_WLE}-04.bmp" "${OUTPUT_FILE_WLE}-05.bmp" "${OUTPUT_FILE_WLE}-06.bmp"
+            "${OUTPUT_FILE_WLE}-07.bmp" "${OUTPUT_FILE_WLE}-08.bmp" "${OUTPUT_FILE_WLE}-09.bmp"
+            "${OUTPUT_FILE_WLE}-10.bmp" "${OUTPUT_FILE_WLE}-11.bmp" "${OUTPUT_FILE_WLE}-12.bmp"
     )
 endfunction()
