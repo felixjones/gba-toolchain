@@ -105,7 +105,7 @@ _start:
     bl	    .Lbx_r2
 
     cmp     r0, #1  @ argc = 1
-    bne 	.Ldetect_none
+    bne 	.Ldetect_ezflash
 
     ldr     r1, .Leverdrive_string_ptr
     push    {r1}
@@ -113,9 +113,21 @@ _start:
     mov     r1, sp      @ argv
     b 	    .Llibc_init
 
-.Ldetect_ezflashomega:
+.Ldetect_ezflash:
+    @ CpuSet copy ezflash
+    ldr	    r0, =__ezflash_lma
+    ldr	    r1, =__ezflash_start
+    ldr	    r2, =__ezflash_cpuset_copy
+    swi     #0xb
+
+    ldr	    r2, =_ezflash_bootcheck
+    bl	    .Lbx_r2
+
+    cmp     r0, #1  @ argc = 1
     bne 	.Ldetect_none
 
+    ldr     r1, .Lezflash_string_ptr
+    push    {r1}
     mov	    r0, #1		@ argc = 1
     mov     r1, sp      @ argv
     b 	    .Llibc_init
@@ -161,3 +173,9 @@ _start:
     .long   .Leverdrive_string
 .Leverdrive_string:
     .asciz  "everdrive-gba"
+
+    .align  2
+.Lezflash_string_ptr:
+    .long   .Lezflash_string
+.Lezflash_string:
+    .asciz  "ezflash"

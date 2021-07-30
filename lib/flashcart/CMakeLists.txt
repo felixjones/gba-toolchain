@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 
 project(flashcart C ASM)
 
-add_library(flashcart STATIC crt0.s everdrive.c gba-syscalls.c)
+add_library(flashcart STATIC crt0.s everdrive.c ezflash.c gba-syscalls.c)
 set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} -mthumb -x assembler-with-cpp")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mthumb -Wall -fno-strict-aliasing -O3")
 

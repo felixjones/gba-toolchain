@@ -13,7 +13,8 @@ __iwram_start = ORIGIN(iwram);
 __iwram_top   = ORIGIN(iwram) + LENGTH(iwram);
 __ewram_start = ORIGIN(ewram);
 __ewram_top   = ORIGIN(ewram) + LENGTH(ewram); /* Heap end */
-__everdrive_start = ORIGIN(ewram) + LENGTH(ewram); /* Heap end */
+__everdrive_start = __ewram_top;
+__ezflash_start = __ewram_top;
 __sp_irq      = __iwram_top - 0x60; /* IRQ stack */
 __sp_usr      = __sp_irq - 0xa0; /* User stack */
 
@@ -268,7 +269,22 @@ SECTIONS {
 
   __everdrive_size = __load_stop_everdrive - __load_start_everdrive;
 
-  __rom_end = __everdrive_lma + __everdrive_size;
+  /*
+  ====================
+    ezflash
+  ====================
+  */
+
+  /* ezflash load memory address (source) */
+  __ezflash_lma = __everdrive_lma + __everdrive_size;
+
+  OVERLAY : NOCROSSREFS AT (__ezflash_lma) {
+    .ezflash { __ezflash_start = ABSOLUTE(.); *(.ezflash .ezflash*) *ezflash.*(.text* .data*) . = ALIGN(4); __ezflash_end = ABSOLUTE(.); }
+  } >ewram
+
+  __ezflash_size = __load_stop_ezflash - __load_start_ezflash;
+
+  __rom_end = __ezflash_lma + __ezflash_size;
 
   /*
   ====================
@@ -281,6 +297,7 @@ SECTIONS {
   __data_cpuset_copy = ((__data_end - __data_start) / 4) | (1 << 26);
   __ewram_cpuset_copy = ((__ewram_end - __ewram_start) / 4) | (1 << 26);
   __everdrive_cpuset_copy = ((__everdrive_end - __everdrive_start) / 4) | (1 << 26);
+  __ezflash_cpuset_copy = ((__ezflash_end - __ezflash_start) / 4) | (1 << 26);
 
   /*
   ====================

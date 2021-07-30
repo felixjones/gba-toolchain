@@ -1,7 +1,7 @@
 typedef volatile unsigned short vu16;
 typedef volatile unsigned char vu8;
 
-#define SECTION_BOOTCHECK __attribute__((section(".everdrive._everdrive_bootcheck.text"), unused))
+#define SECTION_BOOTCHECK __attribute__((section(".everdrive._everdrive_bootcheck"), unused))
 
 int SECTION_BOOTCHECK _everdrive_bootcheck() {
     const int * const rom_title = ( const int * ) 0x080000a0;
