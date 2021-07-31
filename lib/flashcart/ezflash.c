@@ -3,9 +3,9 @@ typedef volatile unsigned char vu8;
 
 #define EZFLASH_SECTION_BOOTCHECK __attribute__((section(".ezflash._ezflash_bootcheck"), unused))
 
-static inline int EZFLASH_SECTION_BOOTCHECK _ezflash_headcmp32( const int * a ) {
-    const volatile int * const rom_header = ( const volatile int * ) 0x080000a0;
+static const volatile int * const rom_header = ( const volatile int * ) 0x080000a0;
 
+static inline int EZFLASH_SECTION_BOOTCHECK _ezflash_headcmp32( const int * a ) {
     for ( int ii = 0; ii < 8; ++ii ) {
         if ( a[ii] != rom_header[ii] ) {
             return 1;
@@ -14,19 +14,30 @@ static inline int EZFLASH_SECTION_BOOTCHECK _ezflash_headcmp32( const int * a ) 
     return 0;
 }
 
-static inline void EZFLASH_SECTION_BOOTCHECK _ezflash_set_rompage( int page ) {
+static inline void EZFLASH_SECTION_BOOTCHECK _ezflash_set_rompage( const unsigned int page ) {
     *( vu16 * ) 0x9fe0000 = 0xd200;
     *( vu16 * ) 0x8000000 = 0x1500;
     *( vu16 * ) 0x8020000 = 0xd200;
     *( vu16 * ) 0x8040000 = 0x1500;
-    *( vu16 * ) 0x9880000 = page;
+    *( vu16 * ) 0x9880000 = ( unsigned short ) page;
     *( vu16 * ) 0x9fc0000 = 0x1500;
 }
 
-int EZFLASH_SECTION_BOOTCHECK _ezflash_bootcheck() {
-    const volatile int * const rom_header = ( const volatile int * ) 0x080000a0;
+static inline void EZFLASH_SECTION_BOOTCHECK _ezflash_rompage_asciiz( unsigned int decimal, char * const ascii ) {
+    ascii[0] = ( char ) ( decimal / 100u );
+    if ( ascii[0] ) ascii[0] += '0';
 
+    ascii[1] = ( decimal % 100u ) / 10u;
+    if ( ascii[1] ) ascii[1] += '0';
+
+    ascii[2] = '0' + ( decimal % 10u );
+    ascii[3] = 0;
+}
+
+int EZFLASH_SECTION_BOOTCHECK _ezflash_bootcheck( char currentPage[4], int * const isOmega ) {
     int romHeader[8];
+    unsigned int romPage;
+
     for ( int ii = 0; ii < 8; ++ii ) {
         romHeader[ii] = rom_header[ii];
     }
@@ -38,20 +49,18 @@ int EZFLASH_SECTION_BOOTCHECK _ezflash_bootcheck() {
         return 0;
     }
 
-    // Find in PSRAM
-    _ezflash_set_rompage( 0x200 );
-    if ( _ezflash_headcmp32( romHeader ) == 0 ) {
-        goto _return_1;
-    }
+    // Detect EZ Flash Omega
+    *isOmega = ( rom_header[0] == 0 );
 
-    // Find in NOR pages
-    for ( int nor = 0; nor < 0x200; ++nor ) {
-        _ezflash_set_rompage( nor );
+    // Find our ROM page
+    romPage = 0x200 + 1;
+    while ( romPage-- ) {
+        _ezflash_set_rompage( romPage );
         if ( _ezflash_headcmp32( romHeader ) == 0 ) {
-            goto _return_1;
+            _ezflash_rompage_asciiz( romPage, currentPage );
+            break;
         }
     }
 
-_return_1:
     return 1;
 }

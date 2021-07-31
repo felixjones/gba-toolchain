@@ -88,8 +88,8 @@ _start:
     cmp     r1, r2
     bne 	.Ldetect_everdrive
 
-    ldr     r1, .Lmgba_string_ptr
-    push    {r1}
+    ldr     r0, .Lmgba_string_ptr
+    push    {r0}
     mov	    r0, #1		@ argc = 1
     mov     r1, sp      @ argv
     b 	    .Llibc_init
@@ -104,11 +104,11 @@ _start:
     ldr	    r2, =_everdrive_bootcheck
     bl	    .Lbx_r2
 
-    cmp     r0, #1  @ argc = 1
-    bne 	.Ldetect_ezflash
+    cmp     r0, #0
+    beq 	.Ldetect_ezflash
 
-    ldr     r1, .Leverdrive_string_ptr
-    push    {r1}
+    ldr     r0, .Leverdrive_string_ptr
+    push    {r0}
     mov	    r0, #1		@ argc = 1
     mov     r1, sp      @ argv
     b 	    .Llibc_init
@@ -121,14 +121,28 @@ _start:
     swi     #0xb
 
     ldr	    r2, =_ezflash_bootcheck
+    sub     sp, sp, #8  @ Space for storing ROM page and Omega flag
+    mov     r1, sp      @ Omega flag
+    add     r0, r1, #4  @ ASCII page
     bl	    .Lbx_r2
+    pop     {r1, r2}    @ Pop Omega flag and ASCII page
 
-    cmp     r0, #1  @ argc = 1
-    bne 	.Ldetect_none
+    cmp     r0, #0
+    beq 	.Ldetect_none
 
+    cmp     r1, #1
+    beq     .Lezflash_omega
     ldr     r1, .Lezflash_string_ptr
-    push    {r1}
-    mov	    r0, #1		@ argc = 1
+    b       .Lezflash_args
+.Lezflash_omega:
+    ldr     r1, .Lezflashomega_string_ptr
+
+.Lezflash_args:
+    push    {r2}        @ Push ASCII page
+    mov     r2, sp      @ r2 = ASCII page address
+    push    {r1, r2}    @ Push ARGVs
+
+    mov	    r0, #2		@ argc = 2
     mov     r1, sp      @ argv
     b 	    .Llibc_init
 
@@ -177,5 +191,9 @@ _start:
     .align  2
 .Lezflash_string_ptr:
     .long   .Lezflash_string
+.Lezflashomega_string_ptr:
+    .long   .Lezflashomega_string
 .Lezflash_string:
     .asciz  "ezflash"
+.Lezflashomega_string:
+    .asciz  "ezflash-omega"
