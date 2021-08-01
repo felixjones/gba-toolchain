@@ -1,6 +1,8 @@
 #include <sys/stat.h>
 #include <errno.h>
 
+#include "diskio.h"
+
 #undef errno
 extern int errno;
 

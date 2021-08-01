@@ -88,6 +88,7 @@ _start:
     cmp     r1, r2
     bne 	.Ldetect_everdrive
 
+    mov     r3, #(__gba_save_id)
     ldr     r0, .Lmgba_string_ptr
     push    {r0}
     mov	    r0, #1		@ argc = 1
@@ -107,6 +108,7 @@ _start:
     cmp     r0, #0
     beq 	.Ldetect_ezflash
 
+    mov     r3, #5
     ldr     r0, .Leverdrive_string_ptr
     push    {r0}
     mov	    r0, #1		@ argc = 1
@@ -130,6 +132,7 @@ _start:
     cmp     r0, #0
     beq 	.Ldetect_none
 
+    mov     r3, #6
     cmp     r1, #1
     beq     .Lezflash_omega
     ldr     r1, .Lezflash_string_ptr
@@ -149,8 +152,17 @@ _start:
 .Ldetect_none:
     mov	    r0, #0		@ argc = 0
     mov     r1, #0      @ argv = 0
+    mov     r3, #(__gba_save_id)
 
 .Llibc_init:
+    @ Initialise disk routines
+    push    {r0, r1}
+    movs    r0, r3
+    .extern _disk_io_init
+    ldr     r2, =_disk_io_init
+    bl	    .Lbx_r2
+    pop     {r0, r1}
+
     @ __libc_init_array
     ldr	    r2, =__libc_init_array
     bl	    .Lbx_r2

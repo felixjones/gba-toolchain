@@ -195,12 +195,48 @@ SECTIONS {
 
   /*
   ====================
+    disk overlays
+  ====================
+  */
+
+  __disk_overlay_lma = __iwram_overlay_lma + __iwram_overlay_size;
+
+  OVERLAY : NOCROSSREFS AT (__disk_overlay_lma) {
+    .disk0 { __disk_overlay = ABSOLUTE(.); *(.disk0 .disk0*) *disk0.*(.text* .data*) . = ALIGN(4); __disk0_end = ABSOLUTE(.); }
+    .disk1 { *(.disk1 .disk1*) *disk1.*(.text* .data*) . = ALIGN(4); __disk1_end = ABSOLUTE(.); }
+    .disk2 { *(.disk2 .disk2*) *disk2.*(.text* .data*) . = ALIGN(4); __disk2_end = ABSOLUTE(.); }
+    .disk3 { *(.disk3 .disk3*) *disk3.*(.text* .data*) . = ALIGN(4); __disk3_end = ABSOLUTE(.); }
+    .disk4 { *(.disk4 .disk4*) *disk4.*(.text* .data*) . = ALIGN(4); __disk4_end = ABSOLUTE(.); }
+    .disk5 { *(.disk5 .disk5*) *disk5.*(.text* .data*) . = ALIGN(4); __disk5_end = ABSOLUTE(.); }
+    .disk6 { *(.disk6 .disk6*) *disk6.*(.text* .data*) . = ALIGN(4); __disk6_end = ABSOLUTE(.); }
+  } >iwram
+
+  __disk0_cpuset_copy = ((__disk0_end - __disk_overlay) / 4) | (1 << 26);
+  __disk1_cpuset_copy = ((__disk1_end - __disk_overlay) / 4) | (1 << 26);
+  __disk2_cpuset_copy = ((__disk2_end - __disk_overlay) / 4) | (1 << 26);
+  __disk3_cpuset_copy = ((__disk3_end - __disk_overlay) / 4) | (1 << 26);
+  __disk4_cpuset_copy = ((__disk4_end - __disk_overlay) / 4) | (1 << 26);
+  __disk5_cpuset_copy = ((__disk5_end - __disk_overlay) / 4) | (1 << 26);
+  __disk6_cpuset_copy = ((__disk6_end - __disk_overlay) / 4) | (1 << 26);
+
+  __disk_overlay_size = __load_stop_disk0 - __load_start_disk0 +
+      __load_stop_disk1 - __load_start_disk1 +
+      __load_stop_disk2 - __load_start_disk2 +
+      __load_stop_disk3 - __load_start_disk3 +
+      __load_stop_disk4 - __load_start_disk4 +
+      __load_stop_disk5 - __load_start_disk5 +
+      __load_stop_disk6 - __load_start_disk6;
+
+  __disk_overlay_end = __disk_overlay + __disk_overlay_size;
+
+  /*
+  ====================
     ewram
   ====================
   */
 
   /* EWRAM load memory address (source) */
-  __ewram_lma = __iwram_overlay_lma + __iwram_overlay_size;
+  __ewram_lma = __disk_overlay_lma + __disk_overlay_size;
 
   .ewram __ewram_start : AT (__ewram_lma) {
     *(.ewram .ewram*)
