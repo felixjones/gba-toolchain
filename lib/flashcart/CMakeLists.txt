@@ -2,9 +2,15 @@ cmake_minimum_required(VERSION 3.0)
 
 project(flashcart C ASM)
 
-add_library(flashcart STATIC crt0.s disk_eeprom.s disk_everdrive.s disk_ezflash.s disk_flash.s disk_sram.s diskio.c everdrive.c ezflash.c gba-syscalls.c)
+set(FatFsSources
+    fatfs/source/ff.c
+    fatfs/source/ffsystem.c
+    fatfs/source/ffunicode.c
+)
+
+add_library(flashcart STATIC crt0.s disk_flash.c disk_everdrive.s disk_ezflash.s diskio.c everdrive.c ezflash.c gba-syscalls.c ${FatFsSources})
 set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} -mthumb -x assembler-with-cpp")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mthumb -Wall -fno-strict-aliasing -O3")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mthumb -Wall -fno-strict-aliasing -Og")
 
 message(STATUS "Activating GBA flashcart runtime")
 

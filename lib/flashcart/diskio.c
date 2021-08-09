@@ -70,25 +70,6 @@ void _disk_io_init( int type ) {
             _disk_io_tab.ioctl = _none_disk_ioctl;
             _disk_io_tab.fattime = _none_fattime;
             break;
-        case 1: // EEPROM
-            _disk_io_tab.status = _eeprom_disk_status;
-            _disk_io_tab.initialize = _eeprom_disk_initialize;
-            _disk_io_tab.read = _eeprom_disk_read;
-            _disk_io_tab.write = _eeprom_disk_write;
-            _disk_io_tab.ioctl = _eeprom_disk_ioctl;
-            _disk_io_tab.fattime = _eeprom_disk_fattime;
-            disk_overlay_set( &__load_start_disk0, &__disk_overlay, ( int ) __disk0_cpuset_copy );
-            break;
-        case 2: // SRAM
-            _disk_io_tab.status = _sram_disk_status;
-            _disk_io_tab.initialize = _sram_disk_initialize;
-            _disk_io_tab.read = _sram_disk_read;
-            _disk_io_tab.write = _sram_disk_write;
-            _disk_io_tab.ioctl = _sram_disk_ioctl;
-            _disk_io_tab.fattime = _sram_disk_fattime;
-            disk_overlay_set( &__load_start_disk1, &__disk_overlay, ( int ) __disk1_cpuset_copy );
-            break;
-        case 3: // Flash
         case 4: // Flash1M
             _disk_io_tab.status = _flash_disk_status;
             _disk_io_tab.initialize = _flash_disk_initialize;
@@ -96,7 +77,7 @@ void _disk_io_init( int type ) {
             _disk_io_tab.write = _flash_disk_write;
             _disk_io_tab.ioctl = _flash_disk_ioctl;
             _disk_io_tab.fattime = _flash_disk_fattime;
-            disk_overlay_set( &__load_start_disk2, &__disk_overlay, ( int ) __disk2_cpuset_copy );
+            disk_overlay_set( &__load_start_disk0, &__disk_overlay, ( int ) __disk0_cpuset_copy );
             break;
         case 5: // Everdrive
             _disk_io_tab.status = _everdrive_disk_status;
@@ -105,7 +86,7 @@ void _disk_io_init( int type ) {
             _disk_io_tab.write = _everdrive_disk_write;
             _disk_io_tab.ioctl = _everdrive_disk_ioctl;
             _disk_io_tab.fattime = _everdrive_disk_fattime;
-            disk_overlay_set( &__load_start_disk3, &__disk_overlay, ( int ) __disk3_cpuset_copy );
+            disk_overlay_set( &__load_start_disk1, &__disk_overlay, ( int ) __disk1_cpuset_copy );
             break;
         case 6: // EZFlash
             _disk_io_tab.status = _ezflash_disk_status;
@@ -114,7 +95,7 @@ void _disk_io_init( int type ) {
             _disk_io_tab.write = _ezflash_disk_write;
             _disk_io_tab.ioctl = _ezflash_disk_ioctl;
             _disk_io_tab.fattime = _ezflash_disk_fattime;
-            disk_overlay_set( &__load_start_disk4, &__disk_overlay, ( int ) __disk4_cpuset_copy );
+            disk_overlay_set( &__load_start_disk2, &__disk_overlay, ( int ) __disk2_cpuset_copy );
             break;
     }
 }

@@ -16,7 +16,15 @@ typedef enum dresult_type {
 
     uint32_max_dresult = UINT32_MAX
 } dresult_type;
-typedef uint_type cmd_type;
+typedef enum cmd_type {
+    cmd_control_sync = 0,
+    cmd_get_sector_count = 1,
+    cmd_get_sector_size = 2,
+    cmd_get_block_size = 3,
+    cmd_control_trim = 4,
+
+    uint32_max_cmd = UINT32_MAX
+} cmd_type;
 typedef uint_type time_type;
 
 typedef struct disk_io_tab_t {
@@ -30,32 +38,14 @@ typedef struct disk_io_tab_t {
 
 extern disk_io_tab_t _disk_io_tab;
 
-dstatus_type _eeprom_disk_status( pdrv_type );
-dstatus_type _eeprom_disk_initialize( pdrv_type );
-dresult_type _eeprom_disk_read( pdrv_type pdrv, byte_type * buff, uint_type sector, uint_type count );
-dresult_type _eeprom_disk_write( pdrv_type pdrv, const byte_type * buff, uint_type sector, uint_type count );
-dresult_type _eeprom_disk_ioctl( pdrv_type pdrv, cmd_type cmd, void * buff );
-time_type _eeprom_disk_fattime();
-extern int __load_start_disk0;
-extern int __disk0_cpuset_copy[];
-
-dstatus_type _sram_disk_status( pdrv_type );
-dstatus_type _sram_disk_initialize( pdrv_type );
-dresult_type _sram_disk_read( pdrv_type pdrv, byte_type * buff, uint_type sector, uint_type count );
-dresult_type _sram_disk_write( pdrv_type pdrv, const byte_type * buff, uint_type sector, uint_type count );
-dresult_type _sram_disk_ioctl( pdrv_type pdrv, cmd_type cmd, void * buff );
-time_type _sram_disk_fattime();
-extern int __load_start_disk1;
-extern int __disk1_cpuset_copy[];
-
 dstatus_type _flash_disk_status( pdrv_type );
 dstatus_type _flash_disk_initialize( pdrv_type );
 dresult_type _flash_disk_read( pdrv_type pdrv, byte_type * buff, uint_type sector, uint_type count );
 dresult_type _flash_disk_write( pdrv_type pdrv, const byte_type * buff, uint_type sector, uint_type count );
 dresult_type _flash_disk_ioctl( pdrv_type pdrv, cmd_type cmd, void * buff );
 time_type _flash_disk_fattime();
-extern int __load_start_disk2;
-extern int __disk2_cpuset_copy[];
+extern int __load_start_disk0;
+extern int __disk0_cpuset_copy[];
 
 dstatus_type _everdrive_disk_status( pdrv_type );
 dstatus_type _everdrive_disk_initialize( pdrv_type );
@@ -63,8 +53,8 @@ dresult_type _everdrive_disk_read( pdrv_type pdrv, byte_type * buff, uint_type s
 dresult_type _everdrive_disk_write( pdrv_type pdrv, const byte_type * buff, uint_type sector, uint_type count );
 dresult_type _everdrive_disk_ioctl( pdrv_type pdrv, cmd_type cmd, void * buff );
 time_type _everdrive_disk_fattime();
-extern int __load_start_disk3;
-extern int __disk3_cpuset_copy[];
+extern int __load_start_disk1;
+extern int __disk1_cpuset_copy[];
 
 dstatus_type _ezflash_disk_status( pdrv_type );
 dstatus_type _ezflash_disk_initialize( pdrv_type );
@@ -72,7 +62,7 @@ dresult_type _ezflash_disk_read( pdrv_type pdrv, byte_type * buff, uint_type sec
 dresult_type _ezflash_disk_write( pdrv_type pdrv, const byte_type * buff, uint_type sector, uint_type count );
 dresult_type _ezflash_disk_ioctl( pdrv_type pdrv, cmd_type cmd, void * buff );
 time_type _ezflash_disk_fattime();
-extern int __load_start_disk4;
-extern int __disk4_cpuset_copy[];
+extern int __load_start_disk2;
+extern int __disk2_cpuset_copy[];
 
 #endif // define _FLASHCART_DISKIO_H_

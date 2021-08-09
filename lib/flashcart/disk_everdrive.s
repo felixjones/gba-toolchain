@@ -2,7 +2,7 @@
 @ disk_everdrive.s
 @----------------------------------------
 
-    .section .disk3, "ax"
+    .section .disk1, "ax"
     .align 2
     .arm
     .global _everdrive_disk_status

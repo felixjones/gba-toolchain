@@ -67,6 +67,9 @@ function(gba_download_dependencies manifestUrl)
 
         gba_key_value_get("${CMAKE_CURRENT_LIST_DIR}/urls.txt" "nedclib")
         set(URL_NEDCLIB ${GBA_KEY_VALUE_OUT})
+
+        gba_key_value_get("${CMAKE_CURRENT_LIST_DIR}/urls.txt" "fatfs")
+        set(URL_FATFS ${GBA_KEY_VALUE_OUT})
     endif()
 
     #====================
@@ -139,6 +142,13 @@ function(gba_download_dependencies manifestUrl)
             set(TMP_URL_NEDCLIB ${GBA_KEY_VALUE_OUT})
             if(NOT "${TMP_URL_NEDCLIB}" STREQUAL "${URL_NEDCLIB}")
                 set(URL_NEDCLIB "${TMP_URL_NEDCLIB}")
+            endif()
+
+            # Replace URL_FATFAT
+            gba_key_value_get("${CMAKE_CURRENT_LIST_DIR}/urls.tmp" "fatfs")
+            set(TMP_URL_FATFAT ${GBA_KEY_VALUE_OUT})
+            if(NOT "${TMP_URL_FATFAT}" STREQUAL "${URL_FATFAT}")
+                set(URL_FATFAT "${TMP_URL_FATFAT}")
             endif()
 
             file(RENAME "${CMAKE_CURRENT_LIST_DIR}/urls.tmp" "${CMAKE_CURRENT_LIST_DIR}/urls.txt")
@@ -248,7 +258,6 @@ function(gba_download_dependencies manifestUrl)
         endif()
     endif()
 
-    get_filename_component(POSPRINTF_NAME_WE "${URL_POSPRINTF}" NAME_WE)
     if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/lib/posprintf")
         # Check URL_POSPRINTF
         get_filename_component(POSPRINTF_FILE "${URL_POSPRINTF}" NAME_WE)
@@ -272,6 +281,18 @@ function(gba_download_dependencies manifestUrl)
         else()
             # Already got it
             unset(URL_NEDCLIB)
+        endif()
+    endif()
+
+    if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/lib/flashcart/fatfs")
+        # Check URL_FATFS
+        get_filename_component(FATFS_FILE "${URL_FATFS}" NAME_WE)
+        gba_key_value_get("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "fatfs")
+        if(NOT "${FATFS_FILE}" STREQUAL "${GBA_KEY_VALUE_OUT}")
+            gba_key_value_set("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "fatfs" "${FATFS_FILE}")
+        else()
+            # Already got it
+            unset(URL_FATFS)
         endif()
     endif()
 
@@ -420,6 +441,21 @@ function(gba_download_dependencies manifestUrl)
 
         gba_github_get_commit("${URL_NEDCLIB}")
         gba_key_value_set("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "nedclib" "${GBA_GITHUB_COMMIT_OUT}")
+    endif()
+
+    #====================
+    # Download FatFs
+    #====================
+
+    if(DEFINED URL_FATFS)
+        get_filename_component(FATFS_FILE "${URL_FATFS}" NAME_WE)
+        gba_download_extract("${URL_FATFS}" "${CMAKE_CURRENT_LIST_DIR}/lib/flashcart/fatfs")
+
+        file(COPY "${CMAKE_CURRENT_LIST_DIR}/lib/flashcart/flashcart_ffconf.h" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/lib/flashcart/fatfs/source")
+        file(RENAME "${CMAKE_CURRENT_LIST_DIR}/lib/flashcart/fatfs/source/ffconf.h" "${CMAKE_CURRENT_LIST_DIR}/lib/flashcart/fatfs/source/ffconf.old.h")
+        file(RENAME "${CMAKE_CURRENT_LIST_DIR}/lib/flashcart/fatfs/source/flashcart_ffconf.h" "${CMAKE_CURRENT_LIST_DIR}/lib/flashcart/fatfs/source/ffconf.h")
+
+        gba_key_value_set("${CMAKE_CURRENT_LIST_DIR}/dependencies.txt" "fatfs" "${FATFS_FILE}")
     endif()
 
     #====================

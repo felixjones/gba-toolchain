@@ -2,6 +2,10 @@
 @ crt0.s
 @----------------------------------------
 
+#ifndef __gba_save_id
+#define __gba_save_id 0
+#endif
+
     .section .crt0, "ax"
     .align 2
     .arm
@@ -25,9 +29,11 @@ _start:
     .byte	0x00		@ Complement check  (0x80000BD)
     .byte	0x00, 0x00  @ Checksum          (0x80000BE)
 
+#ifdef __gba_save_string
     @ Save type string
     .asciz  __gba_save_string
     .align  2
+#endif
 
 .Lrom_start:
     @ r3 set to REG_BASE
@@ -209,3 +215,43 @@ _start:
     .asciz  "ezflash"
 .Lezflashomega_string:
     .asciz  "ezflash-omega"
+
+    @ Prevent FatFs functions from being removed
+    .global f_open
+    .global f_close
+    .global f_read
+    .global f_write
+    .global f_lseek
+    .global f_truncate
+    .global f_sync
+    .global f_forward
+    .global f_expand
+    .global f_gets
+    .global f_putc
+    .global f_puts
+    .global f_printf
+    .global f_tell
+    .global f_eof
+    .global f_size
+    .global f_error
+    .global f_opendir
+    .global f_closedir
+    .global f_readdir
+    .global f_findfirst
+    .global f_findnext
+    .global f_stat
+    .global f_unlink
+    .global f_rename
+    .global f_chmod
+    .global f_utime
+    .global f_mkdir
+    .global f_chdir
+    .global f_chdrive
+    .global f_getcwd
+    .global f_mount
+    .global f_mkfs
+    .global f_fdisk
+    .global f_getfree
+    .global f_getlabel
+    .global f_setlabel
+    .global f_setcp

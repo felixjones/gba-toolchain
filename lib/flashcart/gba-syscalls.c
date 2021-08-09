@@ -1,7 +1,7 @@
 #include <sys/stat.h>
 #include <errno.h>
 
-#include "diskio.h"
+#include "fatfs/source/ff.h"
 
 #undef errno
 extern int errno;
@@ -10,6 +10,7 @@ char * __env[1] = { 0 };
 char ** environ = __env;
 
 void _exit( __attribute__((unused)) int status ) {
+    // TODO : Return to everdrive/EZF
     __asm__ volatile("swi #0x00\n"); /* Soft reset */
     /* __asm__ volatile("swi #0x26\n"); */ /* Hard reset */
     __builtin_unreachable();

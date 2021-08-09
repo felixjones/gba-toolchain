@@ -2,7 +2,7 @@
 @ disk_ezflash.s
 @----------------------------------------
 
-    .section .disk4, "ax"
+    .section .disk2, "ax"
     .align 2
     .arm
     .global _ezflash_disk_status
