@@ -1,13 +1,44 @@
 #include <sys/stat.h>
 #include <errno.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <fcntl.h>
 
 #include "fatfs/source/ff.h"
 
 #undef errno
 extern int errno;
 
+#define SECTION_EWRAM_DATA __attribute__((section(".ewram.data")))
+
 char * __env[1] = { 0 };
 char ** environ = __env;
+unsigned int _disk_status = 0;
+
+static int file_table_bits SECTION_EWRAM_DATA = 0;
+static FIL file_table[8] SECTION_EWRAM_DATA;
+
+static FIL * file_table_alloc( int * idx ) {
+    for ( int ii = 0; ii < 8; ++ii ) {
+        const int mask = ( 1 << ii );
+        if ( ( file_table_bits & mask ) == 0 ) {
+            file_table_bits |= mask;
+            *idx = ii;
+            return &file_table[ii];
+        }
+    }
+    return NULL;
+}
+
+static FIL * file_table_free( int idx ) {
+    const int mask = ( 1 << idx );
+    file_table_bits &= ~mask;
+    return &file_table[idx];
+}
+
+static FIL * file_table_get( int idx ) {
+    return &file_table[idx];
+}
 
 void _exit( __attribute__((unused)) int status ) {
     // TODO : Return to everdrive/EZF
@@ -40,7 +71,13 @@ static int _gba_nosys() {
     return -1;
 }
 
-int _close( int file ) __attribute__((alias("_gba_nosys")));
+int _close( int file ) {
+    if ( !_disk_status ) {
+        return EIO;
+    }
+    FIL * const fp = file_table_free( file );
+    return f_close( fp );
+}
 
 int _execve( char * name, char ** argv, char ** env ) __attribute__((alias("_gba_nosys")));
 
@@ -54,11 +91,72 @@ int _kill( int pid, int sig ) __attribute__((alias("_gba_nosys")));
 
 int _link( char * old, char * next ) __attribute__((alias("_gba_nosys")));
 
-int _lseek( int file, int ptr, int dir ) __attribute__((alias("_gba_nosys")));
+int _lseek( int file, int ptr, int dir ) {
+    if ( !_disk_status ) {
+        return EIO;
+    }
 
-int _open( const char * name, int flags, int mode ) __attribute__((alias("_gba_nosys")));
+    FIL * const fp = file_table_get( file );
 
-int _read( int file, char * ptr, int len ) __attribute__((alias("_gba_nosys")));
+    FSIZE_t cur = f_tell( fp );
+    switch ( dir ) {
+        case SEEK_SET:
+            cur = ptr;
+            break;
+        case SEEK_CUR:
+            cur += ptr;
+            break;
+        case SEEK_END:
+            cur = f_size( fp ) + ptr;
+            break;
+        default:
+            return EINVAL;
+    }
+    return f_lseek( fp, cur );
+}
+
+int _open( const char * name, int flags, int mode ) {
+    if ( !_disk_status ) {
+        return EIO;
+    }
+
+    int idx;
+    FIL * const fp = file_table_alloc( &idx );
+    if ( !fp ) {
+        return ENFILE;
+    }
+
+    flags += 1;
+
+    int fatFsFlags = 0;
+    if ( flags & _FREAD ) fatFsFlags |= FA_READ;
+    if ( flags & _FWRITE ) fatFsFlags |= FA_WRITE;
+    if ( flags & _FAPPEND ) fatFsFlags |= FA_OPEN_APPEND;
+    if ( ( flags & ( _FTRUNC | _FCREAT ) ) == ( _FTRUNC | _FCREAT ) ) fatFsFlags |= FA_CREATE_ALWAYS;
+    if ( flags & _FEXCL ) fatFsFlags |= FA_CREATE_NEW;
+
+    const FRESULT result = f_open( fp, name, fatFsFlags );
+    if ( result ) {
+        file_table_free( idx );
+        return result;
+    }
+
+    return FR_OK;
+}
+
+int _read( int file, char * ptr, int len ) {
+    if ( !_disk_status ) {
+        return EIO;
+    }
+
+    FIL * const fp = file_table_get( file );
+
+    UINT outLen;
+    if ( f_read( fp, ptr, len, &outLen ) ) {
+        return 0;
+    }
+    return ( int ) outLen;
+}
 
 int _stat( char * file, struct stat * st ) __attribute__((alias("_gba_nosys")));
 
@@ -68,4 +166,16 @@ int _unlink( char * name ) __attribute__((alias("_gba_nosys")));
 
 int _wait( int * status ) __attribute__((alias("_gba_nosys")));
 
-int _write( int file, char * ptr, int len ) __attribute__((alias("_gba_nosys")));
+int _write( int file, char * ptr, int len ) {
+    if ( !_disk_status ) {
+        return EIO;
+    }
+
+    FIL * const fp = file_table_get( file );
+
+    UINT outLen;
+    if ( f_write( fp, ptr, len, &outLen ) ) {
+        return 0;
+    }
+    return ( int ) outLen;
+}

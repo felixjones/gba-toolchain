@@ -1,6 +1,12 @@
 #include "diskio.h"
 
-disk_io_tab_t _disk_io_tab;
+#include "fatfs/source/ff.h"
+
+#define SECTION_EWRAM_DATA __attribute__((section(".ewram.data")))
+
+extern unsigned int _disk_status;
+
+disk_io_tab_t _disk_io_tab SECTION_EWRAM_DATA;
 
 dstatus_type disk_initialize( pdrv_type pdrv ) {
     return _disk_io_tab.initialize( pdrv );
@@ -22,7 +28,7 @@ dresult_type disk_ioctl( pdrv_type pdrv, cmd_type cmd, void * buff ) {
     return _disk_io_tab.ioctl( pdrv, cmd, buff );
 }
 
-time_type get_fattime() {
+DWORD get_fattime() {
     return _disk_io_tab.fattime();
 }
 
@@ -59,6 +65,8 @@ static void __attribute__((naked)) disk_overlay_set( const void * source, void *
         :: [Swi]"i"( 0xb ) : "r0", "r1", "r2", "r3"
     );
 }
+
+static FATFS fat_file_system SECTION_EWRAM_DATA;
 
 void _disk_io_init( int type ) {
     switch ( type ) {
@@ -98,4 +106,11 @@ void _disk_io_init( int type ) {
             disk_overlay_set( &__load_start_disk2, &__disk_overlay, ( int ) __disk2_cpuset_copy );
             break;
     }
+
+    FRESULT mountResult = f_mount( &fat_file_system, "", 1 );
+    if ( mountResult == FR_NO_FILESYSTEM && type == 4 ) {
+        char workingArea[512];
+        mountResult = f_mkfs( "", 0, workingArea, sizeof( workingArea ) );
+    }
+    _disk_status = ( mountResult == FR_OK );
 }
