@@ -1,16 +1,26 @@
 #include "everdrive.h"
 
+//typedef struct {
+//    uint16_t cart_cfg;
+//    uint8_t sd_cfg;
+//    uint8_t card_type;
+//} config_type;
+//
+//static config_type everdrive_cfg SECTION_EWRAM_DATA;
+//static uint32_t disk_addr SECTION_EWRAM_DATA;
+//static uint8_t sd_resp_buff[18] SECTION_EWRAM_DATA;
+
 #define SECTION_EWRAM_DATA __attribute__((section(".ewram.data")))
 
-typedef struct {
+typedef struct everdrive_context {
     uint16_t cart_cfg;
     uint8_t sd_cfg;
     uint8_t card_type;
-} config_type;
+    uint32_t disk_addr;
+    uint8_t sd_resp_buff[18];
+} everdrive_context;
 
-static config_type everdrive_cfg SECTION_EWRAM_DATA;
-static uint32_t disk_addr SECTION_EWRAM_DATA;
-static uint8_t sd_resp_buff[18] SECTION_EWRAM_DATA;
+static everdrive_context * _ctx SECTION_EWRAM_DATA = NULL;
 
 #define WAIT    ( 2048 )
 
@@ -51,19 +61,22 @@ static void _everdrive_sd_mode( uint8_t mode );
 static void _everdrive_sd_dat_wr( uint8_t data );
 static uint8_t _everdrive_cmd_sd( uint8_t cmd, uint32_t arg );
 
+void * _sbrk( intptr_t increment );
+
 int _everdrive_init() {
     // _sbrk the everdrive context
+    _ctx = _sbrk( sizeof( everdrive_context ) );
 
     // BIOS init
     REG_KEY = EVERDRIVE_KEY;
-    REG_CFG = everdrive_cfg.cart_cfg = CFG_DEFAULT | CFG_EVERDRIVE_UNLOCK;
-    REG_SD_CFG = everdrive_cfg.sd_cfg = 0;
+    REG_CFG = _ctx->cart_cfg = CFG_DEFAULT | CFG_EVERDRIVE_UNLOCK;
+    REG_SD_CFG = _ctx->sd_cfg = 0;
 
     // disk init
     vu8 resp = 0;
     uint32_t wait_len = WAIT;
 
-    everdrive_cfg.card_type = 0;
+    _ctx->card_type = 0;
 
     _everdrive_sd_speed( SD_SPD_LO );
 
@@ -78,16 +91,16 @@ int _everdrive_init() {
     if ( resp != 0 && resp != DISK_ERR_CMD_TIMEOUT ) {
         return DISK_ERR_INIT + 0;
     }
-    if ( resp == 0 ) everdrive_cfg.card_type |= SD_V2;
+    if ( resp == 0 ) _ctx->card_type |= SD_V2;
 
     int i;
-    if ( everdrive_cfg.card_type == SD_V2 ) {
+    if ( _ctx->card_type == SD_V2 ) {
         for ( i = 0; i < wait_len; ++i ) {
             resp = _everdrive_cmd_sd( CMD55, 0 );
             if ( resp ) return DISK_ERR_INIT + 1;
-            if ( ( sd_resp_buff[3] & 0x1 ) != 1 ) continue;
+            if ( ( _ctx->sd_resp_buff[3] & 0x1 ) != 1 ) continue;
             resp = _everdrive_cmd_sd( CMD41, 0x40300000 );
-            if ( ( sd_resp_buff[1] & 0x80 ) == 0 ) continue;
+            if ( ( _ctx->sd_resp_buff[1] & 0x80 ) == 0 ) continue;
             break;
         }
     } else {
@@ -97,13 +110,13 @@ int _everdrive_init() {
             if ( resp ) return DISK_ERR_INIT + 2;
             resp = _everdrive_cmd_sd( CMD41, 0x40300000 );
             if ( resp ) return DISK_ERR_INIT + 3;
-        } while ( sd_resp_buff[1] < 1 && i++ < wait_len );
+        } while ( _ctx->sd_resp_buff[1] < 1 && i++ < wait_len );
     }
 
     if ( i == wait_len ) return DISK_ERR_INIT + 4;
 
-    if ( ( sd_resp_buff[1] & 0x40 ) && everdrive_cfg.card_type != 0 ) {
-        everdrive_cfg.card_type |= SD_HC;
+    if ( ( _ctx->sd_resp_buff[1] & 0x40 ) && _ctx->card_type != 0 ) {
+        _ctx->card_type |= SD_HC;
     }
 
     resp = _everdrive_cmd_sd( CMD2, 0 );
@@ -114,7 +127,7 @@ int _everdrive_init() {
 
     resp = _everdrive_cmd_sd( CMD7, 0 );
 
-    uint32_t rca = ( sd_resp_buff[1] << 24 ) | ( sd_resp_buff[2] << 16 ) | ( sd_resp_buff[3] << 8 ) | ( sd_resp_buff[4] << 0 );
+    uint32_t rca = ( _ctx->sd_resp_buff[1] << 24 ) | ( _ctx->sd_resp_buff[2] << 16 ) | ( _ctx->sd_resp_buff[3] << 8 ) | ( _ctx->sd_resp_buff[4] << 0 );
 
     resp = _everdrive_cmd_sd( CMD9, rca );
     if (resp) return DISK_ERR_INIT + 7;
@@ -130,21 +143,21 @@ int _everdrive_init() {
 
     _everdrive_sd_speed( SD_SPD_HI );
 
-    disk_addr = ~0;
+    _ctx->disk_addr = ~0;
 
     return 0;
 }
 
 static void _everdrive_sd_speed( uint8_t speed ) {
-    everdrive_cfg.sd_cfg &= ~SD_SPD_BITS;
-    everdrive_cfg.sd_cfg |= speed & SD_SPD_BITS;
-    REG_SD_CFG = everdrive_cfg.sd_cfg;
+    _ctx->sd_cfg &= ~SD_SPD_BITS;
+    _ctx->sd_cfg |= speed & SD_SPD_BITS;
+    REG_SD_CFG = _ctx->sd_cfg;
 }
 
 static void _everdrive_sd_mode( uint8_t mode ) {
-    everdrive_cfg.sd_cfg &= ~SD_MODE_BITS;
-    everdrive_cfg.sd_cfg |= mode & SD_MODE_BITS;
-    REG_SD_CFG = everdrive_cfg.sd_cfg;
+    _ctx->sd_cfg &= ~SD_MODE_BITS;
+    _ctx->sd_cfg |= mode & SD_MODE_BITS;
+    REG_SD_CFG = _ctx->sd_cfg;
 }
 
 static void _everdrive_sd_dat_wr( uint8_t data ) {
@@ -196,20 +209,20 @@ static uint8_t _everdrive_cmd_sd( uint8_t cmd, uint32_t arg ) {
 
     _everdrive_sd_mode( SD_MODE8 );
 
-    sd_resp_buff[0] = _everdrive_sd_cmd_rd();
+    _ctx->sd_resp_buff[0] = _everdrive_sd_cmd_rd();
 
     for (i = 1; i < resp_len - 1; i++) {
-        sd_resp_buff[i] = _everdrive_sd_cmd_rd();
+        _ctx->sd_resp_buff[i] = _everdrive_sd_cmd_rd();
     }
-    sd_resp_buff[i] = _everdrive_sd_cmd_val();
+    _ctx->sd_resp_buff[i] = _everdrive_sd_cmd_val();
 
     if ( resp_type != R3 ) {
         if ( resp_type == R2 ) {
-            crc = _everdrive_crc7( sd_resp_buff + 1, resp_len - 2 ) | 1;
+            crc = _everdrive_crc7( _ctx->sd_resp_buff + 1, resp_len - 2 ) | 1;
         } else {
-            crc = _everdrive_crc7( sd_resp_buff, resp_len - 1 ) | 1;
+            crc = _everdrive_crc7( _ctx->sd_resp_buff, resp_len - 1 ) | 1;
         }
-        if ( crc != sd_resp_buff[resp_len - 1] ) return DISK_ERR_CRC_ERROR;
+        if ( crc != _ctx->sd_resp_buff[resp_len - 1] ) return DISK_ERR_CRC_ERROR;
     }
 
     return 0;
@@ -267,18 +280,18 @@ static uint8_t _everdrive_sd_dma_rd( void * dst, int slen );
 
 int _everdrive_read( uintptr_t sd_addr, void * dst, size_t slen ) {
     uint8_t resp;
-    if ( sd_addr != disk_addr ) {
+    if ( sd_addr != _ctx->disk_addr ) {
         resp = _everdrive_close_rw();
         if ( resp ) return resp;
         resp = _everdrive_open_read( sd_addr );
         if ( resp ) return resp;
-        disk_addr = sd_addr;
+        _ctx->disk_addr = sd_addr;
     }
 
     resp = _everdrive_sd_dma_rd( dst, slen );
     if ( resp ) return DISK_ERR_RD2;
 
-    disk_addr += slen;
+    _ctx->disk_addr += slen;
 
     return 0;
 }
@@ -286,8 +299,8 @@ int _everdrive_read( uintptr_t sd_addr, void * dst, size_t slen ) {
 static uint8_t _everdrive_sd_dat_rd();
 
 static uint8_t _everdrive_close_rw() {
-    if ( disk_addr == ~0 ) return 0;
-    disk_addr = ~0;
+    if ( _ctx->disk_addr == ~0 ) return 0;
+    _ctx->disk_addr = ~0;
     uint8_t resp = _everdrive_cmd_sd( CMD12, 0 );
     if (resp) return DISK_ERR_CLOSE_RW1;
 
@@ -307,7 +320,7 @@ static uint8_t _everdrive_close_rw() {
 }
 
 static uint8_t _everdrive_open_read( uint32_t saddr ) {
-    if ( ( everdrive_cfg.card_type & SD_HC ) == 0 ) saddr *= 512;
+    if ( ( _ctx->card_type & SD_HC ) == 0 ) saddr *= 512;
 
     uint8_t resp = _everdrive_cmd_sd( CMD18, saddr );
     if ( resp ) return DISK_ERR_RD1;
@@ -378,8 +391,8 @@ int _everdrive_write( uintptr_t sd_addr, const void * src, size_t slen ) {
     uint8_t resp = _everdrive_close_rw();
     if ( resp ) return resp;
 
-    disk_addr = saddr;
-    if ( ( everdrive_cfg.card_type & SD_HC ) == 0 ) saddr *= 512;
+    _ctx->disk_addr = saddr;
+    if ( ( _ctx->card_type & SD_HC ) == 0 ) saddr *= 512;
 
     resp = _everdrive_cmd_sd( CMD25, saddr );
     if ( resp ) return DISK_ERR_WR1;
@@ -459,7 +472,7 @@ static const uint16_t crc_16_table[];
 
 static void _everdrive_crc16_sd_hw( uint16_t * crc_out ) {
     uint16_t crc_table[4];
-    uint8_t buff[512];
+    uint8_t * buff = _sbrk( 512 );
     _everdrive_sd_read_crc_ram( buff );
 
     for ( int i = 0; i < 4; i++ ) crc_table[i] = 0;
@@ -495,6 +508,8 @@ static void _everdrive_crc16_sd_hw( uint16_t * crc_out ) {
             crc_table[u % 4] >>= 1;
         }
     }
+
+    _sbrk( -512 );
 }
 
 static void _everdrive_sd_read_crc_ram( void * dst ) {
