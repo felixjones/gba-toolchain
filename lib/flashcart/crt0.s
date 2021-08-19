@@ -84,6 +84,8 @@ _start:
     ldr	    r2, =__data_cpuset_copy
     swi     #0xb
 
+    nop
+
     @ Detect mGBA
 .Ldetect_mgba:
     ldr     r0, =__mgba_debug_enable
@@ -255,3 +257,8 @@ _start:
     .global f_getlabel
     .global f_setlabel
     .global f_setcp
+
+    @ Prevent Dirent functions from being removed
+    .global opendir
+    .global readdir
+    .global closedir

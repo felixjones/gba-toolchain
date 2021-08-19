@@ -8,9 +8,9 @@ set(FatFsSources
     fatfs/source/ffunicode.c
 )
 
-add_library(flashcart STATIC crt0.s disk_flash.c disk_everdrive.s disk_ezflash.s diskio.c everdrive.c ezflash.c gba-syscalls.c ${FatFsSources})
+add_library(flashcart STATIC everdrive.c crt0.s disk_everdrive.c disk_flash.c disk_ezflash.s diskio.c ezflash.c gba-syscalls.c gba-dirent.c ${FatFsSources})
 set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} -mthumb -x assembler-with-cpp")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mthumb -Wall -fno-strict-aliasing -Og")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mthumb -Wall -fno-strict-aliasing -O3")
 
 message(STATUS "Activating GBA flashcart runtime")
 
@@ -31,3 +31,5 @@ string(CONCAT FLASHCART_SPECS
 
 file(COPY "${CMAKE_CURRENT_LIST_DIR}/gba.ld" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/runtime.specs" ${FLASHCART_SPECS})
+
+target_include_directories(flashcart SYSTEM PUBLIC "include/sys/")

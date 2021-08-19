@@ -16,10 +16,10 @@ char ** environ = __env;
 unsigned int _disk_status = 0;
 
 static int file_table_bits SECTION_EWRAM_DATA = 0;
-static FIL file_table[8] SECTION_EWRAM_DATA;
+static FIL file_table[4] SECTION_EWRAM_DATA;
 
 static FIL * file_table_alloc( int * idx ) {
-    for ( int ii = 0; ii < 8; ++ii ) {
+    for ( int ii = 0; ii < 4; ++ii ) {
         const int mask = ( 1 << ii );
         if ( ( file_table_bits & mask ) == 0 ) {
             file_table_bits |= mask;
@@ -73,10 +73,16 @@ static int _gba_nosys() {
 
 int _close( int file ) {
     if ( !_disk_status ) {
-        return EIO;
+        errno = EIO;
+        return -1;
     }
     FIL * const fp = file_table_free( file );
-    return f_close( fp );
+    if ( f_close( fp ) ) {
+        errno = EIO;
+        return -1;
+    }
+
+    return 0;
 }
 
 int _execve( char * name, char ** argv, char ** env ) __attribute__((alias("_gba_nosys")));
@@ -93,7 +99,8 @@ int _link( char * old, char * next ) __attribute__((alias("_gba_nosys")));
 
 int _lseek( int file, int ptr, int dir ) {
     if ( !_disk_status ) {
-        return EIO;
+        errno = EIO;
+        return -1;
     }
 
     FIL * const fp = file_table_get( file );
@@ -112,18 +119,25 @@ int _lseek( int file, int ptr, int dir ) {
         default:
             return EINVAL;
     }
-    return f_lseek( fp, cur );
+    if ( f_lseek( fp, cur ) ) {
+        errno = EIO;
+        return -1;
+    }
+
+    return ( int ) cur;
 }
 
 int _open( const char * name, int flags, int mode ) {
     if ( !_disk_status ) {
-        return EIO;
+        errno = EIO;
+        return -1;
     }
 
     int idx;
     FIL * const fp = file_table_alloc( &idx );
     if ( !fp ) {
-        return ENFILE;
+        errno = ENFILE;
+        return -1;
     }
 
     flags += 1;
@@ -138,10 +152,11 @@ int _open( const char * name, int flags, int mode ) {
     const FRESULT result = f_open( fp, name, fatFsFlags );
     if ( result ) {
         file_table_free( idx );
-        return result;
+        errno = EIO;
+        return -1;
     }
 
-    return FR_OK;
+    return idx;
 }
 
 int _read( int file, char * ptr, int len ) {

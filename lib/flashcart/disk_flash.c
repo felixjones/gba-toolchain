@@ -16,15 +16,19 @@ time_type _flash_disk_fattime() __attribute__((alias("_flash_disk_status")));
 
 dresult_type SECTION_DISK_CODE _flash_disk_ioctl( pdrv_type drv, cmd_type cmd, void * buff ) {
     switch ( cmd ) {
+#if FF_MAX_SS > FF_MIN_SS
         case cmd_get_sector_count:
             *( int * ) buff = SECTOR_COUNT;
             break;
+#endif
         case cmd_get_sector_size:
             *( int * ) buff = SECTOR_SIZE;
             break;
         case cmd_get_block_size:
             *( int * ) buff = 1;
             break;
+        default:
+            __builtin_unreachable();
     }
     return dresult_ok;
 }

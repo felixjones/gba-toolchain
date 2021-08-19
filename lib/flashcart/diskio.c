@@ -68,6 +68,33 @@ static void __attribute__((naked)) disk_overlay_set( const void * source, void *
 
 static FATFS fat_file_system SECTION_EWRAM_DATA;
 
+#define RED ( 0x001f )
+#define GRN ( 0x001f << 5 )
+#define BLU ( 0x001f << 10 )
+#define YLW ( RED | GRN )
+#define CYN ( GRN | BLU )
+#define MAG ( RED | BLU )
+static void debug_pixel( int x, int y, uint16_t c ) {
+//    *( volatile uint16_t * ) 0x04000000 = 0x0403;
+//    ( ( volatile uint16_t * ) 0x06000000 )[x+y*240] = c;
+}
+
+static void debug_plot16( int x, int y, uint16_t value ) {
+    debug_pixel( x, y, RED );
+    for ( int ii = 0; ii < 16; ++ii ) {
+        if ( value & 0x8000 ) {
+            debug_pixel( x + 1 + ii, y, 0xffff );
+        } else {
+            debug_pixel( x + 1 + ii, y, 0x0000 );
+        }
+        value <<= 1;
+    }
+    debug_pixel( x + 17, y, RED );
+}
+
+#include "../tonc/include/tonc.h"
+#include "../posprintf/posprintf.h"
+
 void _disk_io_init( int type ) {
     switch ( type ) {
         default:
@@ -94,7 +121,6 @@ void _disk_io_init( int type ) {
             _disk_io_tab.write = _everdrive_disk_write;
             _disk_io_tab.ioctl = _everdrive_disk_ioctl;
             _disk_io_tab.fattime = _everdrive_disk_fattime;
-            disk_overlay_set( &__load_start_disk1, &__disk_overlay, ( int ) __disk1_cpuset_copy );
             break;
         case 6: // EZFlash
             _disk_io_tab.status = _ezflash_disk_status;
@@ -103,7 +129,7 @@ void _disk_io_init( int type ) {
             _disk_io_tab.write = _ezflash_disk_write;
             _disk_io_tab.ioctl = _ezflash_disk_ioctl;
             _disk_io_tab.fattime = _ezflash_disk_fattime;
-            disk_overlay_set( &__load_start_disk2, &__disk_overlay, ( int ) __disk2_cpuset_copy );
+            disk_overlay_set( &__load_start_disk1, &__disk_overlay, ( int ) __disk1_cpuset_copy );
             break;
     }
 
