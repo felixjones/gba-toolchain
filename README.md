@@ -37,8 +37,10 @@ The `arm-gba-toolchain.cmake` script will attempt to download the following depe
 |agbabi|[agbabi GitHub master](https://github.com/felixjones/agbabi)|gba-toolchain/lib/agbabi|Optimized implementations for common GBA functions|
 |posprintf|[posprintf developer website](http://danposluns.com/danposluns/gbadev/posprintf/index.html)|gba-toolchain/lib/posprintf|Partial implementation of sprintf for the GBA|
 |nedclib*|[nedclib GitHub master](https://github.com/Lymia/nedclib)|gba-toolchain/tools/nedclib|e-reader dot code generator|
+|FatFs**|[FatFs website](http://elm-chan.org/fsw/ff/00index_e.html)|gba-toolchain/lib/flashcart/fatfs|FAT16, FAT32, exFAT file system library|
 
 \* requires a host compiler, such as Visual Studio's CL.exe, GCC or Clang.
+\** available with the libflashcart runtime for accessing SD card file systems.
 
 # Example CMake
 
