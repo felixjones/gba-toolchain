@@ -8,7 +8,7 @@ Tutorials for getting started can be found [on the project Wiki](https://github.
 
 ## CMake functions
 
-A list of gba-toolchain CMake functions can be found [on the project Wiki](https://github.com/felixjones/gba-toolchain/wiki/CMake-Functions-(2.0.0)).
+A list of gba-toolchain CMake functions can be found [on the project Wiki](https://github.com/felixjones/gba-toolchain/wiki/CMake-Functions).
 
 ## Samples
 
