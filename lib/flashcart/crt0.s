@@ -262,3 +262,6 @@ _start:
     .global opendir
     .global readdir
     .global closedir
+
+    @ Prevent Time functions from being removed
+    .global _gettimeofday

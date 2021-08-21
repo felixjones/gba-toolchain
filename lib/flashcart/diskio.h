@@ -43,7 +43,6 @@ dstatus_type _flash_disk_initialize( pdrv_type );
 dresult_type _flash_disk_read( pdrv_type pdrv, byte_type * buff, uint_type sector, uint_type count );
 dresult_type _flash_disk_write( pdrv_type pdrv, const byte_type * buff, uint_type sector, uint_type count );
 dresult_type _flash_disk_ioctl( pdrv_type pdrv, cmd_type cmd, void * buff );
-time_type _flash_disk_fattime();
 extern int __load_start_disk0;
 extern int __disk0_cpuset_copy[];
 
@@ -52,7 +51,6 @@ dstatus_type _everdrive_disk_initialize( pdrv_type );
 dresult_type _everdrive_disk_read( pdrv_type pdrv, byte_type * buff, uint_type sector, uint_type count );
 dresult_type _everdrive_disk_write( pdrv_type pdrv, const byte_type * buff, uint_type sector, uint_type count );
 dresult_type _everdrive_disk_ioctl( pdrv_type pdrv, cmd_type cmd, void * buff );
-time_type _everdrive_disk_fattime();
 extern int __load_start_disk1;
 extern int __disk1_cpuset_copy[];
 
@@ -61,7 +59,6 @@ dstatus_type _ezflash_disk_initialize( pdrv_type );
 dresult_type _ezflash_disk_read( pdrv_type pdrv, byte_type * buff, uint_type sector, uint_type count );
 dresult_type _ezflash_disk_write( pdrv_type pdrv, const byte_type * buff, uint_type sector, uint_type count );
 dresult_type _ezflash_disk_ioctl( pdrv_type pdrv, cmd_type cmd, void * buff );
-time_type _ezflash_disk_fattime();
 extern int __load_start_disk2;
 extern int __disk2_cpuset_copy[];
 
