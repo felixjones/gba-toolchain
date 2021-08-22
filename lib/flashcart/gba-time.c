@@ -7,6 +7,7 @@
 extern int errno;
 
 #define bcd_decode( x ) ( ( ( x ) & 0xfu ) + ( ( ( x ) >> 4u ) * 10u ) )
+#define bcd_encode( x ) ( ( ( x ) % 10 ) + ( ( ( x ) / 10 ) << 4 ) )
 
 #define REG_IME ( *( volatile unsigned short * ) 0x04000208 )
 
@@ -38,5 +39,37 @@ int _gettimeofday( struct timeval * tv, void * tz ) {
 
     tv->tv_usec = 0;
     tv->tv_sec = mktime( &time );
+    return 0;
+}
+
+int settimeofday( const struct timeval * tv, const struct timezone * tz ) {
+    extern int _dsk_rtc;
+
+    if ( _dsk_rtc ) {
+        errno = EPERM;
+        return -1;
+    }
+
+    struct tm * gmtime( const time_t * timer );
+    const struct tm * tmptr = gmtime( &tv->tv_sec );
+
+    const int year = bcd_encode( tmptr->tm_year - 100 );
+    const int mon = bcd_encode( tmptr->tm_mon ) + 1;
+    const int mday = bcd_encode( tmptr->tm_mday );
+
+    const int wday = bcd_encode( tmptr->tm_wday );
+
+    const int hour = bcd_encode( tmptr->tm_hour );
+    const int min = bcd_encode( tmptr->tm_min );
+    const int sec = bcd_encode( tmptr->tm_sec );
+
+    const rtc_tm date = mday | ( mon << 8 ) | ( year << 16 );
+    const int time = sec | ( min << 8 ) | ( hour << 16 ) | ( wday << 24 );
+
+    const int ime = REG_IME;
+    REG_IME = 0;
+    __rtc_set_datetime( ( date << 32 ) | time );
+    REG_IME = ime;
+
     return 0;
 }
