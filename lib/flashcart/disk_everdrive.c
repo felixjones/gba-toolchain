@@ -2,6 +2,8 @@
 
 #include <stddef.h>
 
+#define SECTOR_SIZE ( 512 )
+
 dstatus_type _everdrive_disk_status( pdrv_type drv ) {
     return dresult_ok;
 }

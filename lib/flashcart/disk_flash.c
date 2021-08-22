@@ -12,8 +12,6 @@ dstatus_type SECTION_ROM_CODE _flash_disk_status( pdrv_type drv ) {
     return dresult_ok;
 }
 
-time_type _flash_disk_fattime() __attribute__((alias("_flash_disk_status")));
-
 dresult_type SECTION_DISK_CODE _flash_disk_ioctl( pdrv_type drv, cmd_type cmd, void * buff ) {
     switch ( cmd ) {
 #if FF_MAX_SS > FF_MIN_SS

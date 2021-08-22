@@ -1,7 +1,6 @@
 #include "rtc.h"
 
 typedef unsigned short u16;
-
 typedef volatile u16 vu16;
 
 #define GPIO_PORT_DATA        ( *( vu16 * ) 0x080000c4 )
