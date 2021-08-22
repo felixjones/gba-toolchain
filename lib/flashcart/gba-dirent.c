@@ -1,6 +1,12 @@
 #include <stdlib.h>
 
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <errno.h>
 #include "fatfs/source/ff.h"
+
+#undef errno
+extern int errno
 
 #define SECTION_EWRAM_DATA __attribute__((section(".ewram.data")))
 
@@ -75,4 +81,64 @@ struct dirent * readdir( DIR * dirp ) {
     }
 
     return ( struct dirent * ) filinfo;
+}
+
+int	mkdir( const char * path, mode_t mode ) {
+    if ( !_disk_status ) {
+        errno = EIO;
+        return -1;
+    }
+
+    FRESULT result = f_mkdir( path );
+    if ( result != FR_OK ) {
+        switch ( result ) {
+            default:
+                errno = EIO;
+                break;
+            case FR_NO_PATH:
+            case FR_INVALID_NAME:
+            case FR_INVALID_DRIVE:
+                errno = ENOENT;
+                break;
+            case FR_DENIED:
+            case FR_WRITE_PROTECTED:
+                errno = EACCES;
+                break;
+            case FR_EXIST:
+                errno = EEXIST;
+                break;
+            case FR_NOT_ENOUGH_CORE:
+                errno = ENOSPC;
+                break;
+        }
+        return -1;
+    }
+
+    if ( mode ) {
+        f_chmod( path, mode, 0x37 );
+    }
+    return 0;
+}
+
+int utimes( const char * filename, const struct timeval times[2] ) {
+    if ( !_disk_status ) {
+        return -1;
+    }
+
+    FILINFO finfo;
+    if ( !times ) {
+        const DWORD fatTime = get_fattime();
+        finfo.fdate = fatTime >> 16;
+        finfo.ftime = fatTime;
+    } else {
+        const struct tm * tmptr = gmtime( &times[1].tv_sec );
+
+        finfo.fdate = ( ( tmptr->tm_year - 80 ) << 9 ) | ( ( tmptr->tm_mon + 1 ) << 5 ) | tmptr->tm_mday;
+        finfo.ftime = ( ( tmptr->tm_hour + 1 ) << 11 ) | ( tmptr->tm_min << 5 ) | ( tmptr->tm_sec >> 1 );
+    }
+
+    if ( f_utime( filename, &finfo ) != FR_OK ) {
+        return -1;
+    }
+    return 0;
 }
