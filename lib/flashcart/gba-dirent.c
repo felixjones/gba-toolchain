@@ -6,7 +6,7 @@
 #include "fatfs/source/ff.h"
 
 #undef errno
-extern int errno
+extern int errno;
 
 #define SECTION_EWRAM_DATA __attribute__((section(".ewram.data")))
 

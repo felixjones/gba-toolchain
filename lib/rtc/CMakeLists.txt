@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 
-project(rtc ASM)
+project(rtc C)
 
 add_library(rtc STATIC rtc.c)
 

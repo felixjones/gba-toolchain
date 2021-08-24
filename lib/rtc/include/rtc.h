@@ -1,5 +1,5 @@
-#ifndef _RTC_RTC_H_
-#define _RTC_RTC_H_
+#ifndef LIBRTC_RTC_H
+#define LIBRTC_RTC_H
 
 #define RTC_EPOWER  ( 1 )
 #define RTC_E12HOUR ( 2 )
@@ -29,4 +29,4 @@ rtc_tm __rtc_get_datetime();
 void __rtc_set_time( rtc_time time );
 void __rtc_set_datetime( rtc_tm datetime );
 
-#endif // define _RTC_RTC_H_
+#endif // define LIBRTC_RTC_H
