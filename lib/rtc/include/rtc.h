@@ -1,6 +1,10 @@
 #ifndef LIBRTC_RTC_H
 #define LIBRTC_RTC_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define RTC_EPOWER  ( 1 )
 #define RTC_E12HOUR ( 2 )
 #define RTC_EYEAR   ( 3 )
@@ -28,5 +32,9 @@ rtc_time __rtc_get_time();
 rtc_tm __rtc_get_datetime();
 void __rtc_set_time( rtc_time time );
 void __rtc_set_datetime( rtc_tm datetime );
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif // define LIBRTC_RTC_H

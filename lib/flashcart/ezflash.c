@@ -36,7 +36,7 @@ static inline void EZFLASH_SECTION_BOOTCHECK ezflash_rompage_asciiz( char * cons
     ascii[3] = 0;
 }
 
-int EZFLASH_SECTION_BOOTCHECK _ezflash_bootcheck( char currentPage[4], int * const isOmega ) {
+int EZFLASH_SECTION_BOOTCHECK _ezflash_bootcheck( char currentPage[4] ) {
     int romHeader[8];
 
     for ( int ii = 0; ii < 8; ++ii ) {
@@ -51,7 +51,7 @@ int EZFLASH_SECTION_BOOTCHECK _ezflash_bootcheck( char currentPage[4], int * con
     }
 
     // Detect EZ Flash Omega
-    *isOmega = ( rom_header[0] == 0 );
+    const int isOmega = ( rom_header[0] == 0 );
 
     // Find our ROM page
     _ezflash_rom_page = 0x200 + 1;
@@ -63,5 +63,5 @@ int EZFLASH_SECTION_BOOTCHECK _ezflash_bootcheck( char currentPage[4], int * con
         }
     }
 
-    return 1;
+    return 1 + isOmega;
 }

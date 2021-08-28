@@ -71,6 +71,10 @@ static dresult_type _none_disk_ioctl( pdrv_type pdrv, cmd_type cmd, void * buff 
     return dresult_ok;
 }
 
+static time_type _none_fattime() {
+    return 0;
+}
+
 #define bcd_decode( x ) ( ( ( x ) & 0xfu ) + ( ( ( x ) >> 4u ) * 10u ) )
 
 time_type _rtc_disk_fattime() {
@@ -140,14 +144,23 @@ void _disk_io_init( int type ) {
             _disk_io_tab.ioctl = _everdrive_disk_ioctl;
             _disk_io_tab.fattime = _rtc_disk_fattime;
             break;
-        case 6: // EZFlash
-            _disk_io_tab.status = _ezflash_disk_status;
-            _disk_io_tab.initialize = _ezflash_disk_initialize;
-            _disk_io_tab.read = _ezflash_disk_read;
-            _disk_io_tab.write = _ezflash_disk_write;
-            _disk_io_tab.ioctl = _ezflash_disk_ioctl;
+        case 6: // EZFlash IV
+            _disk_io_tab.status = _ezflash_iv_disk_status;
+            _disk_io_tab.initialize = _ezflash_iv_disk_initialize;
+            _disk_io_tab.read = _ezflash_iv_disk_read;
+            _disk_io_tab.write = _ezflash_iv_disk_write;
+            _disk_io_tab.ioctl = _ezflash_iv_disk_ioctl;
+            _disk_io_tab.fattime = _none_fattime;
+//            disk_overlay_set( &__load_start_disk1, &__disk_overlay, ( int ) __disk1_cpuset_copy );
+            break;
+        case 7: // EZFlash Omega
+            _disk_io_tab.status = _ezflash_omega_disk_status;
+            _disk_io_tab.initialize = _ezflash_omega_disk_initialize;
+            _disk_io_tab.read = _ezflash_omega_disk_read;
+            _disk_io_tab.write = _ezflash_omega_disk_write;
+            _disk_io_tab.ioctl = _ezflash_omega_disk_ioctl;
             _disk_io_tab.fattime = _rtc_disk_fattime;
-            disk_overlay_set( &__load_start_disk1, &__disk_overlay, ( int ) __disk1_cpuset_copy );
+            disk_overlay_set( &__load_start_disk2, &__disk_overlay, ( int ) __disk2_cpuset_copy );
             break;
     }
 

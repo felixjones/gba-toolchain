@@ -5,7 +5,7 @@ typedef volatile uint32_t vu32;
 
 extern int _ezflash_rom_page;
 
-#define SECTION_DISK_CODE __attribute__((section(".disk1.text"), target("arm"), unused))
+#define SECTION_DISK_CODE __attribute__((section(".disk2.text"), target("arm"), unused))
 
 #define SECTOR_SIZE     ( 512 )
 
@@ -15,24 +15,24 @@ extern int _ezflash_rom_page;
 
 #define SD_RESPONSE ( *( ( vu16 * ) 0x9E00000 ) )
 
-dstatus_type _ezflash_disk_status( pdrv_type drv ) {
+dstatus_type _ezflash_omega_disk_status( pdrv_type pdrv ) {
     return dresult_ok;
 }
 
-dresult_type _ezflash_disk_ioctl( pdrv_type drv, cmd_type cmd, void * buff ) {
+dresult_type _ezflash_omega_disk_ioctl( pdrv_type pdrv, cmd_type cmd, void * buff ) {
     switch ( cmd ) {
 #if FF_MAX_SS > FF_MIN_SS
         case cmd_get_sector_size:
             *( int * ) buff = SECTOR_SIZE;
             break;
 #endif
-            default:
-                __builtin_unreachable();
+        default:
+            __builtin_unreachable();
     }
     return dresult_ok;
 }
 
-dstatus_type _ezflash_disk_initialize( pdrv_type drv ) {
+dstatus_type _ezflash_omega_disk_initialize( pdrv_type pdrv ) {
     return dresult_ok;
 }
 
@@ -69,13 +69,13 @@ static inline int SECTION_DISK_CODE ezflash_await_sd_response() {
     return 1;
 }
 
-void SECTION_DISK_CODE __attribute__((naked)) ezflash_delay( int loops ) {
-    __asm__(
+static void SECTION_DISK_CODE __attribute__((naked)) ezflash_delay( int loops ) {
+    __asm__ (
         ".Lloop:\n\t"
-        "cmp\tr0, #0\n\t"
-        "bxeq\tlr\n\t"
         "sub\tr0, r0, #1\n\t"
-        "b\t.Lloop"
+        "bne\t.Lloop\n\t"
+        "bx\tlr"
+        ::: "r0"
     );
 }
 
@@ -84,7 +84,7 @@ void SECTION_DISK_CODE __attribute__((naked)) ezflash_delay( int loops ) {
 #define DMA_LEN *( ( vu16 * ) 0x40000DC )
 #define DMA_CTR *( ( vu16 * ) 0x40000DE )
 
-dresult_type SECTION_DISK_CODE _ezflash_disk_read( pdrv_type drv, byte_type * buff, uint_type sector, uint_type count ) {
+dresult_type SECTION_DISK_CODE _ezflash_omega_disk_read( pdrv_type pdrv, byte_type * buff, uint_type sector, uint_type count ) {
     ezflash_set_rompage( 0x8000 );
     ezflash_sd_cmd( SD_CMD_ENABLE );
 
@@ -129,7 +129,7 @@ dresult_type SECTION_DISK_CODE _ezflash_disk_read( pdrv_type drv, byte_type * bu
     return dresult_ok;
 }
 
-dresult_type SECTION_DISK_CODE _ezflash_disk_write( pdrv_type drv, const byte_type * buff, uint_type sector, uint_type count ) {
+dresult_type SECTION_DISK_CODE _ezflash_omega_disk_write( pdrv_type pdrv, const byte_type * buff, uint_type sector, uint_type count ) {
     ezflash_set_rompage( 0x8000 );
     ezflash_sd_cmd( SD_CMD_READ );
 

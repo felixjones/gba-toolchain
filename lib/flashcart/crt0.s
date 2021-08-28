@@ -140,12 +140,13 @@ _start:
     cmp     r0, #0
     beq 	.Ldetect_none
 
-    mov     r3, #6
-    cmp     r1, #1
+    cmp     r0, #2
     beq     .Lezflash_omega
+    mov     r3, #6
     ldr     r1, .Lezflash_string_ptr
     b       .Lezflash_args
 .Lezflash_omega:
+    mov     r3, #7
     ldr     r1, .Lezflashomega_string_ptr
 
 .Lezflash_args:

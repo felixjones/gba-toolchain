@@ -8,7 +8,7 @@ set(FatFsSources
     fatfs/source/ffunicode.c
 )
 
-add_library(flashcart STATIC crt0.s gba-syscalls.c gba-dirent.c gba-time.c diskio.c disk_flash.c disk_everdrive.c disk_ezflash.c everdrive.c ezflash.c ${FatFsSources})
+add_library(flashcart STATIC crt0.s gba-syscalls.c gba-dirent.c gba-time.c diskio.c disk_flash.c disk_everdrive.c disk_ezflash_iv.c disk_ezflash_omega.c everdrive.c ezflash.c ${FatFsSources})
 set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} -mthumb -x assembler-with-cpp")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mthumb -Wall -fno-strict-aliasing -O3")
 
