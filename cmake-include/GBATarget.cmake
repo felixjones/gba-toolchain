@@ -209,7 +209,11 @@ endfunction()
 function(gba_add_gbfs_target target)
     cmake_minimum_required(VERSION 3.0)
 
-    list(TRANSFORM ARGN PREPEND "${CMAKE_CURRENT_SOURCE_DIR}/")
+    foreach(file ${ARGN})
+        get_filename_component(relFilePath "${file}" REALPATH BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+        list(APPEND fileList "${relFilePath}")
+    endforeach()
+    set(ARGN ${fileList})
 
     add_custom_target(${target}
         COMMAND "${GBA_TOOLCHAIN_GBFS}" "${target}" ${ARGN}
@@ -326,4 +330,12 @@ function(gba_target_archive_dotcode target input output region)
             "${OUTPUT_FILE_WLE}-07.bmp" "${OUTPUT_FILE_WLE}-08.bmp" "${OUTPUT_FILE_WLE}-09.bmp"
             "${OUTPUT_FILE_WLE}-10.bmp" "${OUTPUT_FILE_WLE}-11.bmp" "${OUTPUT_FILE_WLE}-12.bmp"
     )
+endfunction()
+
+function(gba_target_link_comm target)
+    cmake_minimum_required(VERSION 3.0)
+
+    add_subdirectory("${GBA_TOOLCHAIN_LIB_COMM_DIR}" "./comm")
+    target_link_libraries(${target} PRIVATE comm)
+    target_include_directories(${target} PUBLIC "${GBA_TOOLCHAIN_LIB_COMM_DIR}/include")
 endfunction()

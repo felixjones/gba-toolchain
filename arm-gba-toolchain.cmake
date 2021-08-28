@@ -5,6 +5,7 @@ message(STATUS "Using toolchain: \"${TOOLCHAIN_FILE}\"")
 
 include("${CMAKE_CURRENT_LIST_DIR}/cmake-include/DownloadDependencies.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/cmake-include/FindCompilers.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/cmake-include/GBAExternalProject.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/cmake-include/GBATarget.cmake")
 
 set(GBA_TOOLCHAIN ON)
@@ -98,3 +99,4 @@ set(GBA_TOOLCHAIN_LIB_MAXMOD_DIR "${CMAKE_CURRENT_LIST_DIR}/lib/maxmod")
 set(GBA_TOOLCHAIN_LIB_GBFS_DIR "${CMAKE_CURRENT_LIST_DIR}/lib/gbfs")
 set(GBA_TOOLCHAIN_LIB_POSPRINTF_DIR "${CMAKE_CURRENT_LIST_DIR}/lib/posprintf")
 set(GBA_TOOLCHAIN_LIB_RTC_DIR "${CMAKE_CURRENT_LIST_DIR}/lib/rtc")
+set(GBA_TOOLCHAIN_LIB_COMM_DIR "${CMAKE_CURRENT_LIST_DIR}/lib/comm")
