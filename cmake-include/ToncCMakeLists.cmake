@@ -11,5 +11,10 @@ list(REMOVE_ITEM TONC_SRC "${TTE_IOHOOK}")
 add_library(tonc STATIC ${TONC_SRC})
 target_include_directories(tonc SYSTEM PUBLIC "include/")
 
+if(GBA_TOOLCHAIN)
+    gba_clang_minsizerel(CMAKE_C_FLAGS_MINSIZEREL)
+    set(CMAKE_BUILD_TYPE MinSizeRel)
+endif()
+
 set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} -mthumb -x assembler-with-cpp")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mthumb -Wall -fno-strict-aliasing -Wno-char-subscripts")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mthumb -Wall -Wextra -Wno-unused-parameter -Wno-char-subscripts -Wno-sign-compare")

@@ -4,8 +4,10 @@ project(rom C ASM)
 
 add_library(rom STATIC crt0.s gba-syscalls.c)
 
-gba_clang_minsizerel(CMAKE_C_FLAGS_MINSIZEREL)
-set(CMAKE_BUILD_TYPE MinSizeRel)
+if(GBA_TOOLCHAIN)
+    gba_clang_minsizerel(CMAKE_C_FLAGS_MINSIZEREL)
+    set(CMAKE_BUILD_TYPE MinSizeRel)
+endif()
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mthumb -Wall -Wextra -Wno-unused-parameter")
 
