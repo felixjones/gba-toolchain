@@ -17,4 +17,4 @@ if(GBA_TOOLCHAIN)
 endif()
 
 set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} -mthumb -x assembler-with-cpp")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mthumb -Wall -Wextra -Wno-unused-parameter -Wno-char-subscripts -Wno-sign-compare")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mthumb -Wall -Wextra -Wno-unused-parameter -Wno-char-subscripts -Wno-sign-compare -Wno-implicit-fallthrough")

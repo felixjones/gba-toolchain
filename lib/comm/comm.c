@@ -67,7 +67,11 @@ static int __attribute__((naked)) multi_boot( const struct multi_boot_param * pa
 static void __attribute__((naked)) comm_wait( int loops ) {
     __asm__ volatile (
         ".Lloop:\n\t"
+#ifdef __clang__
         "subs\tr0, r0, #1\n\t"
+#else
+        "sub\tr0, r0, #1\n\t"
+#endif
         "bne\t.Lloop\n\t"
         "bx\tlr"
         ::: "r0"
