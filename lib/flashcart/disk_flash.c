@@ -77,7 +77,7 @@ dresult_type SECTION_DISK_CODE _flash_disk_read( pdrv_type drv, byte_type * buff
 
         const uint_type len = ( numBytes > BANK_SIZE ? BANK_SIZE : numBytes );
         numBytes -= BANK_SIZE;
-        for ( int ii = 0; ii < len; ++ii ) {
+        for ( uint_type ii = 0; ii < len; ++ii ) {
             volatile byte_type * address = ( volatile byte_type * ) ( baseAddress + ii );
 
             *buff++ = *address;
@@ -104,7 +104,7 @@ dresult_type SECTION_DISK_CODE _flash_disk_write( pdrv_type drv, const byte_type
 
         const uint_type len = ( numBytes > BANK_SIZE ? BANK_SIZE : numBytes );
         numBytes -= BANK_SIZE;
-        for ( int ii = 0; ii < len; ++ii ) {
+        for ( uint_type ii = 0; ii < len; ++ii ) {
             const byte_type value = *buff;
             volatile byte_type * address = ( volatile byte_type * ) ( baseAddress + ii );
 

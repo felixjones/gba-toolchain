@@ -41,12 +41,12 @@ function(gba_external_project_add name)
     list(APPEND gba_external_project_add_CMAKE_CACHE_ARGS -DCMAKE_TOOLCHAIN_FILE:PATH=${ToolchainFile})
 
     ExternalProject_Add(${name}
-            SOURCE_DIR ${gba_external_project_add_SOURCE_DIR}
-            BINARY_DIR ${gba_external_project_add_BINARY_DIR}
-            INSTALL_COMMAND ${gba_external_project_add_INSTALL_COMMAND}
-            CMAKE_COMMAND ${gba_external_project_add_CMAKE_COMMAND}
-            CMAKE_ARGS ${gba_external_project_add_CMAKE_ARGS}
-            CMAKE_CACHE_ARGS ${gba_external_project_add_CMAKE_CACHE_ARGS}
-            CMAKE_CACHE_DEFAULT_ARGS ${gba_external_project_add_CMAKE_CACHE_DEFAULT_ARGS}
-            )
+        SOURCE_DIR ${gba_external_project_add_SOURCE_DIR}
+        BINARY_DIR ${gba_external_project_add_BINARY_DIR}
+        INSTALL_COMMAND ${gba_external_project_add_INSTALL_COMMAND}
+        CMAKE_COMMAND ${gba_external_project_add_CMAKE_COMMAND}
+        CMAKE_ARGS ${gba_external_project_add_CMAKE_ARGS}
+        CMAKE_CACHE_ARGS ${gba_external_project_add_CMAKE_CACHE_ARGS}
+        CMAKE_CACHE_DEFAULT_ARGS ${gba_external_project_add_CMAKE_CACHE_DEFAULT_ARGS}
+    )
 endfunction()

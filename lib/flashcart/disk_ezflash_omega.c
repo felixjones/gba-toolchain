@@ -88,8 +88,8 @@ dresult_type SECTION_DISK_CODE _ezflash_omega_disk_read( pdrv_type pdrv, byte_ty
     ezflash_set_rompage( 0x8000 );
     ezflash_sd_cmd( SD_CMD_ENABLE );
 
-    for ( int ii = 0; ii < count; ii += 4 ) {
-        const int blocks = ( count - ii ) >= 4 ? 4 : ( int ) ( count - ii );
+    for ( uint_type ii = 0; ii < count; ii += 4 ) {
+        const uint_type blocks = ( count - ii ) >= 4 ? 4 : ( count - ii );
         int retries = 2;
 
         while ( 1 ) {
@@ -133,8 +133,8 @@ dresult_type SECTION_DISK_CODE _ezflash_omega_disk_write( pdrv_type pdrv, const 
     ezflash_set_rompage( 0x8000 );
     ezflash_sd_cmd( SD_CMD_READ );
 
-    for ( int ii = 0; ii < count; ii += 4 ) {
-        const int blocks = ( count - ii ) >= 4 ? 4 : ( int ) ( count - ii );
+    for ( uint_type ii = 0; ii < count; ii += 4 ) {
+        const uint_type blocks = ( count - ii ) >= 4 ? 4 : ( count - ii );
 
         DMA_SRC = ( uint32_t ) buff;
         DMA_DST = 0x9E00000;

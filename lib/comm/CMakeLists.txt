@@ -4,6 +4,9 @@ project(comm C)
 
 add_library(comm STATIC comm.c)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mthumb -Wall -fno-strict-aliasing -Og")
+gba_clang_minsizerel(CMAKE_C_FLAGS_MINSIZEREL)
+set(CMAKE_BUILD_TYPE MinSizeRel)
+
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mthumb -Wall -Wextra -Wno-unused-parameter")
 
 target_include_directories(comm SYSTEM PUBLIC "include/")

@@ -236,7 +236,7 @@ static int _everdrive_cmd_sd( uint8_t cmd, uint32_t arg ) {
 
     _ctx->sd_resp_buff[0] = _everdrive_sd_cmd_rd();
 
-    int ii;
+    size_t ii;
     for ( ii = 1; ii < resp_len - 1; ++ii) {
         _ctx->sd_resp_buff[ii] = _everdrive_sd_cmd_rd();
     }
@@ -335,7 +335,7 @@ int _everdrive_read( uintptr_t sd_addr, void * dst, size_t slen ) {
 static uint8_t _everdrive_sd_dat_rd();
 
 static int _everdrive_close_rw() {
-    if ( _ctx->disk_addr == ~0 ) {
+    if ( _ctx->disk_addr == 0xffffffff ) {
         return 0;
     }
     _ctx->disk_addr = ~0;

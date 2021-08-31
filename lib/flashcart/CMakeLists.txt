@@ -9,8 +9,12 @@ set(FatFsSources
 )
 
 add_library(flashcart STATIC crt0.s gba-syscalls.c gba-dirent.c gba-time.c diskio.c disk_flash.c disk_everdrive.c disk_ezflash_iv.c disk_ezflash_omega.c everdrive.c ezflash.c ${FatFsSources})
+
+gba_clang_minsizerel(CMAKE_C_FLAGS_MINSIZEREL)
+set(CMAKE_BUILD_TYPE MinSizeRel)
+
 set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} -mthumb -x assembler-with-cpp")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mthumb -Wall -fno-strict-aliasing -O3")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mthumb -Wall -Wextra -Wno-unused-parameter")
 
 message(STATUS "Activating GBA flashcart runtime")
 
