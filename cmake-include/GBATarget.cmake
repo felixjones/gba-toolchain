@@ -3,6 +3,14 @@ include(ExternalProject OPTIONAL RESULT_VARIABLE GBA_TOOLCHAIN_HAS_MODULE_EXTERN
 function(gba_target_link_runtime target library)
     cmake_minimum_required(VERSION 3.0)
 
+    set(keywords SAVE_TYPE BUILD_TYPE)
+    cmake_parse_arguments(gba_target_link_runtime "" "${keywords}" "" "${ARGN}")
+    if (NOT DEFINED gba_target_link_runtime_BUILD_TYPE)
+        set(gba_target_link_runtime_BUILD_TYPE MinSizeRel)
+    endif()
+    set(CMAKE_BUILD_TYPE_COPY ${CMAKE_BUILD_TYPE})
+    set(CMAKE_BUILD_TYPE ${gba_target_link_runtime_BUILD_TYPE})
+
     if("${library}" STREQUAL "rom")
         add_subdirectory("${GBA_TOOLCHAIN_LIB_ROM_DIR}" "./${library}")
     elseif("${library}" STREQUAL "multiboot")
@@ -21,8 +29,8 @@ function(gba_target_link_runtime target library)
         message(FATAL_ERROR "gba_target_link_runtime unknown library \"${library}\"")
     endif()
 
-    if(ARGN)
-        list(GET ARGN 0 savetype)
+    if (DEFINED gba_target_link_runtime_SAVE_TYPE)
+        set(savetype ${gba_target_link_runtime_SAVE_TYPE})
         if(${savetype} MATCHES "^EEPROM_V...")
             set(saveid 1)
         elseif(${savetype} MATCHES "^SRAM_V...")
@@ -46,6 +54,8 @@ function(gba_target_link_runtime target library)
 
     add_dependencies(${target} ${library})
     target_link_libraries(${target} PRIVATE "-specs=${library}/runtime.specs")
+
+    set(CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE_COPY} PARENT_SCOPE)
 endfunction()
 
 function(gba_target_object_copy target input output)
@@ -168,9 +178,22 @@ endfunction()
 function(gba_target_link_tonc target)
     cmake_minimum_required(VERSION 3.0)
 
+    set(keywords BUILD_TYPE)
+    cmake_parse_arguments(gba_target_link_tonc "" "${keywords}" "" "${ARGN}")
+    if (NOT DEFINED gba_target_link_tonc_BUILD_TYPE)
+        set(gba_target_link_tonc_BUILD_TYPE Release)
+    endif()
+    set(CMAKE_BUILD_TYPE_COPY ${CMAKE_BUILD_TYPE})
+    set(CMAKE_BUILD_TYPE ${gba_target_link_tonc_BUILD_TYPE})
+
+    set(CMAKE_BUILD_TYPE_COPY ${CMAKE_BUILD_TYPE})
+    set(CMAKE_BUILD_TYPE ${gba_target_link_tonc_BUILD_TYPE} PARENT_SCOPE)
+
     add_subdirectory("${GBA_TOOLCHAIN_LIB_TONC_DIR}" "./tonc")
     target_link_libraries(${target} PRIVATE tonc)
     target_include_directories(${target} PUBLIC "${GBA_TOOLCHAIN_LIB_TONC_DIR}/include")
+
+    set(CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE_COPY} PARENT_SCOPE)
 endfunction()
 
 function(gba_target_link_maxmod target)
@@ -186,18 +209,38 @@ function(gba_target_link_gbfs target)
 
     gba_target_add_gbfs_external_project(${target})
 
+    set(keywords BUILD_TYPE)
+    cmake_parse_arguments(gba_target_link_gbfs "" "${keywords}" "" "${ARGN}")
+    if (NOT DEFINED gba_target_link_gbfs_BUILD_TYPE)
+        set(gba_target_link_gbfs_BUILD_TYPE Release)
+    endif()
+    set(CMAKE_BUILD_TYPE_COPY ${CMAKE_BUILD_TYPE})
+    set(CMAKE_BUILD_TYPE ${gba_target_link_gbfs_BUILD_TYPE})
+
     add_subdirectory("${GBA_TOOLCHAIN_LIB_GBFS_DIR}" "./gbfs")
     target_link_libraries(${target} PRIVATE libgbfs)
     target_include_directories(${target} PUBLIC "${GBA_TOOLCHAIN_LIB_GBFS_DIR}/include")
+
+    set(CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE_COPY} PARENT_SCOPE)
 endfunction()
 
 function(gba_target_link_agb_abi target)
     cmake_minimum_required(VERSION 3.0)
 
+    set(keywords BUILD_TYPE)
+    cmake_parse_arguments(gba_target_link_agb_abi "" "${keywords}" "" "${ARGN}")
+    if (NOT DEFINED gba_target_link_agb_abi_BUILD_TYPE)
+        set(gba_target_link_agb_abi_BUILD_TYPE MinSizeRel)
+    endif()
+    set(CMAKE_BUILD_TYPE_COPY ${CMAKE_BUILD_TYPE})
+    set(CMAKE_BUILD_TYPE ${gba_target_link_agb_abi_BUILD_TYPE})
+
     add_subdirectory("${GBA_TOOLCHAIN_LIB_AGBABI_DIR}" "./agbabi")
     target_link_libraries(${target} PRIVATE agbabi)
     target_include_directories(${target} PUBLIC "${GBA_TOOLCHAIN_LIB_AGBABI_DIR}/include")
     target_compile_definitions(${target} PRIVATE __agb_abi=1)
+
+    set(CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE_COPY} PARENT_SCOPE)
 endfunction()
 
 function(gba_target_link_gba_plusplus target)
@@ -335,7 +378,17 @@ endfunction()
 function(gba_target_link_comm target)
     cmake_minimum_required(VERSION 3.0)
 
+    set(keywords SAVE_TYPE BUILD_TYPE)
+    cmake_parse_arguments(gba_target_link_comm "" "${keywords}" "" "${ARGN}")
+    if (NOT DEFINED gba_target_link_comm_BUILD_TYPE)
+        set(gba_target_link_comm_BUILD_TYPE MinSizeRel)
+    endif()
+    set(CMAKE_BUILD_TYPE_COPY ${CMAKE_BUILD_TYPE})
+    set(CMAKE_BUILD_TYPE ${gba_target_link_comm_BUILD_TYPE})
+
     add_subdirectory("${GBA_TOOLCHAIN_LIB_COMM_DIR}" "./comm")
     target_link_libraries(${target} PRIVATE comm)
     target_include_directories(${target} PUBLIC "${GBA_TOOLCHAIN_LIB_COMM_DIR}/include")
+
+    set(CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE_COPY} PARENT_SCOPE)
 endfunction()

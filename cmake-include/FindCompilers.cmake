@@ -58,6 +58,11 @@ function(gba_find_compilers)
 
         set(CMAKE_C_LINK_EXECUTABLE "\"${GNU_C_COMPILER}\" <CMAKE_C_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>" PARENT_SCOPE)
         set(CMAKE_CXX_LINK_EXECUTABLE "\"${GNU_CXX_COMPILER}\" <CMAKE_CXX_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>" PARENT_SCOPE)
+
+        string(REPLACE "-Os" "-Oz" newCFlags ${CMAKE_C_FLAGS_MINSIZEREL})
+        string(REPLACE "-Os" "-Oz" newCXXFlags ${CMAKE_CXX_FLAGS_MINSIZEREL})
+        set(CMAKE_C_FLAGS_MINSIZEREL ${newCFlags} PARENT_SCOPE)
+        set(CMAKE_CXX_FLAGS_MINSIZEREL ${newCXXFlags} PARENT_SCOPE)
     else()
         set(CMAKE_C_FLAGS "-mabi=aapcs -march=armv4t -mcpu=arm7tdmi" PARENT_SCOPE)
         set(CMAKE_CXX_FLAGS "-mabi=aapcs -march=armv4t -mcpu=arm7tdmi" PARENT_SCOPE)
@@ -127,11 +132,4 @@ function(gba_find_compilers)
     endif()
     set(CMAKE_ASM_FLAGS "-mabi=aapcs -march=armv4t -mcpu=arm7tdmi" PARENT_SCOPE)
 
-endfunction()
-
-function(gba_clang_minsizerel inOutFlags)
-    if(${USE_CLANG})
-        string(REPLACE "-Os" "-Oz" newFlags ${${inOutFlags}})
-        set(${inOutFlags} ${newFlags} PARENT_SCOPE)
-    endif()
 endfunction()
