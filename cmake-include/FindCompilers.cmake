@@ -76,6 +76,9 @@ function(gba_find_compilers)
         endif()
     endif()
 
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Og" PARENT_SCOPE)
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Og" PARENT_SCOPE)
+
     #====================
     # objcopy ar ranlib nm objdump strip
     #====================
