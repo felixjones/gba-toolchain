@@ -92,6 +92,8 @@ function(gba_target_add_gbfs_external_project target)
                 BINARY_DIR "${GBA_TOOLCHAIN_TOOLS}/gbfs"
                 PREFIX "${GBA_TOOLCHAIN_TOOLS}/gbfs"
                 INSTALL_COMMAND ""
+                CMAKE_CACHE_DEFAULT_ARGS
+                    -DCMAKE_MAKE_PROGRAM:STRING=${CMAKE_MAKE_PROGRAM}
             )
         endif()
     endif()
@@ -108,6 +110,8 @@ function(gba_target_fix target inputOutput title gameCode makerCode version)
             BINARY_DIR "${GBA_TOOLCHAIN_TOOLS}/gbafix"
             PREFIX "${GBA_TOOLCHAIN_TOOLS}/gbafix"
             INSTALL_COMMAND ""
+            CMAKE_CACHE_DEFAULT_ARGS
+                -DCMAKE_MAKE_PROGRAM:STRING=${CMAKE_MAKE_PROGRAM}
         )
 
         add_dependencies(${target} gbafix)
@@ -331,6 +335,8 @@ function(gba_target_archive_dotcode target input output region)
             BINARY_DIR "${GBA_TOOLCHAIN_TOOLS}/nedclib"
             PREFIX "${GBA_TOOLCHAIN_TOOLS}/nedclib"
             INSTALL_COMMAND ""
+            CMAKE_CACHE_DEFAULT_ARGS
+                -DCMAKE_MAKE_PROGRAM:STRING=${CMAKE_MAKE_PROGRAM}
         )
 
         add_dependencies(${target} nedclib)
