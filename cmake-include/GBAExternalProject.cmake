@@ -8,6 +8,10 @@ function(gba_external_project_add name)
         #
         SOURCE_DIR
         BINARY_DIR
+        #
+        # Directory options
+        #
+        BUILD_ALWAYS
     )
     set(multi
         #
@@ -36,6 +40,11 @@ function(gba_external_project_add name)
         set(gba_external_project_add_CMAKE_COMMAND ${CMAKE_COMMAND})
     endif()
 
+    # Default BUILD_ALWAYS
+    if (NOT DEFINED gba_external_project_add_BUILD_ALWAYS)
+        set(gba_external_project_add_BUILD_ALWAYS 0)
+    endif()
+
     # Default CMAKE_CACHE_ARGS
     file(TO_CMAKE_PATH "${CMAKE_TOOLCHAIN_FILE}" ToolchainFile)
     list(APPEND gba_external_project_add_CMAKE_CACHE_ARGS -DCMAKE_TOOLCHAIN_FILE:PATH=${ToolchainFile})
@@ -48,5 +57,6 @@ function(gba_external_project_add name)
         CMAKE_ARGS ${gba_external_project_add_CMAKE_ARGS}
         CMAKE_CACHE_ARGS ${gba_external_project_add_CMAKE_CACHE_ARGS}
         CMAKE_CACHE_DEFAULT_ARGS ${gba_external_project_add_CMAKE_CACHE_DEFAULT_ARGS}
+        BUILD_ALWAYS ${gba_external_project_add_BUILD_ALWAYS}
     )
 endfunction()

@@ -40,7 +40,7 @@ static int _everdrive_cfg_default() {
 }
 
 int SECTION_BOOTCHECK _everdrive_bootcheck() {
-    static const int * const rom_title = ( const int * ) 0x080000a0;
+    static const volatile int * const rom_title = ( const volatile int * ) 0x080000a0;
     static const int * const everdrive_title = ( const int * ) "BOOT-1\0\0\0\0\0\0EDGB";
 
     REG_KEY = EVERDRIVE_KEY;

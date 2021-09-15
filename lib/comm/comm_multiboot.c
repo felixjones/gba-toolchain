@@ -20,6 +20,7 @@ typedef volatile uint32_t vu32;
 #define REG_RCNT        ( *( vu16 * ) 0x4000134 )
 
 #define CLOCK_INTERNAL  ( 0x1 << 0 )
+#define MHZ_2           ( 0x1 << 1 )
 #define OPPONENT_SO_HI  ( 0x1 << 2 )
 #define SIO_START       ( 0x1 << 7 )
 
@@ -86,7 +87,7 @@ int __comm_multiboot_send( const int clients, const void * const rom, const size
     }
 
     REG_RCNT = 0;
-    REG_SIOCNT = CLOCK_INTERNAL | ( 0x1 << 13 );
+    REG_SIOCNT = CLOCK_INTERNAL | MHZ_2 | ( 0x1 << 13 );
 
     if ( REG_SIOCNT & OPPONENT_SO_HI ) {
         return MB_ERR_NOT_SERVER;
