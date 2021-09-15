@@ -18,6 +18,10 @@ function(gba_target_link_runtime target library)
     elseif("${library}" STREQUAL "ereader")
         add_subdirectory("${GBA_TOOLCHAIN_LIB_EREADER_DIR}" "./${library}")
     elseif("${library}" STREQUAL "flashcart")
+        if(${CMAKE_BUILD_TYPE} STREQUAL Debug)
+            message(WARNING "Everdrive requires Release or MinSizeRel BUILD_TYPE (${CMAKE_BUILD_TYPE} not compatible)")
+        endif()
+
         add_subdirectory("${GBA_TOOLCHAIN_LIB_FLASHCART_DIR}" "./${library}")
         target_include_directories(${target} PUBLIC "${GBA_TOOLCHAIN_LIB_FLASHCART_DIR}/include")
 
