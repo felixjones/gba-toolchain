@@ -12,7 +12,7 @@ else()
     # Project for host tools
     project(gbfs C)
 
-    add_executable(gbfs "tools/gbfs.c")
+    add_executable(gbfs "tools/gbfs.c" "tools/djbasename.c")
 
     add_executable(bin2s "tools/bin2s.c")
 

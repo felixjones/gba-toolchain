@@ -269,7 +269,6 @@ function(gba_add_gbfs_target target)
     add_custom_target(${target}
         COMMAND "${GBA_TOOLCHAIN_GBFS}" "${target}" ${ARGN}
         DEPENDS ${ARGN}
-        BYPRODUCTS "${target}"
         WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
         COMMENT "GBFS -> \"${target}\""
     )
@@ -289,14 +288,12 @@ function(gba_target_append_gbfs target gbfs input)
             POST_BUILD
             COMMAND copy /B "${input}" + "${gbfs}" "${input}"
             COMMENT "File cat \"${gbfs}\" -> \"${input}\""
-            BYPRODUCTS "${input}"
         )
     elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL Linux OR CMAKE_HOST_SYSTEM_NAME STREQUAL Darwin OR CMAKE_HOST_SYSTEM_NAME MATCHES "MING.*" OR CMAKE_HOST_SYSTEM_NAME MATCHES "MSYS.*")
         add_custom_command(TARGET ${target}
             POST_BUILD
             COMMAND cat "${gbfs}" >> "${input}"
             COMMENT "File cat \"${gbfs}\" -> \"${input}\""
-            BYPRODUCTS "${input}"
         )
     else()
         message(FATAL_ERROR "Failed to recognise host operating system (${CMAKE_HOST_SYSTEM_NAME})")
