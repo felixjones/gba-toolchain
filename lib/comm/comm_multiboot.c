@@ -7,10 +7,6 @@ void __aeabi_memclr4( void *, size_t n );
 typedef volatile uint16_t vu16;
 typedef volatile uint32_t vu32;
 
-#define REG_SIODATA32   ( *( vu32 * ) 0x4000120 )
-#define REG_SIODATA32_L ( *( vu16 * ) 0x4000120 )
-#define REG_SIODATA32_H ( *( vu16 * ) 0x4000122 )
-
 #define REG_SIOMULTI0   ( *( vu16 * ) 0x4000120 )
 #define REG_SIOMULTI1   ( *( vu16 * ) 0x4000122 )
 #define REG_SIOMULTI2   ( *( vu16 * ) 0x4000124 )
@@ -29,7 +25,6 @@ typedef volatile uint32_t vu32;
 #define CHILD3  MB_CLIENT3
 
 #define MB_MODE_MULTI   ( 0x1 << 0 )
-#define MB_MODE_2MHZ    ( 0x1 << 1 )
 
 struct multi_boot_param {
     uint32_t reserved1[5];

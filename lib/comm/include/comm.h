@@ -3,8 +3,6 @@
 
 #include <stddef.h>
 
-#define MB_ERR  ( -1 )
-
 #define MB_ERR_PALETTE      ( 0x1 << 0 )
 #define MB_ERR_NOT_SERVER   ( 0x2 << 0 )
 
