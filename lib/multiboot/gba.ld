@@ -105,6 +105,16 @@ SECTIONS {
     . = ALIGN(4);
   } >ewram
 
+  /* EWRAM load memory address (source) */
+  __ewram_data_lma = .;
+
+  .ewram : AT (__ewram_data_lma) {
+    __ewram_data_start = ABSOLUTE(.);
+    *ewram.*(.data*)
+    . = ALIGN(4);
+    __ewram_data_end = ABSOLUTE(.);
+  } >ewram
+
   /*
   ====================
     iwram
@@ -200,6 +210,7 @@ SECTIONS {
   __iwram_cpuset_copy = ((__iwram_end - __iwram_start) / 4) | (1 << 26);
   __bss_cpuset_fill = ((__bss_end - __bss_start) / 4) | (5 << 24);
   __data_cpuset_copy = ((__data_end - __data_start) / 4) | (1 << 26);
+  __ewram_data_cpuset_copy = ((__ewram_data_end - __ewram_data_start) / 4) | (1 << 26);
 
   /*
   ====================
