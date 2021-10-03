@@ -11,3 +11,6 @@ endforeach()
 project(nedcmake CXX)
 add_executable(nedcmake "src/nedcmake.cpp" ${NEDCLIB_SRC})
 target_include_directories(nedcmake PRIVATE "src/lib/" "src/lib/rawbin" "src/lib/rawbmp" "src/lib/vpk")
+target_compile_definitions(nedcmake PUBLIC NEDCLIB2_EXPORTS)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-builtin-declaration-mismatch -Wno-pointer-arith")

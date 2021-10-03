@@ -26,6 +26,12 @@ _start:
     mov     r0, #0xfe
     swi     #0x1
 
+    @ CpuSet copy ewram data
+    ldr	    r0, =__ewram_data_lma
+    ldr	    r1, =__ewram_data_start
+    ldr	    r2, =__ewram_data_cpuset_copy
+    swi     #0xb
+
     @ CpuSet copy iwram
     ldr	    r0, =__iwram_lma
     ldr	    r1, =__iwram_start
