@@ -115,6 +115,8 @@ SECTIONS {
     __ewram_data_end = ABSOLUTE(.);
   } >ewram
 
+  __ewram_end = .;
+
   /*
   ====================
     iwram
@@ -198,8 +200,6 @@ SECTIONS {
     __load_stop_iwram9 - __load_start_iwram9;
 
   __iwram_overlay_end = __iwram_overlay + __iwram_overlay_size;
-
-  __ewram_end = .;
 
   /*
   ====================
