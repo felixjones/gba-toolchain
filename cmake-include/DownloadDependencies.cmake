@@ -312,7 +312,15 @@ function(gba_download_dependencies manifestUrl)
         string(REGEX MATCH "(.*)(-win32|-x86_64-linux|-aarch64-linux|-mac)" _ "${ARM_GNU_FILE}")
         if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/arm-gnu-toolchain/${CMAKE_MATCH_1}")
             file(RENAME "${CMAKE_CURRENT_LIST_DIR}/arm-gnu-toolchain" "${CMAKE_CURRENT_LIST_DIR}/arm-gnu-toolchain-tmp")
-            file(RENAME "${CMAKE_CURRENT_LIST_DIR}/arm-gnu-toolchain-tmp/${CMAKE_MATCH_1}" "${CMAKE_CURRENT_LIST_DIR}/arm-gnu-toolchain")
+
+            file(GLOB children RELATIVE "${CMAKE_CURRENT_LIST_DIR}/arm-gnu-toolchain-tmp" "${CMAKE_CURRENT_LIST_DIR}/arm-gnu-toolchain-tmp/*")
+            foreach(child ${children})
+                if(IS_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/arm-gnu-toolchain-tmp/${child}")
+                    file(RENAME "${CMAKE_CURRENT_LIST_DIR}/arm-gnu-toolchain-tmp/${child}" "${CMAKE_CURRENT_LIST_DIR}/arm-gnu-toolchain")
+                    break()
+                endif()
+            endforeach()
+
             file(REMOVE_RECURSE "${CMAKE_CURRENT_LIST_DIR}/arm-gnu-toolchain-tmp")
         endif()
 
