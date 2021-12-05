@@ -67,7 +67,7 @@ function(gba_target_object_copy target input output)
 
     add_custom_command(TARGET ${target}
         POST_BUILD
-        COMMAND "${CMAKE_OBJCOPY}" -O binary "${input}" "${output}"
+        COMMAND "${GNU_OBJCOPY}" -O binary "${input}" "${output}"
         COMMENT "Object copy -> \"${output}\""
         BYPRODUCTS "${output}"
     )

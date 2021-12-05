@@ -48,11 +48,11 @@ function(gba_download_extract url path)
         )
     elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL Linux OR CMAKE_HOST_SYSTEM_NAME STREQUAL Darwin OR CMAKE_HOST_SYSTEM_NAME MATCHES "MING.*" OR CMAKE_HOST_SYSTEM_NAME MATCHES "MSYS.*")
         get_filename_component(FILE_EXT "${path}/${FILE_NAME}" EXT)
-        if(${FILE_EXT} MATCHES ".zip$")
+        if(${FILE_EXT} MATCHES "\\.zip$")
             execute_process(
                 COMMAND unzip "${path}/${FILE_NAME}" -d "${path}/"
             )
-        elseif(${FILE_EXT} STREQUAL ".tar.bz2")
+        elseif(${FILE_EXT} MATCHES "\\.tar\\.bz2$")
             execute_process(
                 COMMAND tar -xvf "${path}/${FILE_NAME}" -C "${path}/" --strip-components=1
             )
