@@ -1,0 +1,16 @@
+#===============================================================================
+#
+# Spec file for substituting nano
+#
+# Copyright (C) 2021-2022 gba-toolchain contributors
+# For conditions of distribution and use, see copyright notice in LICENSE.md
+#
+#===============================================================================
+
+%rename link  nano_link
+
+*link:
+  %(nano_link) %:replace-outfile(-lc -lc_nano) %:replace-outfile(-lg -lg_nano) %:replace-outfile(-lrdimon -lrdimon_nano) %:replace-outfile(-lstdc++ -lstdc++_nano) %:replace-outfile(-lsupc++ -lsupc++_nano)
+
+*startfile:
+  crti%O%s crtbegin%O%s libruntime.a%s

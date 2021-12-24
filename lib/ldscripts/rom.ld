@@ -1,0 +1,278 @@
+/*
+===============================================================================
+
+Linker script for GBA ROMs
+
+Copyright (C) 2021-2022 gba-toolchain contributors
+For conditions of distribution and use, see copyright notice in LICENSE.md
+
+===============================================================================
+*/
+
+OUTPUT_FORMAT("elf32-littlearm", "elf32-bigarm", "elf32-littlearm")
+OUTPUT_ARCH(arm)
+ENTRY(_start)
+
+/*
+ * Memory regions
+ */
+MEMORY {
+    ewram : ORIGIN = 0x02000000, LENGTH = 256K
+    iwram : ORIGIN = 0x03000000, LENGTH = 32K
+    rom   : ORIGIN = 0x08000000, LENGTH = 32M
+}
+
+/*
+ * Common symbols
+ */
+__rom_start   = ORIGIN(rom);
+__iwram_start = ORIGIN(iwram);
+__iwram_top   = ORIGIN(iwram) + LENGTH(iwram);
+__ewram_start = ORIGIN(ewram);
+__ewram_top   = ORIGIN(ewram) + LENGTH(ewram);
+__sp_irq      = __iwram_top - 0x60;
+__sp_usr      = __sp_irq - 0xA0;
+
+/*
+ * Sections
+ */
+SECTIONS {
+    /*
+     * ROM
+     */
+
+    . = __rom_start;
+
+    /* Compiler runtime entry point */
+    .crt0 : ALIGN(4) {
+        KEEP (*(.crt0))
+        . = ALIGN(4);
+    } > rom
+
+    /* Program code */
+    .text : ALIGN(4) {
+        *(EXCLUDE_FILE (*.iwram.* *.ewram.* *.iwram[0-9].* *.ewram[0-9].*) .text*)
+        *(.stub)
+        . = ALIGN(4);
+    } > rom
+
+    /*
+     * Initialization
+     */
+    /* Pre-initialization array is called before _init */
+    .preinit_array : ALIGN(4) {
+        __preinit_array_start = ABSOLUTE(.);
+        KEEP (*(.preinit_array))
+        __preinit_array_end = ABSOLUTE(.);
+        . = ALIGN(4);
+    } > rom
+
+    .init : ALIGN(4) {
+        KEEP (*(.init))
+        . = ALIGN(4);
+    } > rom
+
+    /* Initialization array is called after _init */
+    .init_array : ALIGN(4) {
+        __init_array_start = ABSOLUTE(.);
+        KEEP (*(SORT(.init_array.*)))
+        KEEP (*(.init_array))
+        __init_array_end = ABSOLUTE(.);
+        . = ALIGN(4);
+    } > rom
+
+    /* Finalization code */
+    .fini : ALIGN(4) {
+        KEEP (*(.fini))
+        . = ALIGN(4);
+    } > rom
+
+    /* Initialization array is called after _fini */
+    .fini_array : ALIGN(4) {
+        __fini_array_start = ABSOLUTE(.);
+        KEEP (*(SORT(.fini_array.*)))
+        KEEP (*(.fini_array*))
+        __fini_array_end = ABSOLUTE(.);
+        . = ALIGN(4);
+    } > rom
+
+    /*
+     * Exception handling
+     */
+    .eh_frame : ALIGN(4) {
+        KEEP (*(.eh_frame))
+        *(.eh_frame.*)
+        . = ALIGN(4);
+    } > rom
+
+    /* Index entries for section unwinding */
+    .ARM.exidx : ALIGN(4) {
+        PROVIDE_HIDDEN (__exidx_start = .);
+        *(.ARM.exidx*)
+        PROVIDE_HIDDEN (__exidx_end = .);
+        . = ALIGN(4);
+    } > rom
+
+    /*
+     * Read only data
+     */
+    .rodata : ALIGN(4) {
+        *(.rodata .rodata.*)
+        . = ALIGN(4);
+    } > rom
+
+    /*
+     * IWRAM
+     */
+
+    /* IWRAM load memory address (source) */
+    __iwram_lma = ALIGN(4);
+
+    .iwram __iwram_start : AT(__iwram_lma) ALIGN(4) {
+        *(.iwram .iwram.*)
+        *iwram.*(.text* .data*)
+        . = ALIGN(4);
+        __iwram_end = ABSOLUTE(.);
+    } > iwram
+
+    /* Block starting symbol */
+    .bss : ALIGN(4) {
+        __bss_start = ABSOLUTE(.);
+        *(.dynbss)
+        *(.bss .bss.*)
+        *(COMMON)
+        . = ALIGN(4);
+        __bss_end = ABSOLUTE(.);
+    } > iwram
+
+    /* data load memory address (source) */
+    __data_lma = __iwram_lma + ALIGN(SIZEOF(.iwram), 4);
+
+    .data : AT(__data_lma) ALIGN(4) {
+        __data_start = ABSOLUTE(.);
+        *(.data .data.*)
+        SORT(CONSTRUCTORS)
+        . = ALIGN(4);
+        __data_end = ABSOLUTE(.);
+    } > iwram
+
+    /*
+     * IWRAM overlays
+     */
+
+    __iwram_overlay_lma = __data_lma + ALIGN(SIZEOF(.data), 4);
+
+    OVERLAY : NOCROSSREFS AT(__iwram_overlay_lma) {
+        .iwram0 { __iwram_overlay = ABSOLUTE(.); *(.iwram0 .iwram0*) *iwram0.*(.text* .data*) . = ALIGN(32); __iwram0_end = ABSOLUTE(.); }
+        .iwram1 { *(.iwram1 .iwram1*) *iwram1.*(.text* .data*) . = ALIGN(32); __iwram1_end = ABSOLUTE(.); }
+        .iwram2 { *(.iwram2 .iwram2*) *iwram2.*(.text* .data*) . = ALIGN(32); __iwram2_end = ABSOLUTE(.); }
+        .iwram3 { *(.iwram3 .iwram3*) *iwram3.*(.text* .data*) . = ALIGN(32); __iwram3_end = ABSOLUTE(.); }
+        .iwram4 { *(.iwram4 .iwram4*) *iwram4.*(.text* .data*) . = ALIGN(32); __iwram4_end = ABSOLUTE(.); }
+        .iwram5 { *(.iwram5 .iwram5*) *iwram5.*(.text* .data*) . = ALIGN(32); __iwram5_end = ABSOLUTE(.); }
+        .iwram6 { *(.iwram6 .iwram6*) *iwram6.*(.text* .data*) . = ALIGN(32); __iwram6_end = ABSOLUTE(.); }
+        .iwram7 { *(.iwram7 .iwram7*) *iwram7.*(.text* .data*) . = ALIGN(32); __iwram7_end = ABSOLUTE(.); }
+        .iwram8 { *(.iwram8 .iwram8*) *iwram8.*(.text* .data*) . = ALIGN(32); __iwram8_end = ABSOLUTE(.); }
+        .iwram9 { *(.iwram9 .iwram9*) *iwram9.*(.text* .data*) . = ALIGN(32); __iwram9_end = ABSOLUTE(.); }
+    } > iwram
+
+    __iwram0_size = __load_stop_iwram0 - __load_start_iwram0;
+    __iwram1_size = __load_stop_iwram1 - __load_start_iwram1;
+    __iwram2_size = __load_stop_iwram2 - __load_start_iwram2;
+    __iwram3_size = __load_stop_iwram3 - __load_start_iwram3;
+    __iwram4_size = __load_stop_iwram4 - __load_start_iwram4;
+    __iwram5_size = __load_stop_iwram5 - __load_start_iwram5;
+    __iwram6_size = __load_stop_iwram6 - __load_start_iwram6;
+    __iwram7_size = __load_stop_iwram7 - __load_start_iwram7;
+    __iwram8_size = __load_stop_iwram8 - __load_start_iwram8;
+    __iwram9_size = __load_stop_iwram9 - __load_start_iwram9;
+
+    __iwram0_cpuset_copy = ((__iwram0_size) / 4) | (1 << 26);
+    __iwram1_cpuset_copy = ((__iwram1_size) / 4) | (1 << 26);
+    __iwram2_cpuset_copy = ((__iwram2_size) / 4) | (1 << 26);
+    __iwram3_cpuset_copy = ((__iwram3_size) / 4) | (1 << 26);
+    __iwram4_cpuset_copy = ((__iwram4_size) / 4) | (1 << 26);
+    __iwram5_cpuset_copy = ((__iwram5_size) / 4) | (1 << 26);
+    __iwram6_cpuset_copy = ((__iwram6_size) / 4) | (1 << 26);
+    __iwram7_cpuset_copy = ((__iwram7_size) / 4) | (1 << 26);
+    __iwram8_cpuset_copy = ((__iwram8_size) / 4) | (1 << 26);
+    __iwram9_cpuset_copy = ((__iwram9_size) / 4) | (1 << 26);
+
+    __iwram_overlay_size =  __iwram0_size + __iwram1_size + __iwram2_size + __iwram3_size + __iwram4_size +
+                            __iwram5_size + __iwram6_size + __iwram7_size + __iwram8_size + __iwram9_size;
+
+    __iwram_overlay_end = __iwram_overlay + __iwram_overlay_size;
+
+    /*
+     * EWRAM
+     */
+
+    __ewram_lma = __iwram_overlay_lma + __iwram_overlay_size;
+
+    .ewram __ewram_start : AT(__ewram_lma) ALIGN(4) {
+        *(.ewram .ewram.*)
+        *ewram.*(.text* .data*)
+        . = ALIGN(4);
+        __ewram_end = ABSOLUTE(.);
+    } > ewram
+
+    /*
+     * EWRAM overlays
+     */
+
+    __ewram_overlay_lma = __ewram_lma + ALIGN(SIZEOF(.ewram), 4);
+
+    OVERLAY : NOCROSSREFS AT(__ewram_overlay_lma) {
+        .ewram0 { __ewram_overlay = ABSOLUTE(.); *(.ewram0 .ewram0*) *ewram0.*(.text* .data*) . = ALIGN(32); __ewram0_end = ABSOLUTE(.); }
+        .ewram1 { *(.ewram1 .ewram1*) *ewram1.*(.text* .data*) . = ALIGN(32); __ewram1_end = ABSOLUTE(.); }
+        .ewram2 { *(.ewram2 .ewram2*) *ewram2.*(.text* .data*) . = ALIGN(32); __ewram2_end = ABSOLUTE(.); }
+        .ewram3 { *(.ewram3 .ewram3*) *ewram3.*(.text* .data*) . = ALIGN(32); __ewram3_end = ABSOLUTE(.); }
+        .ewram4 { *(.ewram4 .ewram4*) *ewram4.*(.text* .data*) . = ALIGN(32); __ewram4_end = ABSOLUTE(.); }
+        .ewram5 { *(.ewram5 .ewram5*) *ewram5.*(.text* .data*) . = ALIGN(32); __ewram5_end = ABSOLUTE(.); }
+        .ewram6 { *(.ewram6 .ewram6*) *ewram6.*(.text* .data*) . = ALIGN(32); __ewram6_end = ABSOLUTE(.); }
+        .ewram7 { *(.ewram7 .ewram7*) *ewram7.*(.text* .data*) . = ALIGN(32); __ewram7_end = ABSOLUTE(.); }
+        .ewram8 { *(.ewram8 .ewram8*) *ewram8.*(.text* .data*) . = ALIGN(32); __ewram8_end = ABSOLUTE(.); }
+        .ewram9 { *(.ewram9 .ewram9*) *ewram9.*(.text* .data*) . = ALIGN(32); __ewram9_end = ABSOLUTE(.); }
+    } > ewram
+
+    __ewram0_size = __load_stop_ewram0 - __load_start_ewram0;
+    __ewram1_size = __load_stop_ewram1 - __load_start_ewram1;
+    __ewram2_size = __load_stop_ewram2 - __load_start_ewram2;
+    __ewram3_size = __load_stop_ewram3 - __load_start_ewram3;
+    __ewram4_size = __load_stop_ewram4 - __load_start_ewram4;
+    __ewram5_size = __load_stop_ewram5 - __load_start_ewram5;
+    __ewram6_size = __load_stop_ewram6 - __load_start_ewram6;
+    __ewram7_size = __load_stop_ewram7 - __load_start_ewram7;
+    __ewram8_size = __load_stop_ewram8 - __load_start_ewram8;
+    __ewram9_size = __load_stop_ewram9 - __load_start_ewram9;
+
+    __ewram0_cpuset_copy = ((__ewram0_size) / 4) | (1 << 26);
+    __ewram1_cpuset_copy = ((__ewram1_size) / 4) | (1 << 26);
+    __ewram2_cpuset_copy = ((__ewram2_size) / 4) | (1 << 26);
+    __ewram3_cpuset_copy = ((__ewram3_size) / 4) | (1 << 26);
+    __ewram4_cpuset_copy = ((__ewram4_size) / 4) | (1 << 26);
+    __ewram5_cpuset_copy = ((__ewram5_size) / 4) | (1 << 26);
+    __ewram6_cpuset_copy = ((__ewram6_size) / 4) | (1 << 26);
+    __ewram7_cpuset_copy = ((__ewram7_size) / 4) | (1 << 26);
+    __ewram8_cpuset_copy = ((__ewram8_size) / 4) | (1 << 26);
+    __ewram9_cpuset_copy = ((__ewram9_size) / 4) | (1 << 26);
+
+    __ewram_overlay_size =  __ewram0_size + __ewram1_size + __ewram2_size + __ewram3_size + __ewram4_size +
+                            __ewram5_size + __ewram6_size + __ewram7_size + __ewram8_size + __ewram9_size;
+
+    __ewram_overlay_end = __ewram_overlay + __ewram_overlay_size;
+
+    /*
+     * End of ROM symbol
+     */
+
+    __rom_end = __ewram_overlay_lma + __ewram_overlay_size;
+
+    /*
+     * crt0.s CpuSet constants
+     */
+
+    __iwram_cpuset_copy = ((__iwram_end - __iwram_start) / 4) | (1 << 26);
+    __bss_cpuset_fill = ((__bss_end - __bss_start) / 4) | (5 << 24);
+    __data_cpuset_copy = ((__data_end - __data_start) / 4) | (1 << 26);
+    __ewram_cpuset_copy = ((__ewram_end - __ewram_start) / 4) | (1 << 26);
+}

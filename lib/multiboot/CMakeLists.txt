@@ -1,0 +1,27 @@
+#===============================================================================
+#
+# CMakeLists.txt for compiling libmultiboot
+#
+# Copyright (C) 2021-2022 gba-toolchain contributors
+# For conditions of distribution and use, see copyright notice in LICENSE.md
+#
+#===============================================================================
+
+cmake_minimum_required(VERSION 3.1)
+project(multiboot ASM C)
+
+add_library(multiboot STATIC crt0.s ../gba-runtime-nosyscalls.c)
+set_target_properties(multiboot PROPERTIES OUTPUT_NAME runtime)
+
+if(USE_CLANG)
+    set(optimization -Oz)
+else()
+    set(optimization -Os)
+endif()
+
+target_compile_options(multiboot PRIVATE ${optimization} -mthumb -ffunction-sections -fdata-sections -Wall -Wextra -Wno-unused-parameter)
+target_link_options(multiboot PRIVATE -Wl,--gc-sections)
+
+set(GBA_MULTIBOOT_LDSCRIPT "${CMAKE_CURRENT_LIST_DIR}/../ldscripts/multiboot.ld" PARENT_SCOPE)
+set(GBA_MULTIBOOT_SPECS "${CMAKE_CURRENT_LIST_DIR}/../gba-runtime-nano.specs" PARENT_SCOPE)
+set(GBA_MULTIBOOT_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}" PARENT_SCOPE)
