@@ -14,8 +14,8 @@ cmake_minimum_required(VERSION 3.20)
 #====================
 
 option(USE_CLANG "Enable Clang compiler" OFF)
+set(GBA_TOOLCHAIN_URL "https://github.com/felixjones/gba-toolchain/archive/refs/heads/3.0.zip" CACHE STRING "URL to download GBA toolchain")
 set(ARM_GNU_TOOLCHAIN "$ENV{ARM_GNU_TOOLCHAIN}" CACHE PATH "Path to ARM GNU toolchain")
-set(DEPENDENCIES_URL "" CACHE STRING "URL to download dependencies.ini")
 set(MGBA "$ENV{MGBA}" CACHE PATH "Path to mGBA binary")
 
 # Tools
@@ -233,7 +233,26 @@ endfunction()
 # Download gba-toolchain
 #====================
 
-# TODO : if dependencies.ini missing, then download gba-toolchain
+# If dependencies.ini missing, then download gba-toolchain
+# The assumption is that the user only has the toolchain file
+if(NOT EXISTS "${GBA_TOOLCHAIN_LIST_DIR}/dependencies.ini")
+    file(LOCK "${GBA_TOOLCHAIN_LOCK}" GUARD FILE)
+
+    # Prepare a working directory for updating toolchain
+    set(i 0)
+    while(EXISTS "${GBA_TOOLCHAIN_LIST_DIR}/temp${i}")
+        math(EXPR i "${i} + 1")
+    endwhile()
+    set(workingDir "${GBA_TOOLCHAIN_LIST_DIR}/temp${i}")
+    file(MAKE_DIRECTORY "${workingDir}")
+
+    # Download into working directory, then copy contents into toolchain directory
+    _gba_download(${GBA_TOOLCHAIN_URL} "${workingDir}")
+    file(COPY "${workingDir}/" DESTINATION "${GBA_TOOLCHAIN_LIST_DIR}" PATTERN "arm-gba-toolchain.cmake" EXCLUDE)
+    file(REMOVE_RECURSE "${workingDir}")
+
+    file(LOCK "${GBA_TOOLCHAIN_LOCK}" RELEASE)
+endif()
 
 #====================
 # Includes
