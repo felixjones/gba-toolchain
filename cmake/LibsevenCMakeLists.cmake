@@ -47,3 +47,5 @@ endif()
 list(JOIN cFlags " " cFlags)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${cFlags}")
+
+add_library(libseven ALIAS seven)

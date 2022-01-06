@@ -89,3 +89,28 @@ function(_gba_find_ext_posprintf)
         file(RENAME "${GBA_TOOLCHAIN_LIST_DIR}/lib/posprintf/PosprintfCMakeLists.cmake" "${GBA_TOOLCHAIN_LIST_DIR}/lib/posprintf/CMakeLists.txt")
     endif()
 endfunction()
+
+#! _gba_find_ext_maxmod : Locate and download Maxmod
+#
+function(_gba_find_ext_maxmod)
+    if(NOT EXISTS "${GBA_TOOLCHAIN_LIST_DIR}/lib/maxmod/Makefile")
+        if(NOT EXISTS "${GBA_TOOLCHAIN_LIST_DIR}/dependencies.ini")
+            if(NOT DEPENDENCIES_URL)
+                message(FATAL_ERROR "Missing DEPENDENCIES_URL")
+            endif()
+
+            file(DOWNLOAD "${DEPENDENCIES_URL}" "${GBA_TOOLCHAIN_LIST_DIR}/dependencies.ini" SHOW_PROGRESS)
+        endif()
+
+        file(READ "${GBA_TOOLCHAIN_LIST_DIR}/dependencies.ini" iniFile)
+        _ini_read_section("${iniFile}" "maxmod" maxmod)
+
+        message(STATUS "Downloading Maxmod from \"${maxmod_url}\" to \"${GBA_TOOLCHAIN_LIST_DIR}/lib/maxmod\"")
+        _gba_download("${maxmod_url}" "${GBA_TOOLCHAIN_LIST_DIR}/lib/maxmod" SHOW_PROGRESS EXPECTED_MD5 "${maxmod_md5}")
+    endif()
+
+    if(EXISTS "${GBA_TOOLCHAIN_LIST_DIR}/lib/maxmod" AND NOT EXISTS "${GBA_TOOLCHAIN_LIST_DIR}/lib/maxmod/CMakeLists.txt")
+        file(COPY "${GBA_TOOLCHAIN_LIST_DIR}/cmake/MaxmodCMakeLists.cmake" DESTINATION "${GBA_TOOLCHAIN_LIST_DIR}/lib/maxmod")
+        file(RENAME "${GBA_TOOLCHAIN_LIST_DIR}/lib/maxmod/MaxmodCMakeLists.cmake" "${GBA_TOOLCHAIN_LIST_DIR}/lib/maxmod/CMakeLists.txt")
+    endif()
+endfunction()
