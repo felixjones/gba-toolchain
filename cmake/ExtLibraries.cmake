@@ -9,6 +9,8 @@
 
 cmake_minimum_required(VERSION 3.20)
 
+#! _gba_find_ext_tonclib : Locate and download Tonclib/libtonc
+#
 function(_gba_find_ext_tonclib)
     if(NOT EXISTS "${GBA_TOOLCHAIN_LIST_DIR}/lib/tonc/Makefile")
         if(NOT EXISTS "${GBA_TOOLCHAIN_LIST_DIR}/dependencies.ini")
@@ -32,6 +34,8 @@ function(_gba_find_ext_tonclib)
     endif()
 endfunction()
 
+#! _gba_find_ext_libseven : Locate and download libseven
+#
 function(_gba_find_ext_libseven)
     if(NOT EXISTS "${GBA_TOOLCHAIN_LIST_DIR}/lib/seven/Makefile")
         if(NOT EXISTS "${GBA_TOOLCHAIN_LIST_DIR}/dependencies.ini")
@@ -52,5 +56,36 @@ function(_gba_find_ext_libseven)
     if(EXISTS "${GBA_TOOLCHAIN_LIST_DIR}/lib/seven" AND NOT EXISTS "${GBA_TOOLCHAIN_LIST_DIR}/lib/seven/CMakeLists.txt")
         file(COPY "${GBA_TOOLCHAIN_LIST_DIR}/cmake/LibsevenCMakeLists.cmake" DESTINATION "${GBA_TOOLCHAIN_LIST_DIR}/lib/seven")
         file(RENAME "${GBA_TOOLCHAIN_LIST_DIR}/lib/seven/LibsevenCMakeLists.cmake" "${GBA_TOOLCHAIN_LIST_DIR}/lib/seven/CMakeLists.txt")
+    endif()
+endfunction()
+
+#! _gba_find_ext_posprintf : Locate and download posprintf
+#
+function(_gba_find_ext_posprintf)
+    if(NOT EXISTS "${GBA_TOOLCHAIN_LIST_DIR}/lib/posprintf/license.txt")
+        if(NOT EXISTS "${GBA_TOOLCHAIN_LIST_DIR}/dependencies.ini")
+            if(NOT DEPENDENCIES_URL)
+                message(FATAL_ERROR "Missing DEPENDENCIES_URL")
+            endif()
+
+            file(DOWNLOAD "${DEPENDENCIES_URL}" "${GBA_TOOLCHAIN_LIST_DIR}/dependencies.ini" SHOW_PROGRESS)
+        endif()
+
+        file(READ "${GBA_TOOLCHAIN_LIST_DIR}/dependencies.ini" iniFile)
+        _ini_read_section("${iniFile}" "posprintf" posprintf)
+
+        message(STATUS "Downloading posprintf from \"${posprintf_url}\" to \"${GBA_TOOLCHAIN_LIST_DIR}/lib/posprintf\"")
+        _gba_download("${posprintf_url}" "${GBA_TOOLCHAIN_LIST_DIR}/lib/posprintf" SHOW_PROGRESS)
+    endif()
+
+    if(EXISTS "${GBA_TOOLCHAIN_LIST_DIR}/lib/posprintf" AND NOT EXISTS "${GBA_TOOLCHAIN_LIST_DIR}/lib/posprintf/CMakeLists.txt")
+        # Fix folder structure
+        file(COPY "${GBA_TOOLCHAIN_LIST_DIR}/lib/posprintf/posprintf/" DESTINATION "${GBA_TOOLCHAIN_LIST_DIR}/lib/posprintf/")
+        file(REMOVE_RECURSE "${GBA_TOOLCHAIN_LIST_DIR}/lib/posprintf/posprintf/" "${GBA_TOOLCHAIN_LIST_DIR}/lib/posprintf/__MACOSX/")
+        file(COPY "${GBA_TOOLCHAIN_LIST_DIR}/lib/posprintf/posprintf.h" DESTINATION "${GBA_TOOLCHAIN_LIST_DIR}/lib/posprintf/include")
+        file(REMOVE "${GBA_TOOLCHAIN_LIST_DIR}/lib/posprintf/posprintf.h")
+
+        file(COPY "${GBA_TOOLCHAIN_LIST_DIR}/cmake/PosprintfCMakeLists.cmake" DESTINATION "${GBA_TOOLCHAIN_LIST_DIR}/lib/posprintf")
+        file(RENAME "${GBA_TOOLCHAIN_LIST_DIR}/lib/posprintf/PosprintfCMakeLists.cmake" "${GBA_TOOLCHAIN_LIST_DIR}/lib/posprintf/CMakeLists.txt")
     endif()
 endfunction()
