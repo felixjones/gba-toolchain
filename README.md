@@ -25,6 +25,14 @@ If a library is required by CMake, but is missing, it will be downloaded into th
 
 [gbfs](https://pineight.com/gba/#gbfs) provides an asset file system for GBA. Includes several tools for managing these.
 
+### posprintf
+
+[posprintf](http://www.danposluns.com/gbadev/posprintf/instructions.html) is a partial implementation of sprintf optimized for GBA.
+
+### Maxmod
+
+[Maxmod](https://maxmod.devkitpro.org/) is a complete music and sound solution for the GBA.
+
 ## Runtime libraries
 
 A compiler runtime-library (`crt0.s`) and linker script (`lib/ldscripts`) is required for compiling a GBA binary.
