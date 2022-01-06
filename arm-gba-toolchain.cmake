@@ -16,7 +16,6 @@ cmake_minimum_required(VERSION 3.20)
 option(USE_CLANG "Enable Clang compiler" OFF)
 set(GBA_TOOLCHAIN_URL "https://github.com/felixjones/gba-toolchain/archive/refs/heads/3.0.zip" CACHE STRING "URL to download GBA toolchain")
 set(ARM_GNU_TOOLCHAIN "$ENV{ARM_GNU_TOOLCHAIN}" CACHE PATH "Path to ARM GNU toolchain")
-set(MGBA "$ENV{MGBA}" CACHE PATH "Path to mGBA binary")
 
 # Tools
 set(GBAFIX "$ENV{GBAFIX}" CACHE PATH "Path to gbafix binary")
@@ -261,7 +260,6 @@ endif()
 include("${GBA_TOOLCHAIN_LIST_DIR}/cmake/ExtLibraries.cmake")
 include("${GBA_TOOLCHAIN_LIST_DIR}/cmake/Gba.cmake")
 include("${GBA_TOOLCHAIN_LIST_DIR}/cmake/Ini.cmake")
-include("${GBA_TOOLCHAIN_LIST_DIR}/cmake/Test.cmake")
 include("${GBA_TOOLCHAIN_LIST_DIR}/cmake/Toolchain.cmake")
 
 #====================
