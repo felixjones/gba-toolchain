@@ -114,3 +114,23 @@ function(_gba_find_ext_maxmod)
         file(RENAME "${GBA_TOOLCHAIN_LIST_DIR}/lib/maxmod/MaxmodCMakeLists.cmake" "${GBA_TOOLCHAIN_LIST_DIR}/lib/maxmod/CMakeLists.txt")
     endif()
 endfunction()
+
+#! _gba_find_ext_agbabi : Locate and download agbabi
+#
+function(_gba_find_ext_agbabi)
+    if(NOT EXISTS "${GBA_TOOLCHAIN_LIST_DIR}/lib/agbabi/LICENSE.md")
+        if(NOT EXISTS "${GBA_TOOLCHAIN_LIST_DIR}/dependencies.ini")
+            if(NOT DEPENDENCIES_URL)
+                message(FATAL_ERROR "Missing DEPENDENCIES_URL")
+            endif()
+
+            file(DOWNLOAD "${DEPENDENCIES_URL}" "${GBA_TOOLCHAIN_LIST_DIR}/dependencies.ini" SHOW_PROGRESS)
+        endif()
+
+        file(READ "${GBA_TOOLCHAIN_LIST_DIR}/dependencies.ini" iniFile)
+        _ini_read_section("${iniFile}" "agbabi" agbabi)
+
+        message(STATUS "Downloading agbabi from \"${agbabi_url}\" to \"${GBA_TOOLCHAIN_LIST_DIR}/lib/agbabi\"")
+        _gba_download("${agbabi_url}" "${GBA_TOOLCHAIN_LIST_DIR}/lib/agbabi" SHOW_PROGRESS)
+    endif()
+endfunction()

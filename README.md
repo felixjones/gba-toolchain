@@ -21,6 +21,12 @@ If a library is required by CMake, but is missing, it will be downloaded into th
 
 [libtonc](https://github.com/devkitPro/libtonc) is the classic GBA C development library. Includes a text rendering engine, [Tonc's Text Engine](https://www.coranac.com/tonc/text/tte.htm).
 
+### agbabi
+
+[agbabi](https://github.com/felixjones/agbabi) ARM embedded ABI functions optimized for GBA. Also provides additional, low-level GBA utility functions.
+
+Simply linking with agbabi will activate the optimised aeabi functions.
+
 ### GBFS
 
 [gbfs](https://pineight.com/gba/#gbfs) provides an asset file system for GBA. Includes several tools for managing these.
