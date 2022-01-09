@@ -19,7 +19,10 @@ else()
     set(optimization -Os)
 endif()
 
-target_compile_options(multiboot PRIVATE ${optimization} -mthumb -ffunction-sections -fdata-sections -Wall -Wextra -Wno-unused-parameter)
+target_compile_options(multiboot PRIVATE
+    $<$<COMPILE_LANGUAGE:ASM>:-x assembler-with-cpp>
+    $<$<COMPILE_LANGUAGE:C>:${optimization} -mabi=aapcs -march=armv4t -mcpu=arm7tdmi -mthumb -ffunction-sections -fdata-sections -Wall -Wextra -Wno-unused-parameter>
+)
 target_link_options(multiboot PRIVATE -Wl,--gc-sections)
 
 set(GBA_MULTIBOOT_LDSCRIPT "${CMAKE_CURRENT_LIST_DIR}/../ldscripts/multiboot.ld" PARENT_SCOPE)

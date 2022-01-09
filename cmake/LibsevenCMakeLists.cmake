@@ -29,23 +29,13 @@ add_library(seven STATIC
 target_include_directories(seven SYSTEM PUBLIC include/)
 target_include_directories(seven PRIVATE src/)
 
-set(cFlags
-    -Os
-    -g
-    -ffunction-sections
-    -fdata-sections
-    -ffreestanding
-    -std=c99
-    -Wall
-    -Wpedantic
-    -mcpu=arm7tdmi
-    -mthumb
-)
 if(NOT USE_CLANG)
-    list(APPEND cFlags -mthumb-interwork)
+    set(flagInterwork -mthumb-interwork)
 endif()
-list(JOIN cFlags " " cFlags)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${cFlags}")
+target_compile_options(seven PRIVATE
+    $<$<COMPILE_LANGUAGE:ASM>:-x assembler-with-cpp>
+    $<$<COMPILE_LANGUAGE:C>:-Os -g -ffunction-sections -fdata-sections -ffreestanding -std=c99 -Wall -Wpedantic -mcpu=arm7tdmi -mthumb ${flagInterwork}>
+)
 
 add_library(libseven ALIAS seven)

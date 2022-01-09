@@ -101,7 +101,6 @@ function(_configure_toolchain)
 
     set(DOCSTRING_CMAKE_C_FLAGS                 "Flags used by the C compiler during all build types.")
     set(DOCSTRING_CMAKE_CXX_FLAGS               "Flags used by the C++ compiler during all build types.")
-    set(DOCSTRING_CMAKE_ASM_FLAGS               "Flags used by the ASM compiler during all build types.")
     set(DOCSTRING_CMAKE_C_FLAGS_MINSIZEREL      "Flags used by the C compiler during MINSIZEREL builds.")
     set(DOCSTRING_CMAKE_CXX_FLAGS_MINSIZEREL    "Flags used by the C++ compiler during MINSIZEREL builds.")
     set(DOCSTRING_CMAKE_C_FLAGS_DEBUG           "Flags used by the C compiler during DEBUG builds.")
@@ -158,7 +157,6 @@ function(_configure_toolchain)
 
     # Assembler
     set(CMAKE_ASM_COMPILER "${GNU_C_COMPILER}" CACHE FILEPATH "${DOCSTRING_CMAKE_ASM_COMPILER}")
-    set(CMAKE_ASM_FLAGS "-mabi=aapcs -march=armv4t -mcpu=arm7tdmi -x assembler-with-cpp" CACHE STRING "${DOCSTRING_CMAKE_ASM_FLAGS}")
 
     #====================
     # objcopy ar ranlib nm objdump strip

@@ -21,7 +21,9 @@ list(REMOVE_ITEM sources "${iohook}")
 add_library(tonc STATIC ${sources})
 target_include_directories(tonc SYSTEM PUBLIC include/)
 
-set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} -mthumb -x assembler-with-cpp")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mthumb -Wall -Wextra -Wno-unused-parameter -Wno-char-subscripts -Wno-sign-compare -Wno-implicit-fallthrough -Wno-type-limits")
+target_compile_options(tonc PRIVATE
+    $<$<COMPILE_LANGUAGE:ASM>:-mthumb -x assembler-with-cpp>
+    $<$<COMPILE_LANGUAGE:C>:-mthumb -Wall -Wextra -Wno-unused-parameter -Wno-char-subscripts -Wno-sign-compare -Wno-implicit-fallthrough -Wno-type-limits>
+)
 
 add_library(tonclib ALIAS tonc)

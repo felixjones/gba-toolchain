@@ -16,7 +16,7 @@ if(GBA)
     add_library(gbfs STATIC "libgbfs.c")
 
     target_include_directories(gbfs SYSTEM PUBLIC include/)
-    target_compile_options(gbfs PRIVATE -mthumb -ffunction-sections -fdata-sections -Wall -Wextra -Wno-unused-parameter)
+    target_compile_options(gbfs PRIVATE -mabi=aapcs -march=armv4t -mcpu=arm7tdmi -mthumb -ffunction-sections -fdata-sections -Wall -Wextra -Wno-unused-parameter)
     target_link_options(gbfs PRIVATE -Wl,--gc-sections)
 else()
     # Host tools

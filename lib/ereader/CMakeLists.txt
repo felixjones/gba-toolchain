@@ -19,7 +19,10 @@ else()
     set(optimization -Os)
 endif()
 
-target_compile_options(ereader PRIVATE ${optimization} -mthumb -ffunction-sections -fdata-sections -Wall -Wextra -Wno-unused-parameter)
+target_compile_options(ereader PRIVATE
+    $<$<COMPILE_LANGUAGE:ASM>:-x assembler-with-cpp>
+    $<$<COMPILE_LANGUAGE:C>:${optimization} -mabi=aapcs -march=armv4t -mcpu=arm7tdmi -mthumb -ffunction-sections -fdata-sections -Wall -Wextra -Wno-unused-parameter>
+)
 target_link_options(ereader PRIVATE -Wl,--gc-sections)
 
 set(GBA_EREADER_LDSCRIPT "${CMAKE_CURRENT_LIST_DIR}/../ldscripts/ereader.ld" PARENT_SCOPE)
