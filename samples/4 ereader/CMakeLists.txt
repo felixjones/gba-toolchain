@@ -16,14 +16,16 @@ gba_add_library_subdirectory(ereader tonc)
 add_executable(helloDotCode main.c)
 set_target_properties(helloDotCode PROPERTIES SUFFIX ".elf")
 
+target_compile_options(helloDotCode PRIVATE -mthumb -mcpu=arm7tdmi -ffunction-sections -fdata-sections -Wall -Wextra)
+target_link_options(helloDotCode PRIVATE -Wl,--gc-sections)
+
 # Really we want MinSizeRel always
 if(USE_CLANG)
     set(optimization -Oz)
 else()
     set(optimization -Os)
 endif()
-target_compile_options(helloDotCode PRIVATE -Wall -mcpu=arm7tdmi -mthumb)
-target_compile_options(tonc PRIVATE ${optimization})
+target_compile_options(tonc PRIVATE ${optimization} -mthumb -mcpu=arm7tdmi -ffunction-sections -fdata-sections)
 
 target_link_libraries(helloDotCode PRIVATE tonc)
 gba_target_link_runtime_library(helloDotCode ereader)

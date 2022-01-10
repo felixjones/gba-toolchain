@@ -16,7 +16,7 @@ gba_add_library_subdirectory(rom tonc)
 add_executable(helloTonc main.c)
 set_target_properties(helloTonc PROPERTIES SUFFIX ".elf")
 
-target_compile_options(helloTonc PRIVATE -Wall -mcpu=arm7tdmi -mthumb)
+target_compile_options(helloTonc PRIVATE -mthumb -mcpu=arm7tdmi -Wall)
 
 target_link_libraries(helloTonc PRIVATE tonc)
 gba_target_link_runtime_library(helloTonc rom)
