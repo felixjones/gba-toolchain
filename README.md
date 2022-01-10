@@ -1,5 +1,12 @@
 # gba-toolchain
 
+### Please see the [Sample Projects](https://github.com/felixjones/gba-toolchain/tree/3.0/samples) for example GBA projects.
+
+## Requirements
+
+* [CMake](https://cmake.org/) (3.20 minimum)
+* Host compiler (optional for compiling additional tools)
+
 ## Basic Usage
 
 gba-toolchain uses [CMake toolchain files](https://cmake.org/cmake/help/latest/manual/cmake-toolchains.7.html#cross-compiling) to download and compile dependencies and set up compilers for cross-compiling.
@@ -7,7 +14,7 @@ gba-toolchain uses [CMake toolchain files](https://cmake.org/cmake/help/latest/m
 The toolchain file (`arm-gba-toolchain.cmake`) is activated with the command line parameter `--toolchain /path/to/arm-gba-toolchain.cmake` when invoking CMake.
 
 gba-toolchain will attempt to locate an installation of the [GNU Arm Embedded Toolchain](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm).
-If the GNU Arm Embedded Toolchain cannot be located, it will be downloaded to the host `local` directory (`%LocalAppData%` on Windows, `opt/local/` on *NIX).
+If the GNU Arm Embedded Toolchain cannot be located, it will be downloaded to the host `local` directory (`%LocalAppData%` on Windows, `~/` on Linux, `/usr/local/share` on macOS).
 
 ## GBA Libraries
 
@@ -101,10 +108,6 @@ Converts a given binary file to an ASM source file. Useful for compiling GBFS ar
 Pads a given binary to the next nearest multiple of a given number.
 GBFS searches on 256 byte boundaries, making this useful for aligning a ROM for appending a GBFS archive onto.
 
-## Samples
-
-Several sample GBA CMake projects are provided in the `samples/` directory.
-
 ## CMake Options
 
 ### -DARM_GNU_TOOLCHAIN=/path/to/arm-gnu-toolchain/root/directory/
@@ -124,14 +127,6 @@ The GNU Arm Embedded Toolchain is still required for GCC linking, compiling asse
 Overrides the initial URL used to download `dependecies.ini`.
 
 Any existing `dependecies.ini` needs to be deleted from the gba-toolchain directory for this variable to take effect.
-
-### -DMGBA=/path/to/mGBA/root
-
-[mGBA](https://mgba.io/) is used for executing unit tests.
-
-This can also be configured via the environment variable `MGBA`.
-
-The directory `gba-toolchain/mGBA` is also searched for mGBA.
 
 ### -DGBAFIX=/path/to/binary
 
