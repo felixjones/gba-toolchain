@@ -16,6 +16,12 @@ file(READ "src/lib/rawbmp/dcs.h" filedata)
 string(REGEX REPLACE "extern int dpi_multiplier;" "//extern int dpi_multiplier;" filedata "${filedata}")
 file(WRITE "src/lib/rawbmp/dcs.h" "${filedata}")
 
+# Fixup nedcmake.cpp
+file(READ "src/nedcmake.cpp" filedata)
+string(REGEX REPLACE "fclose[(]f[)];" "if(f)fclose(f);f=NULL;" filedata "${filedata}")
+string(REGEX REPLACE "fwrite[(]carddata,1,cardsize,f[)];" "if(f)fwrite(carddata,1,cardsize,f);" filedata "${filedata}")
+file(WRITE "src/nedcmake.cpp" "${filedata}")
+
 # nedclib shared library
 file(GLOB_RECURSE nedclibSrc "src/lib/*.cpp")
 

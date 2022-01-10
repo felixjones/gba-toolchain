@@ -424,7 +424,7 @@ function(_gba_find_gbafix)
             file(MAKE_DIRECTORY "${GBA_TOOLCHAIN_TOOLS}/gbafix/build")
 
             # Bug fix for platforms stuck on ARM GNU toolchain
-            if(CMAKE_HOST_SYSTEM_NAME MATCHES Darwin)
+            if(CMAKE_HOST_SYSTEM_NAME STREQUAL Darwin OR CMAKE_HOST_SYSTEM_NAME STREQUAL Linux)
                 set(hostOptions -DCMAKE_C_COMPILER=cc)
             endif()
 
@@ -500,8 +500,8 @@ function(_gba_find_nedcmake)
             file(MAKE_DIRECTORY "${GBA_TOOLCHAIN_TOOLS}/nedclib/build")
 
             # Bug fix for platforms stuck on ARM GNU toolchain
-            if(CMAKE_HOST_SYSTEM_NAME MATCHES Darwin)
-                set(hostOptions -DCMAKE_C_COMPILER=cc)
+            if(CMAKE_HOST_SYSTEM_NAME STREQUAL Darwin OR CMAKE_HOST_SYSTEM_NAME STREQUAL Linux)
+                set(hostOptions -DCMAKE_C_COMPILER=cc -DCMAKE_CXX_COMPILER=cc)
             endif()
 
             # Configure nedcmake
@@ -580,7 +580,7 @@ function(_gba_find_gbfs)
             file(MAKE_DIRECTORY "${GBA_TOOLCHAIN_TOOLS}/gbfs/build")
 
             # Bug fix for platforms stuck on ARM GNU toolchain
-            if(CMAKE_HOST_SYSTEM_NAME MATCHES Darwin)
+            if(CMAKE_HOST_SYSTEM_NAME STREQUAL Darwin OR CMAKE_HOST_SYSTEM_NAME STREQUAL Linux)
                 set(hostOptions -DCMAKE_C_COMPILER=cc)
             endif()
 
