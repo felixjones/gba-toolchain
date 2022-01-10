@@ -42,6 +42,9 @@ function(_find_arm_gnu)
             _ini_read_section("${iniFile}" "gnu-arm-embedded-toolchain" gnuArmUrl)
 
             get_filename_component(armGnuToolchain "${HOST_LOCAL_DIRECTORY}/arm-gnu-toolchain" ABSOLUTE)
+            if(NOT gnuArmUrl_${HOST_PLATFORM_NAME})
+                message(FATAL_ERROR "Could not find ARM GNU url for ${HOST_PLATFORM_NAME}")
+            endif()
             message(STATUS "Downloading ARM GNU toolchain from \"${gnuArmUrl_${HOST_PLATFORM_NAME}}\" to \"${armGnuToolchain}\"")
             _gba_download("${gnuArmUrl_${HOST_PLATFORM_NAME}}" "${armGnuToolchain}" SHOW_PROGRESS EXPECTED_MD5 "${gnuArmUrl_${HOST_PLATFORM_NAME}-md5}")
 

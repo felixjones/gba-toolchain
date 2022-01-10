@@ -18,7 +18,21 @@ file(WRITE "src/lib/rawbmp/dcs.h" "${filedata}")
 
 # nedclib shared library
 file(GLOB_RECURSE nedclibSrc "src/lib/*.cpp")
-add_library(nedclib SHARED ${nedclibSrc})
+
+# Fixup malloc.h in all sources
+foreach(source ${nedclibSrc})
+    file(READ "${source}" filedata)
+    string(REGEX REPLACE "#include <malloc[.]h>" "#include <stdlib.h>" filedata "${filedata}")
+    file(WRITE "${source}" "${filedata}")
+endforeach()
+
+if(WIN32)
+    set(libraryType SHARED)
+else()
+    set(libraryType STATIC)
+endif()
+
+add_library(nedclib ${libraryType} ${nedclibSrc})
 target_compile_definitions(nedclib PRIVATE NEDCLIB2_EXPORTS)
 target_include_directories(nedclib PRIVATE src/lib src/lib/rawbmp)
 
@@ -36,5 +50,7 @@ set_target_properties(nedclib nedcmake
     PROPERTIES CXX_STANDARD 11
 )
 
-install(TARGETS nedclib DESTINATION .)
+if(WIN32)
+    install(TARGETS nedclib DESTINATION .)
+endif()
 install(TARGETS nedcmake DESTINATION .)

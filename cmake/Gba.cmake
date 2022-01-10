@@ -423,9 +423,14 @@ function(_gba_find_gbafix)
             file(RENAME "${GBA_TOOLCHAIN_TOOLS}/gbafix/GbaFixCMakeLists.cmake" "${GBA_TOOLCHAIN_TOOLS}/gbafix/CMakeLists.txt")
             file(MAKE_DIRECTORY "${GBA_TOOLCHAIN_TOOLS}/gbafix/build")
 
+            # Bug fix for platforms stuck on ARM GNU toolchain
+            if(CMAKE_HOST_SYSTEM_NAME MATCHES Darwin)
+                set(hostOptions -DCMAKE_C_COMPILER=cc)
+            endif()
+
             # Configure gbafix
             execute_process(
-                COMMAND ${CMAKE_COMMAND} .. -DCMAKE_INSTALL_PREFIX=..
+                COMMAND ${CMAKE_COMMAND} .. -DCMAKE_INSTALL_PREFIX=.. ${hostOptions}
                 WORKING_DIRECTORY "${GBA_TOOLCHAIN_TOOLS}/gbafix/build"
                 RESULT_VARIABLE cmakeResult
             )
@@ -494,11 +499,16 @@ function(_gba_find_nedcmake)
             file(RENAME "${GBA_TOOLCHAIN_TOOLS}/nedclib/NedcmakeCMakeLists.cmake" "${GBA_TOOLCHAIN_TOOLS}/nedclib/CMakeLists.txt")
             file(MAKE_DIRECTORY "${GBA_TOOLCHAIN_TOOLS}/nedclib/build")
 
+            # Bug fix for platforms stuck on ARM GNU toolchain
+            if(CMAKE_HOST_SYSTEM_NAME MATCHES Darwin)
+                set(hostOptions -DCMAKE_C_COMPILER=cc)
+            endif()
+
             # Configure nedcmake
             execute_process(
-                    COMMAND ${CMAKE_COMMAND} .. -DCMAKE_INSTALL_PREFIX=..
-                    WORKING_DIRECTORY "${GBA_TOOLCHAIN_TOOLS}/nedclib/build"
-                    RESULT_VARIABLE cmakeResult
+                COMMAND ${CMAKE_COMMAND} .. -DCMAKE_INSTALL_PREFIX=.. ${hostOptions}
+                WORKING_DIRECTORY "${GBA_TOOLCHAIN_TOOLS}/nedclib/build"
+                RESULT_VARIABLE cmakeResult
             )
             if(NOT ${cmakeResult} EQUAL 0)
                 message(FATAL_ERROR "CMake configure failed for nedcmake (code ${cmakeResult})")
@@ -506,9 +516,9 @@ function(_gba_find_nedcmake)
 
             # Build nedcmake
             execute_process(
-                    COMMAND ${CMAKE_COMMAND} --build . --target install
-                    WORKING_DIRECTORY "${GBA_TOOLCHAIN_TOOLS}/nedclib/build"
-                    RESULT_VARIABLE cmakeResult
+                COMMAND ${CMAKE_COMMAND} --build . --target install
+                WORKING_DIRECTORY "${GBA_TOOLCHAIN_TOOLS}/nedclib/build"
+                RESULT_VARIABLE cmakeResult
             )
             if(NOT ${cmakeResult} EQUAL 0)
                 message(FATAL_ERROR "CMake build failed for nedcmake (code ${cmakeResult})")
@@ -569,9 +579,14 @@ function(_gba_find_gbfs)
             file(RENAME "${GBA_TOOLCHAIN_TOOLS}/gbfs/GbfsCMakeLists.cmake" "${GBA_TOOLCHAIN_TOOLS}/gbfs/CMakeLists.txt")
             file(MAKE_DIRECTORY "${GBA_TOOLCHAIN_TOOLS}/gbfs/build")
 
+            # Bug fix for platforms stuck on ARM GNU toolchain
+            if(CMAKE_HOST_SYSTEM_NAME MATCHES Darwin)
+                set(hostOptions -DCMAKE_C_COMPILER=cc)
+            endif()
+
             # Configure gbfs
             execute_process(
-                COMMAND ${CMAKE_COMMAND} .. -DCMAKE_INSTALL_PREFIX=..
+                COMMAND ${CMAKE_COMMAND} .. -DCMAKE_INSTALL_PREFIX=.. ${hostOptions}
                 WORKING_DIRECTORY "${GBA_TOOLCHAIN_TOOLS}/gbfs/build"
                 RESULT_VARIABLE cmakeResult
             )

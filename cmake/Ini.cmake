@@ -23,6 +23,7 @@ function(_ini_read_section _input _section _outVariable)
 
     string(REGEX REPLACE ";[^\n]*" "" lines "${_input}")
     string(REGEX REPLACE "\n" ";" lines "${lines}")
+    list(TRANSFORM lines STRIP)
 
     foreach(line ${lines})
         if(NOT foundSection)

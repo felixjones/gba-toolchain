@@ -48,6 +48,7 @@ if(WIN32)
     set(HOST_PLATFORM_NAME win32 CACHE INTERNAL "")
     set(HOST_LOCAL_DIRECTORY "$ENV{LocalAppData}" CACHE INTERNAL "")
     set(HOST_APPLICATIONS_DIRECTORIES "$ENV{ProgramFiles}" "$ENV{ProgramFiles\(x86\)}" CACHE INTERNAL "")
+    set(HOST_TEMP_DIRECTORY "$ENV{TEMP}" CACHE INTERNAL "")
 elseif(UNIX)
     if(CMAKE_HOST_SYSTEM_NAME STREQUAL Linux)
         if(CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL aarch64)
@@ -56,12 +57,13 @@ elseif(UNIX)
             set(HOST_PLATFORM_NAME x86_64-linux CACHE INTERNAL "")
         endif()
         set(HOST_APPLICATIONS_DIRECTORIES /bin /usr/bin /usr/share /usr/local /opt CACHE INTERNAL "")
+        set(HOST_TEMP_DIRECTORY /tmp CACHE INTERNAL "")
     elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL Darwin)
         set(HOST_PLATFORM_NAME mac CACHE INTERNAL "")
         set(HOST_APPLICATIONS_DIRECTORIES /Applications CACHE INTERNAL "")
+        set(HOST_TEMP_DIRECTORY "$ENV{TMPDIR}" CACHE INTERNAL "")
     endif()
-
-    set(HOST_LOCAL_DIRECTORY /opt/local CACHE INTERNAL "")
+    set(HOST_LOCAL_DIRECTORY /usr/local/share CACHE INTERNAL "")
 endif()
 
 if(NOT HOST_PLATFORM_NAME)
@@ -73,7 +75,7 @@ endif()
 #====================
 
 # This should be on local disk due to network file systems breaking CMake lock files
-set(GBA_TOOLCHAIN_LOCK "${HOST_LOCAL_DIRECTORY}/gba-toolchain.lock" CACHE INTERNAL "" FORCE)
+set(GBA_TOOLCHAIN_LOCK "${HOST_TEMP_DIRECTORY}/gba-toolchain.lock" CACHE INTERNAL "" FORCE)
 # CMAKE_TOOLCHAIN_FILE should be referenced to hide an invalid warning
 set(GBA_TOOLCHAIN_FILE "${CMAKE_TOOLCHAIN_FILE}")
 
