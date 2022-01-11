@@ -16,7 +16,7 @@ gba_add_library_subdirectory(rom tonc)
 add_executable(helloOverlay main.c)
 set_target_properties(helloOverlay PROPERTIES SUFFIX ".elf")
 
-target_compile_options(helloOverlay PRIVATE -mthumb -mcpu=arm7tdmi -ffunction-sections -fdata-sections -Wall -Wextra)
+target_compile_options(helloOverlay PRIVATE -mthumb -ffunction-sections -fdata-sections -Wall -Wextra)
 target_link_options(helloOverlay PRIVATE -Wl,--gc-sections)
 
 target_link_libraries(helloOverlay PRIVATE tonc)

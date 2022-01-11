@@ -23,7 +23,7 @@ target_include_directories(tonc SYSTEM PUBLIC include/)
 
 target_compile_options(tonc PRIVATE
     $<$<COMPILE_LANGUAGE:ASM>:-mthumb -x assembler-with-cpp>
-    $<$<COMPILE_LANGUAGE:C>:-mthumb -Wall -Wextra -Wno-unused-parameter -Wno-char-subscripts -Wno-sign-compare -Wno-implicit-fallthrough -Wno-type-limits>
+    $<$<COMPILE_LANGUAGE:C>:-mthumb -ffunction-sections -fdata-sections -Wall -Wextra -Wno-unused-parameter -Wno-char-subscripts -Wno-sign-compare -Wno-implicit-fallthrough -Wno-type-limits>
 )
 
 add_library(tonclib ALIAS tonc)

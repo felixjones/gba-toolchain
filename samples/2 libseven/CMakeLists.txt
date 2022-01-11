@@ -16,7 +16,7 @@ gba_add_library_subdirectory(rom seven)
 add_executable(helloSeven main.c)
 set_target_properties(helloSeven PROPERTIES SUFFIX ".elf")
 
-target_compile_options(helloSeven PRIVATE -std=c99 -ffunction-sections -fdata-sections -mcpu=arm7tdmi -mthumb)
+target_compile_options(helloSeven PRIVATE -std=c99 -ffunction-sections -fdata-sections -mthumb)
 
 target_link_libraries(helloSeven PRIVATE seven)
 gba_target_link_runtime_library(helloSeven rom)

@@ -130,12 +130,12 @@ function(_configure_toolchain)
         )
 
         # Flags for all build types
-        set(CMAKE_C_FLAGS "${SHARED_C_FLAGS} --target=arm-arm-none-eabi -isystem \"${ARM_GNU_TOOLCHAIN}/arm-none-eabi/include\"" CACHE STRING "${DOCSTRING_CMAKE_C_FLAGS}" FORCE)
-        set(CMAKE_CXX_FLAGS "${SHARED_CXX_FLAGS} --target=arm-arm-none-eabi -isystem \"${ARM_GNU_TOOLCHAIN}/arm-none-eabi/include\"" CACHE STRING "${DOCSTRING_CMAKE_CXX_FLAGS}" FORCE)
+        set(CMAKE_C_FLAGS_INIT "${SHARED_C_FLAGS} --target=arm-arm-none-eabi -isystem \"${ARM_GNU_TOOLCHAIN}/arm-none-eabi/include\"" CACHE STRING "${DOCSTRING_CMAKE_C_FLAGS}" FORCE)
+        set(CMAKE_CXX_FLAGS_INIT "${SHARED_CXX_FLAGS} --target=arm-arm-none-eabi -isystem \"${ARM_GNU_TOOLCHAIN}/arm-none-eabi/include\"" CACHE STRING "${DOCSTRING_CMAKE_CXX_FLAGS}" FORCE)
 
         # Flags for MinSizeRel
-        set(CMAKE_C_FLAGS_MINSIZEREL "-Oz -DNDEBUG" CACHE STRING "${DOCSTRING_CMAKE_C_FLAGS_MINSIZEREL}")
-        set(CMAKE_CXX_FLAGS_MINSIZEREL "-Oz -DNDEBUG" CACHE STRING "${DOCSTRING_CMAKE_CXX_FLAGS_MINSIZEREL}")
+        set(CMAKE_C_FLAGS_MINSIZEREL_INIT "-Oz -DNDEBUG" CACHE STRING "${DOCSTRING_CMAKE_C_FLAGS_MINSIZEREL}")
+        set(CMAKE_CXX_FLAGS_MINSIZEREL_INIT "-Oz -DNDEBUG" CACHE STRING "${DOCSTRING_CMAKE_CXX_FLAGS_MINSIZEREL}")
 
         # Use GNU compilers for Clang linking
         set(CMAKE_C_LINK_EXECUTABLE "\"${GNU_C_COMPILER}\" <CMAKE_C_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>" CACHE FILEPATH "${DOCSTRING_CMAKE_C_LINK_EXECUTABLE}")
@@ -146,8 +146,8 @@ function(_configure_toolchain)
         set(CMAKE_CXX_COMPILER "${CLANG_CXX_COMPILER}" CACHE FILEPATH "${DOCSTRING_CMAKE_CXX_COMPILER}")
     else()
         # Flags for all build types
-        set(CMAKE_C_FLAGS "${SHARED_C_FLAGS}" CACHE STRING "${DOCSTRING_CMAKE_C_FLAGS}")
-        set(CMAKE_CXX_FLAGS "${SHARED_CXX_FLAGS}" CACHE STRING "${DOCSTRING_CMAKE_CXX_FLAGS}")
+        set(CMAKE_C_FLAGS_INIT "${SHARED_C_FLAGS}" CACHE STRING "${DOCSTRING_CMAKE_C_FLAGS}")
+        set(CMAKE_CXX_FLAGS_INIT "${SHARED_CXX_FLAGS}" CACHE STRING "${DOCSTRING_CMAKE_CXX_FLAGS}")
 
         # Compilers
         set(CMAKE_C_COMPILER "${GNU_C_COMPILER}" CACHE FILEPATH "${DOCSTRING_CMAKE_C_COMPILER}")
@@ -155,8 +155,8 @@ function(_configure_toolchain)
     endif()
 
     # Flags for Debug
-    set(CMAKE_C_FLAGS_DEBUG "-Og -g" CACHE STRING "${DOCSTRING_CMAKE_C_FLAGS_DEBUG}")
-    set(CMAKE_CXX_FLAGS_DEBUG "-Og -g" CACHE STRING "${DOCSTRING_CMAKE_CXX_FLAGS_DEBUG}")
+    set(CMAKE_C_FLAGS_DEBUG_INIT "-Og -g" CACHE STRING "${DOCSTRING_CMAKE_C_FLAGS_DEBUG}")
+    set(CMAKE_CXX_FLAGS_DEBUG_INIT "-Og -g" CACHE STRING "${DOCSTRING_CMAKE_CXX_FLAGS_DEBUG}")
 
     # Assembler
     set(CMAKE_ASM_COMPILER "${GNU_C_COMPILER}" CACHE FILEPATH "${DOCSTRING_CMAKE_ASM_COMPILER}")
@@ -175,6 +175,10 @@ function(_configure_toolchain)
     #====================
     # Linkers
     #====================
+
+    # Unfortunately ARM GNU toolchain compiles with short enums
+    # This causes a 32-bit enum warning to be emitted, even if all binaries use 32-bit enums
+    set(CMAKE_EXE_LINKER_FLAGS_INIT "-Xlinker -no-enum-size-warning" CACHE INTERNAL "" FORCE)
 
     set(CMAKE_LINKER "${GNU_C_COMPILER}" CACHE FILEPATH "Path to ld.")
     set(CMAKE_SHARED_LINKER "${GNU_C_COMPILER}" CACHE FILEPATH "Path to ld for shared linking.")

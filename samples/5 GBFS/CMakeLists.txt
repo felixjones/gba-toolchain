@@ -35,7 +35,7 @@ set_target_properties(helloGbfs PROPERTIES SUFFIX ".elf")
 # helloGbfs depends on assets
 add_dependencies(helloGbfs assets)
 # Compile options and link libraries for helloGbfs
-target_compile_options(helloGbfs PRIVATE -mthumb -mcpu=arm7tdmi -Wall -Wextra)
+target_compile_options(helloGbfs PRIVATE -mthumb -Wall -Wextra)
 target_link_libraries(helloGbfs PRIVATE tonc gbfs)
 gba_target_link_runtime_library(helloGbfs rom)
 
