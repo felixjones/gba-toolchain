@@ -14,14 +14,32 @@
     .arm
     .global _start
 _start:
-    // Enter thumb mode (bit 0 is set to 1)
-    adr     r0, .Lthumb_start + 1
-    bx      r0
+    // Jump to ARM entry point
+    b       .Larm_start
+.Lzero_word:
+    .word   0x00000000
 
     // This word is destroyed by e-reader
     .word   0x00000000
 
-    // ROM (thumb) execution entry point
+    // EWRAM (arm) execution entry point
+    .arm
+.Larm_start:
+    // Switch to IRQ mode (0x12)
+    mov     r0, #0x12
+    msr     cpsr, r0
+    ldr     sp, =__sp_irq // Set IRQ stack pointer
+
+    // Switch to user mode (0x1f)
+    mov     r0, #0x1f
+    msr     cpsr, r0
+    ldr     sp, =__sp_usr // Set user stack pointer
+
+    // Enter thumb mode (bit 0 is set to 1)
+    adr     r0, .Lthumb_start + 1
+    bx      r0
+
+    // EWRAM (thumb) execution entry point
     .thumb
 .Lthumb_start:
     // Reset memory regions (includes bss)
@@ -46,9 +64,6 @@ _start:
     ldr     r2, =__data_cpuset_copy
     swi     #0xb
 
-    // Store e-reader return address
-    push    {lr}
-
     // Initializers
     .extern __libc_init_array
     ldr     r2, =__libc_init_array
@@ -61,24 +76,16 @@ _start:
     ldr     r2, =main
     bl      .Lbx_r2
 
-    // Store result of main
-    push    {r0}
-
     // Finalizers
     .extern __libc_fini_array
     ldr     r2, =__libc_fini_array
     bl      .Lbx_r2
 
-    // Restore result of main
-    pop     {r0}
-
     // Fallthrough to _exit
     .thumb
     .global _exit
 _exit:
-    // Load e-reader return address
-    pop     {r2}
-    // Fallthrough to branch-link
+    swi     #0x00 // Soft reset
 
     // For branch-link
     .thumb
