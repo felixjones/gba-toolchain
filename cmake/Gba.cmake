@@ -349,7 +349,7 @@ function(gba_add_gbfs _target)
 
     add_custom_target(${_target} ALL
         COMMAND "${GBFS}" $<TARGET_GENEX_EVAL:${_target},$<TARGET_PROPERTY:${_target},TARGET_FILE>> ${ARGS_UNPARSED_ARGUMENTS}
-        COMMENT  "Compiling GBFS ${_target}"
+        COMMENT "Compiling GBFS ${_target}"
         SOURCES ${ARGS_UNPARSED_ARGUMENTS}
         WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
     )

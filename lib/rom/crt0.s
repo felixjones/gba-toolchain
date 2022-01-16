@@ -133,4 +133,9 @@ _exit:
     .global _getpid
 _getpid:
     mov     r0, #0
+    // Fallthrough to __sync_synchronize
+
+    .section .crt0.__sync_synchronize, "ax", %progbits
+    .global __sync_synchronize
+__sync_synchronize:
     bx      lr

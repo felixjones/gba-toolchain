@@ -104,6 +104,10 @@ SECTIONS {
     } > ewram
 
     /* Index entries for section unwinding */
+    .ARM.extab : ALIGN(4) {
+        *(.ARM.extab*)
+    } > rom
+
     .ARM.exidx : ALIGN(4) {
         PROVIDE_HIDDEN (__exidx_start = .);
         *(.ARM.exidx*)
