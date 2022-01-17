@@ -24,13 +24,13 @@ MEMORY {
 /*
  * Common symbols
  */
-__iwram_start = ORIGIN(iwram);
-__iwram_top   = ORIGIN(iwram) + LENGTH(iwram);
-__ewram_start = ORIGIN(ewram);
-__ewram_top   = ORIGIN(ewram) + LENGTH(ewram);
-__sp_irq      = __iwram_top - 0x60;
-__sp_usr      = __sp_irq - 0xA0;
-__ewram_lma   = 0x8000000; /* If starting as ROM, copy into EWRAM */
+__iwram_base = ORIGIN(iwram);
+__iwram_top  = ORIGIN(iwram) + LENGTH(iwram);
+__ewram_base = ORIGIN(ewram);
+__ewram_top  = ORIGIN(ewram) + LENGTH(ewram);
+__sp_irq     = __iwram_top - 0x60;
+__sp_usr     = __sp_irq - 0xA0;
+__ewram_lma  = 0x8000000; /* If starting as ROM, copy into EWRAM */
 
 /*
  * Sections
@@ -141,10 +141,22 @@ SECTIONS {
      * IWRAM
      */
 
-    /* IWRAM load memory address (source) */
-    __iwram_lma = ALIGN(4);
+    /* IWRAM base load memory address (source) */
+    __iwram_base_lma = ALIGN(4);
 
-    .iwram __iwram_start : AT(__iwram_lma) ALIGN(4) {
+    .iwram.base __iwram_base : AT(__iwram_base_lma) ALIGN(4) {
+        __iwram_base_start = ABSOLUTE(.);
+        *(.iwram.base .iwram.base.*)
+        *iwram.base.*(.text* .data*)
+        . = ALIGN(4);
+        __iwram_base_end = ABSOLUTE(.);
+    } > iwram
+
+    /* IWRAM load memory address (source) */
+    __iwram_lma = __iwram_base_lma + ALIGN(SIZEOF(.iwram.base), 4);
+
+    .iwram : AT(__iwram_lma) ALIGN(4) {
+        __iwram_start = ABSOLUTE(.);
         *(.iwram .iwram.*)
         *iwram.*(.text* .data*)
         . = ALIGN(4);
@@ -228,6 +240,7 @@ SECTIONS {
      * crt0.s CpuSet constants
      */
 
+    __iwram_base_cpuset_copy = ((__iwram_base_end - __iwram_base_start) / 4) | (1 << 26);
     __ewram_cpuset_copy = ((__ewram_end - __ewram_start) / 4) | (1 << 26);
     __iwram_cpuset_copy = ((__iwram_end - __iwram_start) / 4) | (1 << 26);
     __bss_cpuset_fill = ((__bss_end - __bss_start) / 4) | (5 << 24);
