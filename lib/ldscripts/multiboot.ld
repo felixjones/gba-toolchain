@@ -46,6 +46,24 @@ SECTIONS {
     .crt0 : ALIGN(4) {
         KEEP (*(.crt0))
         . = ALIGN(4);
+
+        __ewram_data_cpuset = ABSOLUTE(.);
+        LONG(__ewram_data_lma)
+        LONG(__ewram_data_start)
+        LONG(__ewram_data_cpuset_copy)
+        . = ALIGN(4);
+
+        __iwram_cpuset = ABSOLUTE(.);
+        LONG(__iwram_lma)
+        LONG(__iwram_start)
+        LONG(__iwram_cpuset_copy)
+        . = ALIGN(4);
+
+        __data_cpuset = ABSOLUTE(.);
+        LONG(__data_lma)
+        LONG(__data_start)
+        LONG(__data_cpuset_copy)
+        . = ALIGN(4);
     } > ewram
 
     /* Program code */

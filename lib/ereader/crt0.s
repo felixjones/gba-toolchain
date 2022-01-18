@@ -46,24 +46,6 @@ _start:
     mov     r0, #0xfe
     swi     #0x1
 
-    // CpuSet copy ewram data
-    ldr     r0, =__ewram_data_lma
-    ldr     r1, =__ewram_data_start
-    ldr     r2, =__ewram_data_cpuset_copy
-    swi     #0xb
-
-    // CpuSet copy iwram
-    ldr     r0, =__iwram_lma
-    ldr     r1, =__iwram_start
-    ldr     r2, =__iwram_cpuset_copy
-    swi     #0xb
-
-    // CpuSet copy data
-    ldr     r0, =__data_lma
-    ldr     r1, =__data_start
-    ldr     r2, =__data_cpuset_copy
-    swi     #0xb
-
 #ifdef __USE_IWRAM_BASE__
     // CpuSet copy iwram base
     ldr     r0, =__iwram_base_lma
@@ -71,6 +53,21 @@ _start:
     ldr     r2, =__iwram_base_cpuset_copy
     swi     #0xb
 #endif
+
+    // CpuSet copy ewram data
+    ldr     r0, =__ewram_data_cpuset
+    ldm     r0, {r0-r2}
+    swi     #0xb
+
+    // CpuSet copy iwram
+    ldr     r0, =__iwram_cpuset
+    ldm     r0, {r0-r2}
+    swi     #0xb
+
+    // CpuSet copy data
+    ldr     r0, =__data_cpuset
+    ldm     r0, {r0-r2}
+    swi     #0xb
 
     // Initializers
     .extern __libc_init_array

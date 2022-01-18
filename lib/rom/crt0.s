@@ -65,28 +65,10 @@ _start:
     // ROM (thumb) execution entry point
     .thumb
 .Lthumb_start:
-    // CpuSet copy ewram
-    ldr     r0, =__ewram_lma
-    ldr     r1, =__ewram_start
-    ldr     r2, =__ewram_cpuset_copy
-    swi     #0xb
-
-    // CpuSet copy iwram
-    ldr     r0, =__iwram_lma
-    ldr     r1, =__iwram_start
-    ldr     r2, =__iwram_cpuset_copy
-    swi     #0xb
-
     // CpuSet fill bss
     ldr     r0, =.Lzero_word
     ldr     r1, =__bss_start
     ldr     r2, =__bss_cpuset_fill
-    swi     #0xb
-
-    // CpuSet copy data
-    ldr     r0, =__data_lma
-    ldr     r1, =__data_start
-    ldr     r2, =__data_cpuset_copy
     swi     #0xb
 
 #ifdef __USE_EWRAM_BASE__
@@ -104,6 +86,21 @@ _start:
     ldr     r2, =__iwram_base_cpuset_copy
     swi     #0xb
 #endif
+
+    // CpuSet copy ewram
+    ldr     r0, =__ewram_cpuset
+    ldm     r0, {r0-r2}
+    swi     #0xb
+
+    // CpuSet copy iwram
+    ldr     r0, =__iwram_cpuset
+    ldm     r0, {r0-r2}
+    swi     #0xb
+
+    // CpuSet copy data
+    ldr     r0, =__data_cpuset
+    ldm     r0, {r0-r2}
+    swi     #0xb
 
     // Initializers
     .extern __libc_init_array

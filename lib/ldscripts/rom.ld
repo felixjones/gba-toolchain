@@ -25,13 +25,13 @@ MEMORY {
 /*
  * Common symbols
  */
-__rom_start   = ORIGIN(rom);
-__iwram_base  = ORIGIN(iwram);
-__iwram_top   = ORIGIN(iwram) + LENGTH(iwram);
-__ewram_base  = ORIGIN(ewram);
-__ewram_top   = ORIGIN(ewram) + LENGTH(ewram);
-__sp_irq      = __iwram_top - 0x60;
-__sp_usr      = __sp_irq - 0xA0;
+__rom_start  = ORIGIN(rom);
+__iwram_base = ORIGIN(iwram);
+__iwram_top  = ORIGIN(iwram) + LENGTH(iwram);
+__ewram_base = ORIGIN(ewram);
+__ewram_top  = ORIGIN(ewram) + LENGTH(ewram);
+__sp_irq     = __iwram_top - 0x60;
+__sp_usr     = __sp_irq - 0xA0;
 
 /*
  * Sections
@@ -46,6 +46,24 @@ SECTIONS {
     /* Compiler runtime entry point */
     .crt0 : ALIGN(4) {
         KEEP (*(.crt0))
+        . = ALIGN(4);
+
+        __ewram_cpuset = ABSOLUTE(.);
+        LONG(__ewram_lma)
+        LONG(__ewram_start)
+        LONG(__ewram_cpuset_copy)
+        . = ALIGN(4);
+
+        __iwram_cpuset = ABSOLUTE(.);
+        LONG(__iwram_lma)
+        LONG(__iwram_start)
+        LONG(__iwram_cpuset_copy)
+        . = ALIGN(4);
+
+        __data_cpuset = ABSOLUTE(.);
+        LONG(__data_lma)
+        LONG(__data_start)
+        LONG(__data_cpuset_copy)
         . = ALIGN(4);
     } > rom
 
