@@ -114,6 +114,10 @@ Converts a given binary file to an ASM source file. Useful for compiling GBFS ar
 Pads a given binary to the next nearest multiple of a given number.
 GBFS searches on 256 byte boundaries, making this useful for aligning a ROM for appending a GBFS archive onto.
 
+#### mmutil
+
+Compiles audio files into a Maxmod sample binary. Can also output an associated header file, or a GBA ROM.
+
 ## CMake Options
 
 ### -DARM_GNU_TOOLCHAIN=/path/to/arm-gnu-toolchain/root/directory/
@@ -163,3 +167,9 @@ This can also be configured via the environment variable `BIN2S`.
 Use an existing installation of padbin (part of [gbfs](https://pineight.com/gba/#gbfs)).
 
 This can also be configured via the environment variable `PADBIN`.
+
+### -DMMUTIL=/path/to/binary
+
+Use an existing installation of [mmutil](https://github.com/devkitPro/mmutil).
+
+This can also be configured via the environment variable `MMUTIL`.
