@@ -24,6 +24,6 @@ set_target_properties(maxmod PROPERTIES OUTPUT_NAME mm)
 target_include_directories(maxmod SYSTEM PUBLIC include/)
 target_include_directories(maxmod PRIVATE asm_include/)
 target_compile_definitions(maxmod PRIVATE SYS_GBA USE_IWRAM)
-target_compile_options(maxmod PRIVATE -march=armv4t -mthumb)
+target_compile_options(maxmod PRIVATE -x assembler-with-cpp)
 
 add_library(mm ALIAS maxmod)

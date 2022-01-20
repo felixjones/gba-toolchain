@@ -23,6 +23,7 @@ set(NEDCMAKE "$ENV{NEDCMAKE}" CACHE PATH "Path to nedcmake binary")
 set(GBFS "$ENV{GBFS}" CACHE PATH "Path to gbfs binary")
 set(BIN2S "$ENV{BIN2S}" CACHE PATH "Path to bin2s binary")
 set(PADBIN "$ENV{PADBIN}" CACHE PATH "Path to padbin binary")
+set(MMUTIL "$ENV{MMUTIL}" CACHE PATH "Path to mmutil binary")
 
 #====================
 # System

@@ -326,7 +326,7 @@ endfunction()
 #
 # GBFS is used to bundle assets together into an archive that can be read by libgbfs
 # This command supports adding dependant targets
-# assuming that they are GBA targets that have a property "OBJCOPY_OUTPUT"
+# assuming that they have the property "TARGET_FILE"
 #
 # \arg:_target Name of the gbfs target to create
 # \group:ARGN List of sources and/or targets to add to this gbfs archive
@@ -347,10 +347,18 @@ function(gba_add_gbfs _target)
     _gba_find_gbfs()
     file(LOCK "${GBA_TOOLCHAIN_LOCK}" RELEASE)
 
+    foreach(arg ${ARGS_UNPARSED_ARGUMENTS})
+        if(TARGET ${arg})
+            list(APPEND targetSources "$<TARGET_GENEX_EVAL:${arg},$<TARGET_PROPERTY:${arg},TARGET_FILE>>")
+        else()
+            list(APPEND sources "${arg}")
+        endif()
+    endforeach()
+
     add_custom_target(${_target} ALL
-        COMMAND "${GBFS}" $<TARGET_GENEX_EVAL:${_target},$<TARGET_PROPERTY:${_target},TARGET_FILE>> ${ARGS_UNPARSED_ARGUMENTS}
+        COMMAND "${GBFS}" $<TARGET_GENEX_EVAL:${_target},$<TARGET_PROPERTY:${_target},TARGET_FILE>> ${sources} ${targetSources}
         COMMENT "Compiling GBFS ${_target}"
-        SOURCES ${ARGS_UNPARSED_ARGUMENTS}
+        SOURCES ${sources}
         WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
     )
 
@@ -378,6 +386,72 @@ function(gba_add_gbfs _target)
     )
     set_property(TARGET ${_target} PROPERTY TARGET_FILE
         $<TARGET_GENEX_EVAL:${_target},$<TARGET_PROPERTY:${_target},TARGET_FILE_DIR>>/$<TARGET_GENEX_EVAL:${_target},$<TARGET_PROPERTY:${_target},TARGET_FILE_NAME>>
+    )
+endfunction()
+
+#! gba_add_maxmod_soundbank : create maxmod soundbank target
+#
+# mmutil (Maxmod Util) is used to compile Maxmod sounds into a soundbank binary
+#
+# \arg:_target Name of the gbfs target to create
+# \group:ARGN List of sources and/or targets to add to this gbfs archive
+#
+function(gba_add_maxmod_soundbank _target)
+    set(options
+        GENERATE_HEADER
+        GENERATE_TEST_ROM
+    )
+    set(oneValueArgs)
+    set(multiValueArgs)
+    cmake_parse_arguments(ARGS "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+    if(NOT ARGS_UNPARSED_ARGUMENTS)
+        message(FATAL_ERROR "No SOURCES given to target: ${_target}")
+    endif()
+
+    if(ARGS_GENERATE_TEST_ROM)
+        set(ARGS_GENERATE_TEST_ROM -b)
+    else()
+        set(ARGS_GENERATE_TEST_ROM "")
+    endif()
+
+    if(ARGS_GENERATE_HEADER)
+        set(ARGS_GENERATE_HEADER 1)
+    else()
+        set(ARGS_GENERATE_HEADER 0)
+    endif()
+
+    file(LOCK "${GBA_TOOLCHAIN_LOCK}" GUARD FILE)
+    _gba_find_mmutil()
+    file(LOCK "${GBA_TOOLCHAIN_LOCK}" RELEASE)
+
+    add_custom_target(${_target} ALL
+        COMMAND "${MMUTIL}" -o\"$<TARGET_GENEX_EVAL:${_target},$<TARGET_PROPERTY:${_target},TARGET_FILE>>\" $<${ARGS_GENERATE_HEADER}:-h\"$<TARGET_GENEX_EVAL:${_target},$<TARGET_PROPERTY:${_target},TARGET_HEADER_FILE>>\"> ${ARGS_GENERATE_TEST_ROM} ${ARGS_UNPARSED_ARGUMENTS}
+        COMMENT "Compiling soundbank ${_target}"
+        SOURCES ${ARGS_UNPARSED_ARGUMENTS}
+        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    )
+
+    set_property(TARGET ${_target} PROPERTY OUTPUT_NAME ${_target})
+
+    set_property(TARGET ${_target} PROPERTY TARGET_FILE_BASE_NAME $<TARGET_GENEX_EVAL:${_target},$<TARGET_PROPERTY:${_target},OUTPUT_NAME>>)
+    set_property(TARGET ${_target} PROPERTY TARGET_FILE_DIR $<TARGET_GENEX_EVAL:${_target},$<TARGET_PROPERTY:${_target},BINARY_DIR>>)
+    set_property(TARGET ${_target} PROPERTY TARGET_FILE_PREFIX $<TARGET_GENEX_EVAL:${_target},$<TARGET_PROPERTY:${_target},PREFIX>>)
+    set_property(TARGET ${_target} PROPERTY TARGET_FILE_SUFFIX $<TARGET_GENEX_EVAL:${_target},$<TARGET_PROPERTY:${_target},SUFFIX>>)
+    set_property(TARGET ${_target} PROPERTY TARGET_FILE_NAME
+        $<TARGET_GENEX_EVAL:${_target},$<TARGET_PROPERTY:${_target},TARGET_FILE_PREFIX>>$<TARGET_GENEX_EVAL:${_target},$<TARGET_PROPERTY:${_target},TARGET_FILE_BASE_NAME>>$<TARGET_GENEX_EVAL:${_target},$<TARGET_PROPERTY:${_target},TARGET_FILE_SUFFIX>>
+    )
+    set_property(TARGET ${_target} PROPERTY TARGET_FILE
+        $<TARGET_GENEX_EVAL:${_target},$<TARGET_PROPERTY:${_target},TARGET_FILE_DIR>>/$<TARGET_GENEX_EVAL:${_target},$<TARGET_PROPERTY:${_target},TARGET_FILE_NAME>>
+    )
+
+    set_property(TARGET ${_target} PROPERTY HEADER_SUFFIX ".h")
+    set_property(TARGET ${_target} PROPERTY TARGET_HEADER_SUFFIX $<TARGET_GENEX_EVAL:${_target},$<TARGET_PROPERTY:${_target},HEADER_SUFFIX>>)
+    set_property(TARGET ${_target} PROPERTY TARGET_HEADER_FILE_NAME
+        $<TARGET_GENEX_EVAL:${_target},$<TARGET_PROPERTY:${_target},TARGET_FILE_PREFIX>>$<TARGET_GENEX_EVAL:${_target},$<TARGET_PROPERTY:${_target},TARGET_FILE_BASE_NAME>>$<TARGET_GENEX_EVAL:${_target},$<TARGET_PROPERTY:${_target},TARGET_HEADER_SUFFIX>>
+    )
+    set_property(TARGET ${_target} PROPERTY TARGET_HEADER_FILE
+        $<TARGET_GENEX_EVAL:${_target},$<TARGET_PROPERTY:${_target},TARGET_FILE_DIR>>/$<TARGET_GENEX_EVAL:${_target},$<TARGET_PROPERTY:${_target},TARGET_HEADER_FILE_NAME>>
     )
 endfunction()
 
@@ -626,6 +700,82 @@ function(_gba_find_gbfs)
                 "${GBA_TOOLCHAIN_TOOLS}/gbfs/gbfs.h"
                 DESTINATION "${GBA_TOOLCHAIN_LIST_DIR}/lib/gbfs/include"
             )
+        endif()
+    endif()
+endfunction()
+
+#! _gba_find_mmutil : Locate and download mmutil
+#
+# mmutil is used by gba_add_maxmod_soundbank to compile soundbanks
+# If it is not available, it is downloaded from the mmutil URL in dependencies.ini
+# The path to the mmutil binary is stored in MMUTIL
+#
+function(_gba_find_mmutil)
+    if(NOT EXISTS "${MMUTIL}")
+        # Searches:
+        #   Environment Path
+        #   Windows %LocalAppData%
+        #   *NIX opt/local/
+        #   GBA_TOOLCHAIN_TOOLS/tools
+        set(searchPaths $ENV{Path})
+        list(APPEND searchPaths "${HOST_LOCAL_DIRECTORY}")
+        list(APPEND searchPaths "${GBA_TOOLCHAIN_TOOLS}/mmutil")
+
+        # Test for mmutil
+        find_program(mmutilBinary NAMES "mmutil" PATHS ${searchPaths})
+        if(mmutilBinary)
+            # Update cached entry
+            set(MMUTIL "${mmutilBinary}" CACHE PATH "Path to mmutil binary" FORCE)
+        else()
+            if(NOT EXISTS "${GBA_TOOLCHAIN_LIST_DIR}/dependencies.ini")
+                if(NOT DEPENDENCIES_URL)
+                    message(FATAL_ERROR "Missing DEPENDENCIES_URL")
+                endif()
+
+                file(DOWNLOAD "${DEPENDENCIES_URL}" "${GBA_TOOLCHAIN_LIST_DIR}/dependencies.ini" SHOW_PROGRESS)
+            endif()
+
+            file(READ "${GBA_TOOLCHAIN_LIST_DIR}/dependencies.ini" iniFile)
+            _ini_read_section("${iniFile}" "mmutil" mmutil)
+
+            get_filename_component(ARM_GNU_TOOLCHAIN "${HOST_LOCAL_DIRECTORY}/arm-gnu-toolchain" ABSOLUTE)
+            message(STATUS "Downloading mmutil from \"${mmutil_url}\" to \"${GBA_TOOLCHAIN_TOOLS}/mmutil\"")
+            _gba_download("${mmutil_url}" "${GBA_TOOLCHAIN_TOOLS}/mmutil" SHOW_PROGRESS EXPECTED_MD5 "${mmutil_md5}")
+
+            file(COPY "${GBA_TOOLCHAIN_LIST_DIR}/cmake/MmutilCMakeLists.cmake" DESTINATION "${GBA_TOOLCHAIN_TOOLS}/mmutil")
+            file(RENAME "${GBA_TOOLCHAIN_TOOLS}/mmutil/MmutilCMakeLists.cmake" "${GBA_TOOLCHAIN_TOOLS}/mmutil/CMakeLists.txt")
+            file(MAKE_DIRECTORY "${GBA_TOOLCHAIN_TOOLS}/mmutil/build")
+
+            # Bug fix for platforms stuck on ARM GNU toolchain
+            if(CMAKE_HOST_SYSTEM_NAME STREQUAL Darwin OR CMAKE_HOST_SYSTEM_NAME STREQUAL Linux)
+                set(hostOptions -DCMAKE_C_COMPILER=cc)
+            endif()
+
+            # Configure mmutil
+            execute_process(
+                    COMMAND ${CMAKE_COMMAND} .. -DCMAKE_INSTALL_PREFIX=.. ${hostOptions}
+                    WORKING_DIRECTORY "${GBA_TOOLCHAIN_TOOLS}/mmutil/build"
+                    RESULT_VARIABLE cmakeResult
+            )
+            if(NOT ${cmakeResult} EQUAL 0)
+                message(FATAL_ERROR "CMake configure failed for mmutil (code ${cmakeResult})")
+            endif()
+
+            # Build mmutil
+            execute_process(
+                    COMMAND ${CMAKE_COMMAND} --build . --target install
+                    WORKING_DIRECTORY "${GBA_TOOLCHAIN_TOOLS}/mmutil/build"
+                    RESULT_VARIABLE cmakeResult
+            )
+            if(NOT ${cmakeResult} EQUAL 0)
+                message(FATAL_ERROR "CMake build failed for mmutil (code ${cmakeResult})")
+            endif()
+
+            # Clean up mmutil build directory
+            file(REMOVE_RECURSE "${GBA_TOOLCHAIN_TOOLS}/mmutil/build")
+
+            find_program(mmutilBinary NAMES "mmutil" PATHS "${GBA_TOOLCHAIN_TOOLS}/mmutil")
+            set(MMUTIL "${mmutilBinary}" CACHE PATH "Path to mmutil binary" FORCE)
         endif()
     endif()
 endfunction()

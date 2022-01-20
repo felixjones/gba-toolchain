@@ -20,7 +20,6 @@ add_executable(first first.c)
 set_target_properties(first PROPERTIES SUFFIX ".elf") # Output with .elf extension
 
 # -mthumb compiles thumb code
-# -mcpu=arm7tdmi tunes the code for the GBA's CPU
 # -Wall enables all warnings
 target_compile_options(first PRIVATE -mthumb -Wall)
 
