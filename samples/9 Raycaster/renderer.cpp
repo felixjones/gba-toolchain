@@ -28,7 +28,7 @@ static constinit fixed_type camera_y = 11.5f;
 static constinit fixed_type dir_x = 22.0f;
 static constinit fixed_type dir_y = 11.5f;
 
-static constinit const fixed_type FORWARD_SPEED = 0.1f;
+static constinit const fixed_type FORWARD_SPEED = 0.2f;
 static constinit const fixed_type STRAFE_SPEED = 0.1f;
 static constinit const fixed_type ASPECT_RATIO = 120.0f / 150.0f;
 

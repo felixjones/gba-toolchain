@@ -46,6 +46,15 @@ gba_target_sources_compile_options(raycaster
 target_link_libraries(raycaster PRIVATE agbabi gbfs m)
 gba_target_link_runtime_library(raycaster rom)
 
-gba_target_objcopy(raycaster FIX_HEADER)
+if(CMAKE_BUILD_TYPE STREQUAL Debug)
+    # Debug build can just fix header
+    gba_target_objcopy(raycaster FIX_HEADER)
+else()
+    # Release build needs to pad the binary and output an asset-less version
+    gba_target_objcopy(raycaster FIX_HEADER PAD 256 OUTPUT raycaster_noassets.gba)
 
-add_dependencies(raycaster assets)
+    # Concatenate with helloGbfs_noassets.gba with assets.gbfs into hellGbfs.gba
+    add_custom_command(TARGET raycaster POST_BUILD
+        COMMAND "${CMAKE_COMMAND}" -E cat raycaster_noassets.gba assets.gbfs ">" raycaster.gba
+    )
+endif()
