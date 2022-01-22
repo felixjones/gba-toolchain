@@ -23,10 +23,10 @@ _mapper("${CMAKE_SOURCE_DIR}/assets/map.txt")
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
     gba_add_gbfs(assets GENERATE_ASM "assets/wolftextures.pal" "assets/wolftextures.bin" "assets/map.bin")
     enable_language(ASM)
-    add_executable(raycaster main.c raycaster.cpp "$<TARGET_PROPERTY:assets,ASM_OUTPUT>")
+    add_executable(raycaster main.c renderer.cpp raycaster.iwram.cpp texmapper.iwram.cpp "$<TARGET_PROPERTY:assets,ASM_OUTPUT>")
 else()
     gba_add_gbfs(assets "assets/wolftextures.pal" "assets/wolftextures.bin" "assets/map.bin")
-    add_executable(raycaster main.c raycaster.cpp)
+    add_executable(raycaster main.c renderer.cpp raycaster.iwram.cpp texmapper.iwram.cpp)
     target_compile_definitions(raycaster PRIVATE ASSETS_GBFS)
 endif()
 
@@ -39,7 +39,7 @@ target_compile_options(raycaster PRIVATE -mthumb -ffunction-sections -fdata-sect
 target_link_options(raycaster PRIVATE -Wl,--gc-sections)
 
 gba_target_sources_compile_options(raycaster
-    IWRAM -g0 -Os -marm
+    IWRAM -g0 -O3 -marm
     EWRAM -g0 -O3 -mthumb
 )
 

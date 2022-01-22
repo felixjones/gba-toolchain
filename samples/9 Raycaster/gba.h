@@ -26,12 +26,19 @@ typedef volatile u16 vu16;
 typedef volatile u8 vu8;
 
 #define REG_DISPCNT ((vu16*) 0x4000000)
+#define REG_DISPSTAT ((vu16*) 0x4000004)
 #define REG_KEYINPUT ((vu16*) 0x4000130)
+#define REG_IE ((vu16*) 0x4000200)
+#define REG_IME ((vu32*) 0x4000208)
+
+#define IRQ_HANDLER ((void(**)(void)) 0x3007FFC)
 
 #define PALMEM ((u16*) 0x5000000)
 #define FRAME_BUFFER ((u8*) 0x6000000)
 #define FRAME_BUFFER_LEN 0xa000
 
+#define DISPSTAT_VBLANK (0x0008)
+#define IRQ_VBLANK (0x0001)
 #define MODE4_BG2 0x0404
 
 #define PAGE0 0x00

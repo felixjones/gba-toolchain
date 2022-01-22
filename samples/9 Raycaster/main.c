@@ -17,7 +17,7 @@
 
 #include "texture.h"
 #include "map.h"
-#include "raycaster.h"
+#include "renderer.h"
 
 #ifndef ASSETS_GBFS
 extern const GBFS_FILE assets_gbfs[];
@@ -30,11 +30,17 @@ extern const char __rom_end[];
 const texture_type* texture_memory;
 const map_type* map_memory;
 
+static void bios_vblank();
+
 int main() {
 #ifdef ASSETS_GBFS
     const GBFS_FILE* const assets_gbfs = find_first_gbfs_file(__rom_end);
 #endif
     *REG_DISPCNT = MODE4_BG2;
+    *REG_DISPSTAT = DISPSTAT_VBLANK;
+    *REG_IE = IRQ_VBLANK;
+    *IRQ_HANDLER = __agbabi_irq_empty;
+    *REG_IME = 1;
 
     u32 palSize;
     const void* palBinary = gbfs_get_obj(assets_gbfs, "wolftextures.pal", &palSize);
@@ -60,16 +66,29 @@ int main() {
         if ((keys & KEY_UP) == 0) mz++;
         if ((keys & KEY_DOWN) == 0) mz--;
 
-        move_z = mz;
-        move_x = mx;
         page = 1 - page;
-        raycast(FRAME_BUFFER_LEN * page);
+        camera_update(mz, mx, FRAME_BUFFER_LEN * page);
+        bios_vblank();
         *REG_DISPCNT = MODE4_BG2 | (PAGE1 * page);
     }
+
+    *REG_DISPCNT = 0;
+    *REG_IME = 0;
 
     // Trap reset keys until they are let go
     do {
         keys = *REG_KEYINPUT;
     } while (!(keys & KEY_RESET_COMBO));
     return 0;
+}
+
+static void bios_vblank() {
+    __asm__(
+#if defined( __thumb__ )
+        "swi\t%[Swi]"
+#elif defined( __arm__ )
+        "swi\t%[Swi] << 16"
+#endif
+        :: [Swi]"i"( 0x5 )
+    );
 }

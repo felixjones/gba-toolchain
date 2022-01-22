@@ -9,13 +9,16 @@
 ===============================================================================
 */
 
-#ifndef RAYCASTER_H
-#define RAYCASTER_H
+#ifndef TEXMAPPER_HPP
+#define TEXMAPPER_HPP
+#ifndef __cplusplus
+#error texmapper.hpp is C++ only
+#endif
 
-extern int camera_angle;
-extern int move_z;
-extern int move_x;
+#include <cstdint>
 
-void raycast(int page);
+extern std::uint16_t* frame_buffer;
 
-#endif // define RAYCASTER_H
+void render_span(int x, int lineHeight, const std::uint8_t* texture);
+
+#endif // define TEXMAPPER_HPP
