@@ -15,7 +15,6 @@
 
 #include <agbabi.h>
 #include <cstdint>
-#include <cmath>
 #include <concepts>
 
 #define WIDTH 240
@@ -78,7 +77,7 @@ struct fixed_type {
     }
 
     constexpr auto operator *(std::integral auto x) const noexcept {
-        return from_raw(data * x);
+        return from_raw(static_cast<std::int64_t>(data) * x);
     }
 
     constexpr auto operator *(const fixed_type o) const noexcept {
@@ -101,12 +100,20 @@ struct fixed_type {
         return from_raw(data << x);
     }
 
-    constexpr auto operator <=>(std::integral auto x) const noexcept {
-        return data <=> (x << Q);
+    constexpr auto operator <(std::integral auto x) const noexcept {
+        return (data >> Q) < x;
     }
 
-    constexpr auto operator <=>(const fixed_type o) const noexcept {
-        return data <=> o.data;
+    constexpr auto operator >(std::integral auto x) const noexcept {
+        return data > (x << Q);
+    }
+
+    constexpr auto operator !() const noexcept {
+        return data == 0;
+    }
+
+    constexpr auto operator <(const fixed_type o) const noexcept {
+        return data < o.data;
     }
 
     data_type data;
@@ -126,7 +133,7 @@ constexpr auto operator *(std::integral auto x, const fixed_type y) noexcept {
 
 constexpr auto operator /(std::integral auto x, const fixed_type y) noexcept {
     const auto dataLL = static_cast<std::int64_t>(x) << (Q * 2);
-    if (std::is_constant_evaluated()) {
+    if (std::is_signed_v<decltype(x)> || std::is_constant_evaluated()) {
         return fixed_type::from_raw(static_cast<fixed_type::data_type>(dataLL / y.data));
     }
     return fixed_type::from_raw(static_cast<fixed_type::data_type>(__agbabi_uluidiv(dataLL, y.data)));
@@ -145,8 +152,12 @@ std::int32_t bios_sqrt([[maybe_unused]] std::int32_t x) {
     );
 }
 
-static fixed_type fixed_sqrt(const fixed_type x) noexcept {
-    return fixed_type::from_raw(bios_sqrt(x.data) << (Q / 2));
+static fixed_type fixed_floor(const fixed_type x) noexcept {
+    return fixed_type::from_raw(x.data & static_cast<fixed_type::data_type>(0xffffffffu << Q));
+}
+
+static fixed_type fixed_abs(const fixed_type x) noexcept {
+    return fixed_type::from_raw(x.data < 0 ? -x.data : x.data);
 }
 
 extern "C" {
@@ -158,20 +169,18 @@ extern "C" {
 static constinit fixed_type posX = 22.0f;
 static constinit fixed_type posY = 11.5f;
 
-static constinit fixed_type IWIDTH = 1.0f / WIDTH;
-static constinit fixed_type ASPECT_RATIO = 160.0f / 240.0f;
-
-static const fixed_type speed = 0.1f;
+static const fixed_type ASPECT_RATIO = 120.0f / 160.0f;
+static const fixed_type MOVE_SPEED = 0.1f;
 
 extern "C" void raycast(int page) {
-    const auto dirX = fixed_type::from_raw( __agbabi_sin( camera_angle + 0x2000 ) >> 13 );
-    const auto dirY = fixed_type::from_raw( __agbabi_sin( camera_angle ) >> 13 );
+    const auto dirX = fixed_type::from_raw(__agbabi_sin(camera_angle + 0x2000) >> (29 - Q));
+    const auto dirY = fixed_type::from_raw(__agbabi_sin(camera_angle) >> (29 - Q));
 
     if (move_z || move_x) {
-        posX += dirX * speed * move_z;
-        posY += dirY * speed * move_z;
-        posY -= dirX * speed * move_x;
-        posX += dirY * speed * move_x;
+        posX += dirX * MOVE_SPEED * move_z;
+        posY += dirY * MOVE_SPEED * move_z;
+        posY -= dirX * MOVE_SPEED * move_x;
+        posX += dirY * MOVE_SPEED * move_x;
     }
 
     const auto planeX = dirY * ASPECT_RATIO;
@@ -180,25 +189,18 @@ extern "C" void raycast(int page) {
     __agbabi_wordset4(FRAME_BUFFER + page, FRAME_BUFFER_LEN, 0);
 
     for (int x = 0; x < WIDTH; x += 2) {
-        fixed_type cameraX = (2 * x * IWIDTH) - 1;
+        fixed_type cameraX = (fixed_type(x) / (WIDTH / 2)) - 1;
         fixed_type rayDirX = dirX + planeX * cameraX;
         fixed_type rayDirY = dirY + planeY * cameraX;
+
+        fixed_type deltaDistX = !rayDirX ? fixed_type::from_raw(0x7fffffff) : fixed_abs(1 / rayDirX);
+        fixed_type deltaDistY = !rayDirY ? fixed_type::from_raw(0x7fffffff) : fixed_abs(1 / rayDirY);
 
         int mapX = (int) posX;
         int mapY = (int) posY;
 
-        fixed_type sideDistX, sideDistY;
-
-        fixed_type deltaDistX = fixed_sqrt(1 + (rayDirY * rayDirY) / (rayDirX * rayDirX));
-        fixed_type deltaDistY = fixed_sqrt(1 + (rayDirX * rayDirX) / (rayDirY * rayDirY));
-        fixed_type perpWallDist;
-
         int stepX;
-        int stepY;
-
-        bool hit = false;
-        int side = 0;
-
+        fixed_type sideDistX;
         if (rayDirX < 0) {
             stepX = -1;
             sideDistX = (posX - mapX) * deltaDistX;
@@ -206,6 +208,9 @@ extern "C" void raycast(int page) {
             stepX = 1;
             sideDistX = (mapX + 1 - posX) * deltaDistX;
         }
+
+        int stepY;
+        fixed_type sideDistY;
         if (rayDirY < 0)  {
             stepY = -1;
             sideDistY = (posY - mapY) * deltaDistY;
@@ -214,6 +219,8 @@ extern "C" void raycast(int page) {
             sideDistY = (mapY + 1 - posY) * deltaDistY;
         }
 
+        bool hit = false;
+        int side;
         while (!hit) {
             if (sideDistX < sideDistY) {
                 sideDistX += deltaDistX;
@@ -227,6 +234,7 @@ extern "C" void raycast(int page) {
             hit = map_memory[mapX][mapY];
         }
 
+        fixed_type perpWallDist;
         if (side == 0) {
             perpWallDist = (sideDistX - deltaDistX);
         } else {
@@ -236,9 +244,13 @@ extern "C" void raycast(int page) {
         int lineHeight = (int) (HEIGHT / perpWallDist);
 
         int drawStart = -lineHeight / 2 + HEIGHT / 2;
-        if(drawStart < 0) drawStart = 0;
+        if (drawStart < 0) {
+            drawStart = 0;
+        }
         int drawEnd = lineHeight / 2 + HEIGHT / 2;
-        if(drawEnd >= HEIGHT) drawEnd = HEIGHT - 1;
+        if (drawEnd >= HEIGHT) {
+            drawEnd = HEIGHT - 1;
+        }
 
         int texNum = map_memory[mapX][mapY] - 1;
 
@@ -248,12 +260,11 @@ extern "C" void raycast(int page) {
         } else {
             wallX = posX + perpWallDist * rayDirX;
         }
-        wallX -= (int) wallX;
+        wallX -= fixed_floor(wallX);
 
         int texX = (int) (wallX * TEXTURE_SIZE);
-        if ((side == 0 && rayDirX > 0) || (side == 1 && rayDirY < 0)) {
-            texX = TEXTURE_SIZE - texX - 1;
-        }
+        if(side == 0 && rayDirX > 0) texX = TEXTURE_SIZE - texX - 1;
+        if(side == 1 && rayDirY < 0) texX = TEXTURE_SIZE - texX - 1;
 
         fixed_type step = TEXTURE_SIZE / fixed_type { lineHeight };
 
