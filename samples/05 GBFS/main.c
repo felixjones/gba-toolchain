@@ -31,16 +31,16 @@ int main() {
 
     tte_init_chr4c_default(0, BG_CBB(0) | BG_SBB(31));
     tte_set_pos(92, 68);
-    if ( !textBinary ) {
+    if (!textBinary) {
         tte_write( "Could not find hello.txt" );
     } else {
-        char * buffer = malloc( textSize + 1 );
-        memcpy( buffer, textBinary, textSize );
+        char * buffer = malloc(textSize + 1);
+        memcpy(buffer, textBinary, textSize);
         buffer[textSize] = 0;
 
-        tte_write( buffer );
+        tte_write(buffer);
 
-        free( buffer );
+        free(buffer);
     }
 
     irq_init(NULL);
