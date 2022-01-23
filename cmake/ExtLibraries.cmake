@@ -50,7 +50,7 @@ function(_gba_find_ext_libseven)
         _ini_read_section("${iniFile}" "libseven" libseven)
 
         message(STATUS "Downloading libseven from \"${libseven_url}\" to \"${GBA_TOOLCHAIN_LIST_DIR}/lib/seven\"")
-        _gba_download("${libseven_url}" "${GBA_TOOLCHAIN_LIST_DIR}/lib/seven" SHOW_PROGRESS)
+        _gba_download("${libseven_url}" "${GBA_TOOLCHAIN_LIST_DIR}/lib/seven" SHOW_PROGRESS EXPECTED_MD5 "${libseven_md5}")
     endif()
 
     if(EXISTS "${GBA_TOOLCHAIN_LIST_DIR}/lib/seven" AND NOT EXISTS "${GBA_TOOLCHAIN_LIST_DIR}/lib/seven/CMakeLists.txt")
