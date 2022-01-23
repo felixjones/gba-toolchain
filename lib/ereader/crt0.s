@@ -87,7 +87,6 @@ _start:
     bl      .Lbx_r2
 
     // Fallthrough to _exit
-    .section .crt0._exit, "ax", %progbits
     .thumb_func
     .global _exit
 _exit:
