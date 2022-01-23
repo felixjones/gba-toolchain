@@ -120,7 +120,7 @@ function(_configure_toolchain)
 
     # Flags for all build types
     set(SHARED_C_FLAGS "-mabi=aapcs -march=armv4t -mcpu=arm7tdmi")
-    set(SHARED_CXX_FLAGS "-mabi=aapcs -march=armv4t -mcpu=arm7tdmi")
+    set(SHARED_CXX_FLAGS "-mabi=aapcs -march=armv4t -mcpu=arm7tdmi -fno-exceptions") # nano is not compiled with C++ exceptions
 
     if(USE_CLANG)
         include_directories(SYSTEM

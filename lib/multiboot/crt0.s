@@ -117,7 +117,9 @@ _start:
     pop     {r0}
 
     // Fallthrough to _exit
+    .section .crt0._exit, "ax", %progbits
     .thumb
+    .thumb_func
     .global _exit
 _exit:
     ldr     r2, =.Lewram_start
@@ -147,12 +149,15 @@ _exit:
     // Placed in own section to allow gc-section removal
     .section .crt0._getpid, "ax", %progbits
     .thumb
+    .thumb_func
     .global _getpid
 _getpid:
     mov     r0, #0
     // Fallthrough to __sync_synchronize
 
     .section .crt0.__sync_synchronize, "ax", %progbits
+    .thumb
+    .thumb_func
     .global __sync_synchronize
 __sync_synchronize:
     bx      lr
