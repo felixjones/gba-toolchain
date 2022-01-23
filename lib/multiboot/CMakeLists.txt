@@ -13,7 +13,7 @@ project(multiboot ASM C)
 add_library(multiboot STATIC crt0.s ../gba-runtime-nosyscalls.c)
 set_target_properties(multiboot PROPERTIES OUTPUT_NAME runtime)
 
-if(USE_CLANG)
+if(CMAKE_C_COMPILER_ID STREQUAL "Clang")
     set(optimization -Oz)
 else()
     set(optimization -Os)

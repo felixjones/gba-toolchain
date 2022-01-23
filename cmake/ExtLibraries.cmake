@@ -52,11 +52,6 @@ function(_gba_find_ext_libseven)
         message(STATUS "Downloading libseven from \"${libseven_url}\" to \"${GBA_TOOLCHAIN_LIST_DIR}/lib/seven\"")
         _gba_download("${libseven_url}" "${GBA_TOOLCHAIN_LIST_DIR}/lib/seven" SHOW_PROGRESS)
     endif()
-
-    if(EXISTS "${GBA_TOOLCHAIN_LIST_DIR}/lib/seven" AND NOT EXISTS "${GBA_TOOLCHAIN_LIST_DIR}/lib/seven/CMakeLists.txt")
-        file(COPY "${GBA_TOOLCHAIN_LIST_DIR}/cmake/LibsevenCMakeLists.cmake" DESTINATION "${GBA_TOOLCHAIN_LIST_DIR}/lib/seven")
-        file(RENAME "${GBA_TOOLCHAIN_LIST_DIR}/lib/seven/LibsevenCMakeLists.cmake" "${GBA_TOOLCHAIN_LIST_DIR}/lib/seven/CMakeLists.txt")
-    endif()
 endfunction()
 
 #! _gba_find_ext_posprintf : Locate and download posprintf

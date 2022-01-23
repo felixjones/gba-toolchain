@@ -13,7 +13,7 @@ project(ereader ASM C)
 add_library(ereader STATIC crt0.s ../gba-runtime-nosyscalls.c)
 set_target_properties(ereader PROPERTIES OUTPUT_NAME runtime)
 
-if(USE_CLANG)
+if(CMAKE_C_COMPILER_ID STREQUAL "Clang")
     set(optimization -Oz)
 else()
     set(optimization -Os)

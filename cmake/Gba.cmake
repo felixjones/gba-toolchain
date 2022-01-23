@@ -753,9 +753,9 @@ function(_gba_find_mmutil)
 
             # Configure mmutil
             execute_process(
-                    COMMAND ${CMAKE_COMMAND} .. -DCMAKE_INSTALL_PREFIX=.. ${hostOptions}
-                    WORKING_DIRECTORY "${GBA_TOOLCHAIN_TOOLS}/mmutil/build"
-                    RESULT_VARIABLE cmakeResult
+                COMMAND ${CMAKE_COMMAND} .. -DCMAKE_INSTALL_PREFIX=.. ${hostOptions}
+                WORKING_DIRECTORY "${GBA_TOOLCHAIN_TOOLS}/mmutil/build"
+                RESULT_VARIABLE cmakeResult
             )
             if(NOT ${cmakeResult} EQUAL 0)
                 message(FATAL_ERROR "CMake configure failed for mmutil (code ${cmakeResult})")
@@ -763,9 +763,9 @@ function(_gba_find_mmutil)
 
             # Build mmutil
             execute_process(
-                    COMMAND ${CMAKE_COMMAND} --build . --target install
-                    WORKING_DIRECTORY "${GBA_TOOLCHAIN_TOOLS}/mmutil/build"
-                    RESULT_VARIABLE cmakeResult
+                COMMAND ${CMAKE_COMMAND} --build . --target install
+                WORKING_DIRECTORY "${GBA_TOOLCHAIN_TOOLS}/mmutil/build"
+                RESULT_VARIABLE cmakeResult
             )
             if(NOT ${cmakeResult} EQUAL 0)
                 message(FATAL_ERROR "CMake build failed for mmutil (code ${cmakeResult})")
