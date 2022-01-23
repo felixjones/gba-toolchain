@@ -1,3 +1,14 @@
+/*
+===============================================================================
+
+ Sample GBA 3D ray-caster based on https://lodev.org/cgtutor/raycasting.html
+
+ Copyright (C) 2021-2022 gba-toolchain contributors
+ For conditions of distribution and use, see copyright notice in LICENSE.md
+
+===============================================================================
+*/
+
 #include "renderer.hpp"
 
 #include <seven/video/mode4.h>
@@ -25,11 +36,11 @@ void renderer::draw_world(std::uint8_t* frameBuffer, const camera_type& camera) 
 
     const auto raycast = raycast_engine { assets::world_map, camera.x, camera.y };
     for (screen_x = 0; screen_x < MODE4_WIDTH; screen_x += 2) {
-        const auto cameraX = (screen_x * reciprocal_width) - 1;
+        const auto cameraX = (screen_x - half_width) * reciprocal_width;
         ray_dirX = camera.dir_x() + planeX * cameraX;
         ray_dirY = camera.dir_y() + planeY * cameraX;
 
-        raycast(ray_dirX, ray_dirY, [](auto hit, auto side, auto perpWallDist, auto wallX){
+        raycast(ray_dirX, ray_dirY, [](auto hit, auto side, auto perpWallDist, auto wallX) {
             const auto lineHeight = static_cast<int>(MODE4_HEIGHT / perpWallDist);
 
             auto drawStart = -lineHeight / 2 + (MODE4_HEIGHT / 2);

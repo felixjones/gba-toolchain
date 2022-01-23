@@ -1,3 +1,14 @@
+/*
+===============================================================================
+
+ Sample GBA 3D ray-caster based on https://lodev.org/cgtutor/raycasting.html
+
+ Copyright (C) 2021-2022 gba-toolchain contributors
+ For conditions of distribution and use, see copyright notice in LICENSE.md
+
+===============================================================================
+*/
+
 #include <cstdint>
 
 #include <seven/prelude.h>
