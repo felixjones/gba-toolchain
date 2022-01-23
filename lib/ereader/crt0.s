@@ -88,7 +88,6 @@ _start:
 
     // Fallthrough to _exit
     .section .crt0._exit, "ax", %progbits
-    .thumb
     .thumb_func
     .global _exit
 _exit:
@@ -105,7 +104,6 @@ _exit:
 
     // Placed in own section to allow gc-section removal
     .section .crt0._getpid, "ax", %progbits
-    .thumb
     .thumb_func
     .global _getpid
 _getpid:
@@ -113,7 +111,6 @@ _getpid:
     // Fallthrough to __sync_synchronize
 
     .section .crt0.__sync_synchronize, "ax", %progbits
-    .thumb
     .thumb_func
     .global __sync_synchronize
 __sync_synchronize:
