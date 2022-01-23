@@ -9,10 +9,10 @@
 
 cmake_minimum_required(VERSION 3.20)
 
-project(sample-raycaster C CXX)
+project(sample-raycaster CXX)
 set (CMAKE_CXX_STANDARD 20)
 
-gba_add_library_subdirectory(rom agbabi gbfs)
+gba_add_library_subdirectory(rom agbabi gbfs seven)
 
 # Run host tools
 include("${CMAKE_CURRENT_LIST_DIR}/tools/Tools.cmake")
@@ -23,10 +23,10 @@ _mapper("${CMAKE_SOURCE_DIR}/assets/map.txt")
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
     gba_add_gbfs(assets GENERATE_ASM "assets/wolftextures.pal" "assets/wolftextures.bin" "assets/map.bin")
     enable_language(ASM)
-    add_executable(raycaster main.c renderer.cpp raycaster.iwram.cpp texmapper.iwram.cpp "$<TARGET_PROPERTY:assets,ASM_OUTPUT>")
+    add_executable(raycaster main.cpp asset_manager.cpp camera.cpp raycast_engine.iwram.cpp renderer.iwram.cpp "$<TARGET_PROPERTY:assets,ASM_OUTPUT>")
 else()
     gba_add_gbfs(assets "assets/wolftextures.pal" "assets/wolftextures.bin" "assets/map.bin")
-    add_executable(raycaster main.c renderer.cpp raycaster.iwram.cpp texmapper.iwram.cpp)
+    add_executable(raycaster main.cpp asset_manager.cpp camera.cpp raycast_engine.iwram.cpp renderer.iwram.cpp)
     target_compile_definitions(raycaster PRIVATE ASSETS_GBFS)
 endif()
 
@@ -35,7 +35,7 @@ set_target_properties(assets PROPERTIES SUFFIX ".gbfs")
 # GBA executable
 set_target_properties(raycaster PROPERTIES SUFFIX ".elf")
 
-target_compile_options(raycaster PRIVATE -mthumb -ffunction-sections -fdata-sections -Wall -Wextra)
+target_compile_options(raycaster PRIVATE -mthumb -ffunction-sections -fdata-sections -Wall -Wextra -funwind-tables)
 target_link_options(raycaster PRIVATE -Wl,--gc-sections)
 
 gba_target_sources_compile_options(raycaster
@@ -43,7 +43,7 @@ gba_target_sources_compile_options(raycaster
     EWRAM -g0 -O3 -mthumb
 )
 
-target_link_libraries(raycaster PRIVATE agbabi gbfs m)
+target_link_libraries(raycaster PRIVATE agbabi gbfs seven)
 gba_target_link_runtime_library(raycaster rom)
 
 if(CMAKE_BUILD_TYPE STREQUAL Debug)

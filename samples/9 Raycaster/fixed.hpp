@@ -1,19 +1,5 @@
-/*
-===============================================================================
-
- Raycaster demo
-
- Copyright (C) 2021-2022 gba-toolchain contributors
- For conditions of distribution and use, see copyright notice in LICENSE.md
-
-===============================================================================
-*/
-
 #ifndef FIXED_HPP
 #define FIXED_HPP
-#ifndef __cplusplus
-#error fixed.hpp is C++ only
-#endif
 
 #include <concepts>
 #include <cstdint>
@@ -144,6 +130,14 @@ inline fixed_type fixed_floor(const fixed_type x) noexcept {
 
 inline fixed_type fixed_abs(const fixed_type x) noexcept {
     return fixed_type::from_raw(x.data < 0 ? -x.data : x.data);
+}
+
+inline fixed_type fixed_frac(const fixed_type x) noexcept {
+    return fixed_type::from_raw(x.data & ((1 << fixed_type::exponent) - 1));
+}
+
+inline auto fixed_negative(const fixed_type x) noexcept {
+    return x.data < 0;
 }
 
 #endif // define fixed.hpp
