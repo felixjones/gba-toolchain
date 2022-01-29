@@ -25,7 +25,6 @@ int main() {
 
     if (noRtc) {
         tte_write("Err");
-    } else {
     }
 
     irq_init(NULL);
