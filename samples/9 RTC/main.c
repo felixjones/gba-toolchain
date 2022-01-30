@@ -15,7 +15,12 @@
 
 #include <time.h>
 
+// GBA Cart I/O Port
+#define REG_GPIOCNT ((vu16*) 0x80000c8)
+
 int main() {
+    *REG_GPIOCNT = 1; // Enable access to RTC
+
     REG_DISPCNT = DCNT_MODE0 | DCNT_BG0;
 
     tte_init_chr4c_default(0, BG_CBB(0) | BG_SBB(31));
