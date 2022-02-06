@@ -16,6 +16,8 @@
 // Returns first 10 fibonacci numbers
 static int fibonacci(agbabi_coro_t* coro);
 
+#include <string.h>
+
 int main() {
     REG_DISPCNT = DCNT_MODE0 | DCNT_BG0;
 
@@ -25,15 +27,15 @@ int main() {
     irq_init(NULL);
     irq_enable(II_VBLANK);
 
-    // Create coroutine with 80 bytes of stack
-    char stack[80];
+    // Create coroutine with 120 bytes of stack
+    char stack[120];
     agbabi_coro_t coro;
     __agbabi_coro_make(&coro, stack + sizeof(stack), fibonacci);
 
     while (!coro.joined) {
         int value = __agbabi_coro_resume(&coro);
 
-        char buffer[80];
+        char buffer[8];
         posprintf(buffer, "%d ", value);
         tte_write(buffer);
     }
