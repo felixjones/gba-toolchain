@@ -14,20 +14,7 @@
 #include <posprintf.h>
 
 // Returns first 10 fibonacci numbers
-int fibonacci(agbabi_coro_t* coro) {
-    int first = 1, second = 1;
-    __agbabi_coro_yield(coro, first);
-    __agbabi_coro_yield(coro, second);
-
-    for (int i = 0; i < 7; ++i) {
-        int third = first + second;
-        first = second;
-        second = third;
-        __agbabi_coro_yield(coro, third);
-    }
-
-    return first + second;
-}
+static int fibonacci(agbabi_coro_t* coro);
 
 int main() {
     REG_DISPCNT = DCNT_MODE0 | DCNT_BG0;
@@ -55,4 +42,19 @@ int main() {
         VBlankIntrWait();
     }
     __builtin_unreachable();
+}
+
+static int fibonacci(agbabi_coro_t* coro) {
+    int first = 1, second = 1;
+    __agbabi_coro_yield(coro, first);
+    __agbabi_coro_yield(coro, second);
+
+    for (int i = 0; i < 7; ++i) {
+        int third = first + second;
+        first = second;
+        second = third;
+        __agbabi_coro_yield(coro, third);
+    }
+
+    return first + second;
 }
