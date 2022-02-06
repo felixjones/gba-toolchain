@@ -128,12 +128,13 @@ SECTIONS {
         *(.ARM.extab*)
     } > rom
 
+    . = ALIGN(4);
+    PROVIDE(__exidx_start = .);
     .ARM.exidx : ALIGN(4) {
-        PROVIDE_HIDDEN (__exidx_start = .);
-        *(.ARM.exidx*)
-        PROVIDE_HIDDEN (__exidx_end = .);
-        . = ALIGN(4);
+        *(.ARM.exidx* .gnu.linkonce.armexidx.*);
     } > rom
+    . = ALIGN(4);
+    PROVIDE(__exidx_end = .);
 
     /*
      * Read only data
