@@ -30,7 +30,7 @@ int main() {
     agbabi_coro_t coro;
     __agbabi_coro_make(&coro, stack + sizeof(stack), fibonacci);
 
-    while (coro.alive) {
+    while (!coro.joined) {
         int value = __agbabi_coro_resume(&coro);
 
         char buffer[80];
