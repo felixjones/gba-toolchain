@@ -16,8 +16,6 @@
 // Returns first 10 fibonacci numbers
 static int fibonacci(agbabi_coro_t* coro);
 
-#include <string.h>
-
 int main() {
     REG_DISPCNT = DCNT_MODE0 | DCNT_BG0;
 
