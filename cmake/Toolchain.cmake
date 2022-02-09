@@ -178,7 +178,7 @@ function(_configure_toolchain)
 
     # Unfortunately ARM GNU toolchain compiles with short enums
     # This causes a 32-bit enum warning to be emitted, even if all binaries use 32-bit enums
-    set(CMAKE_EXE_LINKER_FLAGS_INIT "-Xlinker -no-enum-size-warning" CACHE INTERNAL "" FORCE)
+    set(CMAKE_EXE_LINKER_FLAGS_INIT "-L\"${ARM_GNU_TOOLCHAIN}/arm-none-eabi/lib/thumb/nofp\" -Xlinker -no-enum-size-warning" CACHE INTERNAL "" FORCE)
 
     set(CMAKE_LINKER "${GNU_C_COMPILER}" CACHE FILEPATH "Path to ld.")
     set(CMAKE_SHARED_LINKER "${GNU_C_COMPILER}" CACHE FILEPATH "Path to ld for shared linking.")
