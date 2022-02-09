@@ -86,10 +86,10 @@ function(gba_target_link_runtime_library _target _library)
 
     string(TOUPPER ${_library} libraryUpper)
 
-    target_link_libraries(${_target} PRIVATE
-        "-T \"${GBA_${libraryUpper}_LDSCRIPT}\""
-        "-specs=\"${GBA_${libraryUpper}_SPECS}\""
-        "-B \"${GBA_${libraryUpper}_BINARY_DIR}\""
+    target_link_options(${_target} PRIVATE
+        -T ${GBA_${libraryUpper}_LDSCRIPT}
+        -specs=${GBA_${libraryUpper}_SPECS}
+        -B ${GBA_${libraryUpper}_BINARY_DIR}
     )
 
     set_target_properties(${_target} PROPERTIES RUNTIME ${_library})
