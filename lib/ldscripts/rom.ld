@@ -9,7 +9,7 @@ For conditions of distribution and use, see copyright notice in LICENSE.md
 ===============================================================================
 */
 
-OUTPUT_FORMAT("elf32-littlearm", "elf32-bigarm", "elf32-littlearm")
+OUTPUT_FORMAT("elf32-littlearm")
 OUTPUT_ARCH(arm)
 ENTRY(_start)
 
@@ -256,7 +256,7 @@ SECTIONS {
     __ewram_lma = __ewram_base_lma + ALIGN(SIZEOF(.ewram.base), 4);
 
     /* EWRAM load memory address (source) */
-    .ewram __ewram_base : AT(__ewram_lma) ALIGN(4) {
+    .ewram : AT(__ewram_lma) ALIGN(4) {
         __ewram_start = ABSOLUTE(.);
         *(.ewram .ewram.*)
         *ewram.*(.text* .data*)
