@@ -108,7 +108,7 @@ SECTIONS {
     PROVIDE_HIDDEN (__iwram_lma = ALIGN(4));
 
     .iwram : AT(__iwram_lma) ALIGN(4) {
-        *(SORT(.iwram.sorted.*))
+        KEEP (*(SORT(.iwram.sorted.*)))
         *(.iwram .iwram.*)
         *.iwram.*(.text .text.* .data .data.*)
         . = ALIGN(4);
@@ -157,7 +157,7 @@ SECTIONS {
     PROVIDE_HIDDEN (__ewram_lma = ALIGN(__iwram_lma + (. - __iwram_start), 4));
 
     .ewram : AT(__ewram_lma) ALIGN(4) {
-        *(SORT(.ewram.sorted.*))
+        KEEP (*(SORT(.ewram.sorted.*)))
         *(.ewram .ewram.*)
         *.ewram.*(.data .data.* .text .text.*)
         . = ALIGN(4);
