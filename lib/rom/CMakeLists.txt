@@ -10,7 +10,7 @@
 cmake_minimum_required(VERSION 3.1)
 project(rom ASM C)
 
-add_library(rom STATIC crt0.s ../gba-runtime-nosyscalls.c)
+add_library(rom STATIC crt0.s ../gba-runtime-nosyscalls.c ../gba-runtime-init_array.c ../gba-runtime-fini_array.c)
 set_target_properties(rom PROPERTIES OUTPUT_NAME runtime)
 
 target_compile_options(rom PRIVATE

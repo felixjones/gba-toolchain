@@ -71,21 +71,10 @@ _start:
     ldr     r2, =__bss_cpuset_fill
     swi     #0xb
 
-#ifdef __USE_EWRAM_BASE__
-    // CpuSet copy ewram base
-    ldr     r0, =__ewram_base_lma
-    ldr     r1, =__ewram_base_start
-    ldr     r2, =__ewram_base_cpuset_copy
+    // CpuSet fill sbss
+    ldr     r1, =__sbss_start
+    ldr     r2, =__sbss_cpuset_fill
     swi     #0xb
-#endif
-
-#ifdef __USE_IWRAM_BASE__
-    // CpuSet copy iwram base
-    ldr     r0, =__iwram_base_lma
-    ldr     r1, =__iwram_base_start
-    ldr     r2, =__iwram_base_cpuset_copy
-    swi     #0xb
-#endif
 
     // CpuSet copy ewram
     ldr     r0, =__ewram_cpuset
@@ -94,11 +83,6 @@ _start:
 
     // CpuSet copy iwram
     ldr     r0, =__iwram_cpuset
-    ldm     r0, {r0-r2}
-    swi     #0xb
-
-    // CpuSet copy data
-    ldr     r0, =__data_cpuset
     ldm     r0, {r0-r2}
     swi     #0xb
 
@@ -114,15 +98,11 @@ _start:
     ldr     r2, =main
     bl      .Lbx_r2
 
-    // Store result of main
-    push    {r0}
-
     // Finalizers
     .extern __libc_fini_array
     ldr     r2, =__libc_fini_array
+    push    {r0}
     bl      .Lbx_r2
-
-    // Restore result of main
     pop     {r0}
 
     // Fallthrough to _exit
@@ -136,11 +116,6 @@ _exit:
 .Lbx_r2:
     bx      r2
 
-    // Reference symbols from gba-syscalls.c to prevent removal
-    .global _sbrk
-    .global _kill
-
-    // Placed in own section to allow gc-section removal
     .section .crt0._getpid, "ax", %progbits
     .thumb_func
     .global _getpid
