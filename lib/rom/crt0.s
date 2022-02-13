@@ -116,6 +116,10 @@ _exit:
 .Lbx_r2:
     bx      r2
 
+    // Reference symbols from gba-syscalls.c to prevent removal
+    .global _sbrk
+    .global _kill
+
     .section .crt0._getpid, "ax", %progbits
     .thumb_func
     .global _getpid

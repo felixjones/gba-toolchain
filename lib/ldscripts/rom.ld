@@ -31,7 +31,6 @@ SECTIONS {
     /* crt0.s should start with the ROM header, so that comes first */
     .crt0 : ALIGN(4) {
         KEEP (*(.crt0))
-        KEEP (gba-runtime-*.*(.text .text.* .data .data.*))
         . = ALIGN(4);
 
         /* CpuSet constants */
