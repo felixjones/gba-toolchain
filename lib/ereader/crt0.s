@@ -46,13 +46,11 @@ _start:
     mov     r0, #0xfe
     swi     #0x1
 
-#ifdef __USE_IWRAM_BASE__
-    // CpuSet copy iwram base
-    ldr     r0, =__iwram_base_lma
-    ldr     r1, =__iwram_base_start
-    ldr     r2, =__iwram_base_cpuset_copy
+    // CpuSet fill sbss
+    ldr     r0, =.Lzero_word
+    ldr     r1, =__sbss_start
+    ldr     r2, =__sbss_cpuset_fill
     swi     #0xb
-#endif
 
     // CpuSet copy ewram data
     ldr     r0, =__ewram_data_cpuset
@@ -61,11 +59,6 @@ _start:
 
     // CpuSet copy iwram
     ldr     r0, =__iwram_cpuset
-    ldm     r0, {r0-r2}
-    swi     #0xb
-
-    // CpuSet copy data
-    ldr     r0, =__data_cpuset
     ldm     r0, {r0-r2}
     swi     #0xb
 
@@ -84,7 +77,9 @@ _start:
     // Finalizers
     .extern __libc_fini_array
     ldr     r2, =__libc_fini_array
+    push    {r0}
     bl      .Lbx_r2
+    pop     {r0}
 
     // Fallthrough to _exit
     .thumb_func
