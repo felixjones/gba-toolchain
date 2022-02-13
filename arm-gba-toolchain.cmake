@@ -45,6 +45,12 @@ set(GBA_TOOLCHAIN_TOOLS "${GBA_TOOLCHAIN_LIST_DIR}/tools" CACHE INTERNAL "" FORC
 # Host platform
 #====================
 
+# Detect MSYS
+execute_process(COMMAND uname OUTPUT_VARIABLE uname)
+if (uname MATCHES "^MSYS" OR uname MATCHES "^MINGW")
+    set(MSYS ON)
+endif()
+
 if(WIN32)
     set(HOST_PLATFORM_NAME win32 CACHE INTERNAL "")
     set(HOST_LOCAL_DIRECTORY "$ENV{LocalAppData}" CACHE INTERNAL "")
@@ -65,6 +71,12 @@ elseif(UNIX)
         set(HOST_APPLICATIONS_DIRECTORIES /Applications CACHE INTERNAL "")
         set(HOST_TEMP_DIRECTORY "$ENV{TMPDIR}" CACHE INTERNAL "")
         set(HOST_LOCAL_DIRECTORY /usr/local/share CACHE INTERNAL "")
+    elseif(MSYS)
+        set(HOST_PLATFORM_NAME win32 CACHE INTERNAL "")
+
+        set(HOST_APPLICATIONS_DIRECTORIES /bin /usr/bin /usr/share /usr/local /opt CACHE INTERNAL "")
+        set(HOST_TEMP_DIRECTORY /tmp CACHE INTERNAL "")
+        set(HOST_LOCAL_DIRECTORY ~/ CACHE INTERNAL "")
     endif()
 endif()
 

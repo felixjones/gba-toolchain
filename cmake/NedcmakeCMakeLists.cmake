@@ -32,7 +32,13 @@ foreach(source ${nedclibSrc})
     file(WRITE "${source}" "${filedata}")
 endforeach()
 
-if(WIN32)
+# Detect MSYS
+execute_process(COMMAND uname OUTPUT_VARIABLE uname)
+if (uname MATCHES "^MSYS" OR uname MATCHES "^MINGW")
+    set(MSYS ON)
+endif()
+
+if(WIN32 OR MSYS)
     set(libraryType SHARED)
 else()
     set(libraryType STATIC)
@@ -56,7 +62,7 @@ set_target_properties(nedclib nedcmake
     PROPERTIES CXX_STANDARD 11
 )
 
-if(WIN32)
+if(WIN32 OR MSYS)
     install(TARGETS nedclib DESTINATION .)
 endif()
 install(TARGETS nedcmake DESTINATION .)
