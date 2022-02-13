@@ -24,7 +24,7 @@ EWRAM0 void print_up() {
     tte_write("Up");
 }
 extern u32 __load_start_ewram0[];
-extern u32 __ewram0_cpuset_copy[];
+extern u32 __load_stop_ewram0[];
 
 EWRAM1 void print_down() {
     tte_erase_screen();
@@ -32,7 +32,7 @@ EWRAM1 void print_down() {
     tte_write("Down");
 }
 extern u32 __load_start_ewram1[];
-extern u32 __ewram1_cpuset_copy[];
+extern u32 __load_stop_ewram1[];
 
 EWRAM2 void print_left() {
     tte_erase_screen();
@@ -40,7 +40,7 @@ EWRAM2 void print_left() {
     tte_write("Left");
 }
 extern u32 __load_start_ewram2[];
-extern u32 __ewram2_cpuset_copy[];
+extern u32 __load_stop_ewram2[];
 
 EWRAM3 void print_right() {
     tte_erase_screen();
@@ -48,7 +48,7 @@ EWRAM3 void print_right() {
     tte_write("Right");
 }
 extern u32 __load_start_ewram3[];
-extern u32 __ewram3_cpuset_copy[];
+extern u32 __load_stop_ewram3[];
 
 int main() {
     REG_DISPCNT = DCNT_MODE0 | DCNT_BG0;
@@ -64,19 +64,23 @@ int main() {
         key_poll();
         VBlankIntrWait();
         if (key_hit(KEY_UP)) {
-            CpuFastSet(__load_start_ewram0, __ewram_overlay, (u32) __ewram0_cpuset_copy);
+            const u32 ewram_size = __load_stop_ewram0 - __load_start_ewram0;
+            CpuSet(__load_start_ewram0, __ewram_overlay, ewram_size | CS_CPY32);
             print_up();
         }
         if (key_hit(KEY_DOWN)) {
-            CpuFastSet(__load_start_ewram1, __ewram_overlay, (u32) __ewram1_cpuset_copy);
+            const u32 ewram_size = __load_stop_ewram1 - __load_start_ewram1;
+            CpuSet(__load_start_ewram1, __ewram_overlay, ewram_size | CS_CPY32);
             print_down();
         }
         if (key_hit(KEY_LEFT)) {
-            CpuFastSet(__load_start_ewram2, __ewram_overlay, (u32) __ewram2_cpuset_copy);
+            const u32 ewram_size = __load_stop_ewram2 - __load_start_ewram2;
+            CpuSet(__load_start_ewram2, __ewram_overlay, ewram_size | CS_CPY32);
             print_left();
         }
         if (key_hit(KEY_RIGHT)) {
-            CpuFastSet(__load_start_ewram3, __ewram_overlay, (u32) __ewram3_cpuset_copy);
+            const u32 ewram_size = __load_stop_ewram3 - __load_start_ewram3;
+            CpuSet(__load_start_ewram3, __ewram_overlay, ewram_size | CS_CPY32);
             print_right();
         }
     }

@@ -10,7 +10,7 @@
 cmake_minimum_required(VERSION 3.1)
 project(multiboot ASM C)
 
-add_library(multiboot STATIC crt0.s ../gba-runtime-nosyscalls.c)
+add_library(multiboot STATIC crt0.s ../gba-runtime-nosyscalls.c ../gba-runtime-init_array.c ../gba-runtime-fini_array.c)
 set_target_properties(multiboot PROPERTIES OUTPUT_NAME runtime)
 
 if(CMAKE_C_COMPILER_ID STREQUAL "Clang")

@@ -34,13 +34,7 @@ SECTIONS {
     } > rom
 
     .text : ALIGN(4) {
-        *(.text.unlikely .text.*_unlikely .text.unlikely.*)
-        *(.text.exit .text.exit.*)
-        *(.text.startup .text.startup.*)
-        *(.text.hot .text.hot.*)
-        *(SORT(.text.sorted.*))
-        *(.text .stub .text.* .gnu.linkonce.t.*)
-        *(.glue_7t) *(.glue_7)
+        *(.text .text.* .gnu.linkonce.t.*)
     } > rom
 
     .rodata : ALIGN(4) {
@@ -70,21 +64,20 @@ SECTIONS {
 
     .data __iwram_base : AT(__data_lma) ALIGN(4) {
         __data_start = ABSOLUTE(.);
-        *(.data .data.*)
-        SORT(CONSTRUCTORS)
+        *(.data .data.* .gnu.linkonce.d.*)
         . = ALIGN(4);
         __data_end = ABSOLUTE(.);
     } > iwram
 
     .bss : ALIGN(4) {
         __bss_start = ABSOLUTE(.);
-        *(.dynbss)
         *(.bss .bss.* .gnu.linkonce.b.*)
         *(COMMON)
         . = ALIGN(4);
         __bss_end = ABSOLUTE(.);
     } > iwram
 
+    /* Some link-time constants for copying sections into IWRAM via CpuSet */
     __bss_cpuset_fill = ((__bss_end - __bss_start) / 4) | (5 << 24);
     __data_cpuset_copy = ((__data_end - __data_start) / 4) | (1 << 26);
 }
