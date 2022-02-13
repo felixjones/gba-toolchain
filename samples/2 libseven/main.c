@@ -1,14 +1,11 @@
 #include <seven/prelude.h>
-#include <seven/video/mode3.h>
+#include <seven/video/prelude.h>
+#include <seven/video/bg_bitmap.h>
 
 int main(void)
 {
-    // TODO: irqInitDefault, irqInitSwitchboard
-    irqInit(NULL);
-
-    // TODO: irqEnableFull(IRQ_VBLANK);
-    irqEnable(IRQ_VBLANK);
-    REG_DISPSTAT = LCD_VBLANK_IRQ_ENABLE;
+    irqInitDefault();
+    irqEnableFull(IRQ_VBLANK);
 
     lcdInitMode3();
 
