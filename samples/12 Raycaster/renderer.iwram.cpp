@@ -11,7 +11,7 @@
 
 #include "renderer.hpp"
 
-#include <seven/video/mode4.h>
+#include <seven/video/bg_bitmap.h>
 #include <agbabi.h>
 
 #include "asset_manager.hpp"

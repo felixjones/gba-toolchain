@@ -12,7 +12,7 @@
 #include <cstdint>
 
 #include <seven/prelude.h>
-#include <seven/video/mode4.h>
+#include <seven/video/bg_bitmap.h>
 #include <seven/util/log.h>
 
 #include "asset_manager.hpp"
@@ -27,13 +27,14 @@ int main() {
     assets::load();
     renderer::init();
 
+    // TODO : Setup VBlanking
+//    irqInitStub();
+//    REG_DISPSTAT = LCD_STATUS_VBLANK_IRQ_ENABLE;
+//    REG_IE = IRQ_VBLANK;
+//    REG_IME = 1;
+
     // Mode 4 background
     lcdInitMode4();
-
-    // Setup VBlanking
-    irqInitStub();
-    irqEnable(IRQ_VBLANK);
-    REG_DISPSTAT = LCD_VBLANK_IRQ_ENABLE;
 
     void* frameBuffer = MODE4_FRAME;
     auto camera = camera_type { 22.0, 11.5, 0x4001 };
@@ -41,7 +42,6 @@ int main() {
     while (!inputKeysDown(reset_key_combo)) {
         renderer::draw_world(reinterpret_cast<std::uint8_t*>(frameBuffer), camera);
 
-        svcVBlankIntrWait();
         frameBuffer = lcdSwapBuffers();
 
         inputPoll();
