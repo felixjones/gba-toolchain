@@ -23,5 +23,6 @@ add_executable(mmutil
 
 target_include_directories(mmutil PRIVATE source)
 target_compile_definitions(mmutil PRIVATE PACKAGE_VERSION="1.9.1")
+target_link_libraries(mmutil m)
 
 install(TARGETS mmutil DESTINATION .)
