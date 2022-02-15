@@ -84,6 +84,10 @@ if(NOT HOST_PLATFORM_NAME)
     message(FATAL_ERROR "Unsupported platform \"${CMAKE_HOST_SYSTEM_NAME}\"")
 endif()
 
+if(MSYS)
+    set(CMAKE_DEPENDS_USE_COMPILER FALSE CACHE INTERNAL "")
+endif()
+
 #====================
 # Details
 #====================
