@@ -43,6 +43,7 @@ gba_target_sources_compile_options(raycaster
     EWRAM -g0 -O3 -mthumb
 )
 
+target_link_options(raycaster PRIVATE "-Wl,-Map=mapping.txt")
 target_link_libraries(raycaster PRIVATE agbabi gbfs seven)
 gba_target_link_runtime_library(raycaster rom)
 

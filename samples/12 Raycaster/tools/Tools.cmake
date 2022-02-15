@@ -22,10 +22,14 @@ function(_find_or_build_program _outVar _name _sourceDir)
     make_directory("${_sourceDir}/${binaryDirName}")
 
     # Configure program
+    if(NOT WIN32)
+        set(hostOptions -DCMAKE_C_COMPILER=cc)
+    endif()
+
     execute_process(
-            COMMAND "${CMAKE_COMMAND}" .. "-DCMAKE_INSTALL_PREFIX=${TOOLS_DIR}"
-            WORKING_DIRECTORY "${_sourceDir}/${binaryDirName}"
-            RESULT_VARIABLE cmakeResult
+        COMMAND "${CMAKE_COMMAND}" .. "-DCMAKE_INSTALL_PREFIX=${TOOLS_DIR}" ${hostOptions}
+        WORKING_DIRECTORY "${_sourceDir}/${binaryDirName}"
+        RESULT_VARIABLE cmakeResult
     )
     if(NOT ${cmakeResult} EQUAL 0)
         message(FATAL_ERROR "CMake configure failed for ${_name} (${cmakeResult})")
@@ -33,9 +37,9 @@ function(_find_or_build_program _outVar _name _sourceDir)
 
     # Build program
     execute_process(
-            COMMAND "${CMAKE_COMMAND}" --build . --target install
-            WORKING_DIRECTORY "${_sourceDir}/${binaryDirName}"
-            RESULT_VARIABLE cmakeResult
+        COMMAND "${CMAKE_COMMAND}" --build . --target install
+        WORKING_DIRECTORY "${_sourceDir}/${binaryDirName}"
+        RESULT_VARIABLE cmakeResult
     )
     if(NOT ${cmakeResult} EQUAL 0)
         message(FATAL_ERROR "CMake build failed for ${_name} (${cmakeResult})")
@@ -68,8 +72,8 @@ function(_mapper _input)
     file(LOCK "${GBA_TOOLCHAIN_LOCK}" RELEASE)
 
     execute_process(
-            COMMAND "${MAPPER}" "${_input}"
-            RESULT_VARIABLE cmakeResult
+        COMMAND "${MAPPER}" "${_input}"
+        RESULT_VARIABLE cmakeResult
     )
 
     if(NOT ${cmakeResult} EQUAL 0)
