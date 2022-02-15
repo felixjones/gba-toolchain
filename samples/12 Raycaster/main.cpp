@@ -20,6 +20,10 @@
 
 static constinit const auto reset_key_combo = std::uint16_t(KEY_A | KEY_B | KEY_SELECT | KEY_START);
 
+static void irq_callback(u16 flags) noexcept;
+
+static int simulations = 0;
+
 int main() {
     logInit();
     logSetMaxLevel(LOG_TRACE);
@@ -27,11 +31,11 @@ int main() {
     assets::load();
     renderer::init();
 
-    // TODO : Setup VBlanking
-//    irqInitStub();
-//    REG_DISPSTAT = LCD_STATUS_VBLANK_IRQ_ENABLE;
-//    REG_IE = IRQ_VBLANK;
-//    REG_IME = 1;
+    // Setup VBlanking
+    irqInitSimple(irq_callback);
+    REG_DISPSTAT = LCD_STATUS_VBLANK_IRQ_ENABLE;
+    REG_IE = IRQ_VBLANK;
+    REG_IME = 1;
 
     // Mode 4 background
     lcdInitMode4();
@@ -45,7 +49,11 @@ int main() {
         frameBuffer = lcdSwapBuffers();
 
         inputPoll();
-        camera.update();
+        auto loops = simulations;
+        simulations -= loops;
+        while (loops--) {
+            camera.update();
+        }
     }
 
     // Spin loop while reset keys are held
@@ -56,4 +64,10 @@ int main() {
     }
 
     return 0;
+}
+
+static void irq_callback(u16 flags) noexcept {
+    if (flags & IRQ_VBLANK) {
+        ++simulations;
+    }
 }
