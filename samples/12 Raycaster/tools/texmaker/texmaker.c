@@ -56,8 +56,8 @@ int main(int argc, char* argv[]) {
         ext--;
     }
 
-    FILE* binaryFile;
-    if (fopen_s(&binaryFile, path, "wb")) {
+    FILE* binaryFile = fopen(path, "wb");
+    if (!binaryFile) {
         printf("Failed to open %s", path);
         return 1;
     }
@@ -97,8 +97,8 @@ int main(int argc, char* argv[]) {
         ext--;
     }
 
-    FILE* paletteFile;
-    if (fopen_s(&paletteFile, path, "wb")) {
+    FILE* paletteFile = fopen(path, "wb");
+    if (!paletteFile) {
         printf("Failed to open %s", path);
         return 1;
     }

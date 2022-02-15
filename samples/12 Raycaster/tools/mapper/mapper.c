@@ -23,8 +23,8 @@ int main(int argc, char* argv[]) {
 
     char binaryMap[MAP_SIZE * MAP_SIZE];
 
-    FILE* textFile;
-    if (fopen_s(&textFile, argv[1], "r")) {
+    FILE* textFile = fopen(argv[1], "r");
+    if (!textFile) {
         printf("Failed to open %s", argv[1]);
         return 1;
     }
@@ -61,8 +61,8 @@ int main(int argc, char* argv[]) {
         ext--;
     }
 
-    FILE* binaryFile;
-    if (fopen_s(&binaryFile, path, "wb")) {
+    FILE* binaryFile = fopen(path, "wb");
+    if (!binaryFile) {
         printf("Failed to open %s", path);
         return 1;
     }
