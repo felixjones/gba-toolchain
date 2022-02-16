@@ -49,8 +49,9 @@ else()
     gba_add_gbfs(assets ${GBFS_ASSETS})
     target_compile_definitions(raycaster PRIVATE ASSETS_GBFS)
 endif()
-add_dependencies(assets wolftextures map)
 set_target_properties(assets PROPERTIES SUFFIX ".gbfs")
+add_dependencies(assets wolftextures map)
+add_dependencies(raycaster assets)
 
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
     # Debug build can just fix header
