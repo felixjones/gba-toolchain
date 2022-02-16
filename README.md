@@ -4,7 +4,7 @@
 
 ## Requirements
 
-* [CMake](https://cmake.org/) (3.20 minimum)
+* [CMake](https://cmake.org/) (3.18 minimum)
 * Host compiler (optional for compiling additional tools)
 
 ## Basic Usage
