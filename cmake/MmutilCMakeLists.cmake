@@ -24,7 +24,7 @@ add_executable(mmutil
 target_include_directories(mmutil PRIVATE source)
 target_compile_definitions(mmutil PRIVATE PACKAGE_VERSION="1.9.1")
 if (NOT MSVC)
-    target_link_libraries(mmutil m)
+    target_link_libraries(mmutil PRIVATE m)
 endif()
 
 install(TARGETS mmutil DESTINATION .)
