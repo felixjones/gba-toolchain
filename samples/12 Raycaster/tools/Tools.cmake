@@ -51,32 +51,41 @@ function(_find_or_build_program _outVar _name _sourceDir)
     endif()
 endfunction()
 
-function(_texmaker _input)
+function(_add_texmaker _target _input)
     file(LOCK "${GBA_TOOLCHAIN_LOCK}" GUARD FILE)
     _find_or_build_program(TEXMAKER "texmaker" "${TOOLS_DIR}/texmaker")
     file(LOCK "${GBA_TOOLCHAIN_LOCK}" RELEASE)
 
-    execute_process(
+    get_filename_component(outPath "${_input}" DIRECTORY)
+    get_filename_component(outName "${_input}" NAME_WE)
+
+    add_custom_target(${_target})
+    add_custom_command(TARGET ${_target}
+        POST_BUILD
         COMMAND "${TEXMAKER}" "${_input}"
-        RESULT_VARIABLE cmakeResult
+        BYPRODUCTS "${outPath}/${outName}.pal" "${outPath}/${outName}.bin"
+        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
     )
 
-    if(NOT ${cmakeResult} EQUAL 0)
-        message(FATAL_ERROR "Failed to make textures ${_input}")
-    endif()
+    set_property(TARGET ${_target} PROPERTY PAL_OUTPUT "${outPath}/${outName}.pal")
+    set_property(TARGET ${_target} PROPERTY BIN_OUTPUT "${outPath}/${outName}.bin")
 endfunction()
 
-function(_mapper _input)
+function(_add_mapper _target _input)
     file(LOCK "${GBA_TOOLCHAIN_LOCK}" GUARD FILE)
     _find_or_build_program(MAPPER "mapper" "${TOOLS_DIR}/mapper")
     file(LOCK "${GBA_TOOLCHAIN_LOCK}" RELEASE)
 
-    execute_process(
+    get_filename_component(outPath "${_input}" DIRECTORY)
+    get_filename_component(outName "${_input}" NAME_WE)
+
+    add_custom_target(${_target})
+    add_custom_command(TARGET ${_target}
+        POST_BUILD
         COMMAND "${MAPPER}" "${_input}"
-        RESULT_VARIABLE cmakeResult
+        BYPRODUCTS "${outPath}/${outName}.bin"
+        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
     )
 
-    if(NOT ${cmakeResult} EQUAL 0)
-        message(FATAL_ERROR "Failed to make map ${_input}")
-    endif()
+    set_property(TARGET ${_target} PROPERTY BIN_OUTPUT "${outPath}/${outName}.bin")
 endfunction()

@@ -16,19 +16,28 @@ gba_add_library_subdirectory(rom agbabi gbfs seven)
 
 # Run host tools
 include("${CMAKE_CURRENT_LIST_DIR}/tools/Tools.cmake")
-_texmaker("${CMAKE_SOURCE_DIR}/assets/wolftextures.png")
-_mapper("${CMAKE_SOURCE_DIR}/assets/map.txt")
+_add_texmaker(wolftextures assets/wolftextures.png)
+_add_mapper(map "${CMAKE_SOURCE_DIR}/assets/map.txt")
 
 # GBFS assets
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
-    gba_add_gbfs(assets GENERATE_ASM "assets/wolftextures.pal" "assets/wolftextures.bin" "assets/map.bin")
+    gba_add_gbfs(assets GENERATE_ASM
+        "$<TARGET_PROPERTY:wolftextures,PAL_OUTPUT>"
+        "$<TARGET_PROPERTY:wolftextures,BIN_OUTPUT>"
+        "$<TARGET_PROPERTY:map,BIN_OUTPUT>"
+    )
     enable_language(ASM)
     add_executable(raycaster main.cpp asset_manager.cpp camera.cpp raycast_engine.iwram.cpp renderer.iwram.cpp "$<TARGET_PROPERTY:assets,ASM_OUTPUT>")
 else()
-    gba_add_gbfs(assets "assets/wolftextures.pal" "assets/wolftextures.bin" "assets/map.bin")
+    gba_add_gbfs(assets
+        "$<TARGET_GENEX_EVAL:wolftextures,$<TARGET_PROPERTY:wolftextures,PAL_OUTPUT>>"
+        "$<TARGET_GENEX_EVAL:wolftextures,$<TARGET_PROPERTY:wolftextures,BIN_OUTPUT>>"
+        "$<TARGET_PROPERTY:map,BIN_OUTPUT>"
+    )
     add_executable(raycaster main.cpp asset_manager.cpp camera.cpp raycast_engine.iwram.cpp renderer.iwram.cpp)
     target_compile_definitions(raycaster PRIVATE ASSETS_GBFS)
 endif()
+add_dependencies(assets wolftextures map)
 
 set_target_properties(assets PROPERTIES SUFFIX ".gbfs")
 
