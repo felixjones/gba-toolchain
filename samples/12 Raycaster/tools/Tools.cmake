@@ -19,7 +19,7 @@ function(_find_or_build_program _outVar _name _sourceDir)
 
     # Compile in _sourceDir
     get_filename_component(binaryDirName "${CMAKE_CURRENT_BINARY_DIR}" NAME)
-    make_directory("${_sourceDir}/${binaryDirName}")
+    file(MAKE_DIRECTORY "${_sourceDir}/${binaryDirName}")
 
     # Configure program
     if(NOT WIN32)
@@ -27,7 +27,7 @@ function(_find_or_build_program _outVar _name _sourceDir)
     endif()
 
     execute_process(
-        COMMAND "${CMAKE_COMMAND}" .. "-DCMAKE_INSTALL_PREFIX=${TOOLS_DIR}" ${hostOptions}
+        COMMAND "${CMAKE_COMMAND}" .. -DCMAKE_INSTALL_PREFIX=.. ${hostOptions}
         WORKING_DIRECTORY "${_sourceDir}/${binaryDirName}"
         RESULT_VARIABLE cmakeResult
     )
@@ -37,7 +37,7 @@ function(_find_or_build_program _outVar _name _sourceDir)
 
     # Build program
     execute_process(
-        COMMAND "${CMAKE_COMMAND}" --build . --target install
+        COMMAND ${CMAKE_COMMAND} --build . --target install
         WORKING_DIRECTORY "${_sourceDir}/${binaryDirName}"
         RESULT_VARIABLE cmakeResult
     )
@@ -45,7 +45,7 @@ function(_find_or_build_program _outVar _name _sourceDir)
         message(FATAL_ERROR "CMake build failed for ${_name} (${cmakeResult})")
     endif()
 
-    find_program(${_outVar} NAMES "${_name}" PATHS "${TOOLS_DIR}")
+    find_program(${_outVar} NAMES "${_name}" PATHS "${TOOLS_DIR}/${_name}")
     if(NOT ${_outVar})
         message(FATAL_ERROR "Failed to install ${_name}")
     endif()
