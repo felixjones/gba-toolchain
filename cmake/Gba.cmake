@@ -426,7 +426,7 @@ function(gba_add_maxmod_soundbank _target)
     file(LOCK "${GBA_TOOLCHAIN_LOCK}" RELEASE)
 
     add_custom_target(${_target} ALL
-        COMMAND "${MMUTIL}" -o\"$<TARGET_GENEX_EVAL:${_target},$<TARGET_PROPERTY:${_target},TARGET_FILE>>\" $<${ARGS_GENERATE_HEADER}:-h\"$<TARGET_GENEX_EVAL:${_target},$<TARGET_PROPERTY:${_target},TARGET_HEADER_FILE>>\"> ${ARGS_GENERATE_TEST_ROM} ${ARGS_UNPARSED_ARGUMENTS}
+        COMMAND "${MMUTIL}" "-o$<TARGET_GENEX_EVAL:${_target},$<TARGET_PROPERTY:${_target},TARGET_FILE>>" "$<${ARGS_GENERATE_HEADER}:-h$<TARGET_GENEX_EVAL:${_target},$<TARGET_PROPERTY:${_target},TARGET_HEADER_FILE>>>" ${ARGS_GENERATE_TEST_ROM} ${ARGS_UNPARSED_ARGUMENTS}
         COMMENT "Compiling soundbank ${_target}"
         SOURCES ${ARGS_UNPARSED_ARGUMENTS}
         WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
