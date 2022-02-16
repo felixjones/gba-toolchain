@@ -10,38 +10,12 @@
 cmake_minimum_required(VERSION 3.20)
 
 project(sample-raycaster CXX)
-set (CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 20)
 
 gba_add_library_subdirectory(rom agbabi gbfs seven)
 
-# Run host tools
-include("${CMAKE_CURRENT_LIST_DIR}/tools/Tools.cmake")
-_add_texmaker(wolftextures assets/wolftextures.png)
-_add_mapper(map "${CMAKE_SOURCE_DIR}/assets/map.txt")
-
-# GBFS assets
-if(CMAKE_BUILD_TYPE STREQUAL Debug)
-    gba_add_gbfs(assets GENERATE_ASM
-        "$<TARGET_PROPERTY:wolftextures,PAL_OUTPUT>"
-        "$<TARGET_PROPERTY:wolftextures,BIN_OUTPUT>"
-        "$<TARGET_PROPERTY:map,BIN_OUTPUT>"
-    )
-    enable_language(ASM)
-    add_executable(raycaster main.cpp asset_manager.cpp camera.cpp raycast_engine.iwram.cpp renderer.iwram.cpp "$<TARGET_PROPERTY:assets,ASM_OUTPUT>")
-else()
-    gba_add_gbfs(assets
-        "$<TARGET_GENEX_EVAL:wolftextures,$<TARGET_PROPERTY:wolftextures,PAL_OUTPUT>>"
-        "$<TARGET_GENEX_EVAL:wolftextures,$<TARGET_PROPERTY:wolftextures,BIN_OUTPUT>>"
-        "$<TARGET_PROPERTY:map,BIN_OUTPUT>"
-    )
-    add_executable(raycaster main.cpp asset_manager.cpp camera.cpp raycast_engine.iwram.cpp renderer.iwram.cpp)
-    target_compile_definitions(raycaster PRIVATE ASSETS_GBFS)
-endif()
-add_dependencies(assets wolftextures map)
-
-set_target_properties(assets PROPERTIES SUFFIX ".gbfs")
-
 # GBA executable
+add_executable(raycaster main.cpp asset_manager.cpp camera.cpp raycast_engine.iwram.cpp renderer.iwram.cpp)
 set_target_properties(raycaster PROPERTIES SUFFIX ".elf")
 
 target_compile_options(raycaster PRIVATE -mthumb -ffunction-sections -fdata-sections -Wall -Wextra -funwind-tables)
@@ -52,9 +26,31 @@ gba_target_sources_compile_options(raycaster
     EWRAM -g0 -O3 -mthumb
 )
 
-target_link_options(raycaster PRIVATE "-Wl,-Map=mapping.txt")
 target_link_libraries(raycaster PRIVATE agbabi gbfs seven)
 gba_target_link_runtime_library(raycaster rom)
+
+# Add host tools
+include("${CMAKE_CURRENT_LIST_DIR}/tools/Tools.cmake")
+_add_texmaker(wolftextures assets/wolftextures.png)
+_add_mapper(map "${CMAKE_SOURCE_DIR}/assets/map.txt")
+
+set(GBFS_ASSETS
+    "$<TARGET_PROPERTY:wolftextures,PAL_OUTPUT>"
+    "$<TARGET_PROPERTY:wolftextures,BIN_OUTPUT>"
+    "$<TARGET_PROPERTY:map,BIN_OUTPUT>"
+)
+
+# GBFS assets
+if(CMAKE_BUILD_TYPE STREQUAL Debug)
+    gba_add_gbfs(assets GENERATE_ASM ${GBFS_ASSETS})
+    enable_language(ASM)
+    target_sources(raycaster PRIVATE "$<TARGET_PROPERTY:assets,ASM_OUTPUT>")
+else()
+    gba_add_gbfs(assets ${GBFS_ASSETS})
+    target_compile_definitions(raycaster PRIVATE ASSETS_GBFS)
+endif()
+add_dependencies(assets wolftextures map)
+set_target_properties(assets PROPERTIES SUFFIX ".gbfs")
 
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
     # Debug build can just fix header
