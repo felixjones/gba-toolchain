@@ -52,7 +52,7 @@ void raycast_engine::operator()(fixed_type dirX, fixed_type dirY, const hit_func
             side = 1;
         }
 
-        const auto hit = m_map[mapX][mapY];
+        const auto hit = m_map[mapY][mapX];
         if (hit) {
             fixed_type perpWallDist, wallX;
             if (side == 0) {

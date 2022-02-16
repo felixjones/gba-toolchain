@@ -31,8 +31,8 @@ void renderer::draw_world(std::uint8_t* frameBuffer, const camera_type& camera) 
     __agbabi_wordset4(frameBuffer, 0xA000, -1);
     frame_buffer = frameBuffer;
 
-    const auto planeX = camera.dir_y() * aspect_ratio;
-    const auto planeY = -camera.dir_x() * aspect_ratio;
+    const auto planeX = -camera.dir_y() * aspect_ratio;
+    const auto planeY = camera.dir_x() * aspect_ratio;
 
     const auto raycast = raycast_engine { assets::world_map, camera.x, camera.y };
     for (screen_x = 0; screen_x < MODE4_WIDTH; screen_x += 2) {
@@ -54,11 +54,11 @@ void renderer::draw_world(std::uint8_t* frameBuffer, const camera_type& camera) 
             }
 
             auto texX = static_cast<int>(wallX * assets::texture_size);
-            if ((side == 0 && ray_dirX > 0) || (side == 1 && ray_dirY < 0)) {
+            if (!(side == 0 && ray_dirX > 0)&& !(side == 1 && ray_dirY < 0)) {
                 texX = assets::texture_size - texX - 1;
             }
 
-            const auto& texture = assets::texture_array[hit][side][texX];
+            const auto& texture = assets::texture_array[hit][1 - side][texX];
             const auto step = fixed_type(assets::texture_size) / lineHeight;
 
             auto texPos = (drawStart - (MODE4_HEIGHT / 2) + (lineHeight / 2)) * step;

@@ -112,6 +112,18 @@ struct fixed_type {
         return data < o.data;
     }
 
+    constexpr auto operator >(const fixed_type o) const noexcept {
+        return data > o.data;
+    }
+
+    constexpr auto operator <=(const fixed_type o) const noexcept {
+        return data <= o.data;
+    }
+
+    constexpr auto operator >=(const fixed_type o) const noexcept {
+        return data >= o.data;
+    }
+
     data_type data;
 };
 

@@ -41,9 +41,9 @@ int main() {
     lcdInitMode4();
 
     void* frameBuffer = MODE4_FRAME;
-    auto camera = camera_type { 22.0, 11.5, 0x4001 };
+    auto camera = camera_type { 11.5, 22.0, 0x6001 };
 
-    while (!inputKeysDown(reset_key_combo)) {
+    while (inputKeysDown(reset_key_combo) != reset_key_combo) {
         renderer::draw_world(reinterpret_cast<std::uint8_t*>(frameBuffer), camera);
 
         frameBuffer = lcdSwapBuffers();
