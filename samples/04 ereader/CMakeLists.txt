@@ -19,7 +19,6 @@ set_target_properties(helloDotCode PROPERTIES SUFFIX ".elf")
 target_compile_options(helloDotCode PRIVATE -mthumb -ffunction-sections -fdata-sections -Wall -Wextra)
 target_link_options(helloDotCode PRIVATE -Wl,--gc-sections)
 
-target_link_libraries(helloDotCode PRIVATE tonc)
-gba_target_link_runtime_library(helloDotCode ereader)
+target_link_libraries(helloDotCode PRIVATE ereader tonc)
 
 gba_target_objcopy(helloDotCode ARCHIVE_DOTCODE NAME "Hello, e-reader!")

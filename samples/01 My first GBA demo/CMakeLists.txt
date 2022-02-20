@@ -27,7 +27,7 @@ target_compile_options(first PRIVATE -mthumb -Wall)
 gba_target_sources_compile_options(first IWRAM -g0 -Os -marm)
 
 # Link with librom
-gba_target_link_runtime_library(first rom)
+target_link_libraries(first PRIVATE rom)
 
 # Objcopy the target's output into a .gba binary and fix the header
 gba_target_objcopy(first FIX_HEADER)

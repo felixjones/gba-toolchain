@@ -51,15 +51,6 @@ function(gba_add_library_subdirectory _library)
 
         get_filename_component(libraryDir "${GBA_TOOLCHAIN_LIST_DIR}/lib/${_library}" ABSOLUTE)
         add_subdirectory("${libraryDir}" "${_library}")
-
-        # Handle scripts for runtime libraries
-        if(${_library} STREQUAL rom OR ${_library} STREQUAL multiboot OR ${_library} STREQUAL ereader)
-            string(TOUPPER "${_library}" libraryUpper)
-
-            set(GBA_${libraryUpper}_LDSCRIPT "${GBA_${libraryUpper}_LDSCRIPT}" CACHE INTERNAL "")
-            set(GBA_${libraryUpper}_SPECS "${GBA_${libraryUpper}_SPECS}" CACHE INTERNAL "")
-            set(GBA_${libraryUpper}_BINARY_DIR "${GBA_${libraryUpper}_BINARY_DIR}" CACHE INTERNAL "")
-        endif()
     endfunction()
 
     _gba_add_one_library_subdirectory(${_library})
@@ -67,32 +58,6 @@ function(gba_add_library_subdirectory _library)
     foreach(arg ${ARGN})
         _gba_add_one_library_subdirectory(${arg})
     endforeach()
-endfunction()
-
-#! gba_link_runtime_library : Link a given target against a runtime library
-#
-# This essentially sorts out the target_link_libraries variables required for runtime linking
-#
-# \arg:_target Name of target to link library to
-# \arg:_library Name of a valid runtime library (rom, multiboot, ereader)
-#
-function(gba_target_link_runtime_library _target _library)
-    get_target_property(runtime ${_target} RUNTIME)
-    if(runtime)
-        message(FATAL_ERROR "Target ${_target} is already linked with ${runtime} runtime")
-    endif()
-
-    add_dependencies(${_target} ${_library})
-
-    string(TOUPPER ${_library} libraryUpper)
-
-    target_link_options(${_target} PRIVATE
-        -T ${GBA_${libraryUpper}_LDSCRIPT}
-        -specs=${GBA_${libraryUpper}_SPECS}
-        -B ${GBA_${libraryUpper}_BINARY_DIR}
-    )
-
-    set_target_properties(${_target} PROPERTIES RUNTIME ${_library})
 endfunction()
 
 #! gba_target_sources_compile_options : Add compile options to IWRAM and/or EWRAM sources
@@ -132,6 +97,34 @@ function(gba_target_sources_compile_options _target)
             set_source_files_properties(${source} PROPERTIES COMPILE_FLAGS "${flags}")
         endforeach()
     endif()
+endfunction()
+
+#! gba_get_target_runtime : get target's gba runtime
+#
+# A fatal error is raised if the target has more than one runtime candidates
+#
+# \arg:_out Variable for storing the runtime target
+# \arg:_target Target to retrieve runtime from
+#
+function(gba_get_target_runtime _out _target)
+    get_target_property(libraries ${_target} LINK_LIBRARIES)
+
+    foreach(library ${libraries})
+        get_target_property(sources ${library} SOURCES)
+        list(FILTER sources INCLUDE REGEX "(.*crt0\\..*)")
+        list(LENGTH sources numSources)
+        if(${numSources} GREATER 0)
+            list(APPEND runtimes ${library})
+        endif()
+    endforeach()
+
+    list(LENGTH runtimes numRuntimes)
+    if(${numRuntimes} GREATER 1)
+        message(FATAL_ERROR "${_target} has more than one runtime linked (${runtimes})")
+    endif()
+
+    list(GET runtimes 0 out)
+    set(${_out} ${out} PARENT_SCOPE)
 endfunction()
 
 #! gba_target_objcopy : objcopy command
@@ -179,7 +172,7 @@ function(gba_target_objcopy _target)
     # Ideally this would use $<TARGET_FILE_NAME:${_target}>
     # However, generator expressions are not supported in BYPRODUCTS for add_custom_command
     # https://gitlab.kitware.com/cmake/cmake/-/issues/12877
-    get_target_property(runtime ${_target} RUNTIME)
+    gba_get_target_runtime(runtime ${_target})
     if(ARGS_OUTPUT)
         set(objcopyOutput "${ARGS_OUTPUT}")
     elseif(runtime STREQUAL ereader)

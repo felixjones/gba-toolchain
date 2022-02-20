@@ -16,6 +16,6 @@ gba_add_library_subdirectory(rom)
 add_executable(helloAsm main.s)
 set_target_properties(helloAsm PROPERTIES SUFFIX ".elf")
 
-gba_target_link_runtime_library(helloAsm rom)
+target_link_libraries(helloAsm PRIVATE rom)
 
 gba_target_objcopy(helloAsm FIX_HEADER)

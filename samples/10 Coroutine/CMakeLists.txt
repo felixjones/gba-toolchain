@@ -19,7 +19,6 @@ set_target_properties(helloCoro PROPERTIES SUFFIX ".elf")
 target_compile_options(helloCoro PRIVATE -mthumb -ffunction-sections -fdata-sections -Wall -Wextra)
 target_link_options(helloCoro PRIVATE -Wl,--gc-sections)
 
-target_link_libraries(helloCoro PRIVATE agbabi tonc posprintf)
-gba_target_link_runtime_library(helloCoro rom)
+target_link_libraries(helloCoro PRIVATE rom agbabi tonc posprintf)
 
 gba_target_objcopy(helloCoro FIX_HEADER)

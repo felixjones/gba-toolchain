@@ -18,7 +18,6 @@ set_target_properties(helloTonc PROPERTIES SUFFIX ".elf")
 
 target_compile_options(helloTonc PRIVATE -mthumb -Wall)
 
-target_link_libraries(helloTonc PRIVATE tonc)
-gba_target_link_runtime_library(helloTonc rom)
+target_link_libraries(helloTonc PRIVATE rom tonc)
 
 gba_target_objcopy(helloTonc FIX_HEADER)

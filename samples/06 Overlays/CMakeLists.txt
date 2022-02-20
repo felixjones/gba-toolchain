@@ -19,7 +19,6 @@ set_target_properties(helloOverlay PROPERTIES SUFFIX ".elf")
 target_compile_options(helloOverlay PRIVATE -mthumb -ffunction-sections -fdata-sections -Wall -Wextra)
 target_link_options(helloOverlay PRIVATE -Wl,--gc-sections)
 
-target_link_libraries(helloOverlay PRIVATE tonc)
-gba_target_link_runtime_library(helloOverlay rom)
+target_link_libraries(helloOverlay PRIVATE rom tonc)
 
 gba_target_objcopy(helloOverlay FIX_HEADER)

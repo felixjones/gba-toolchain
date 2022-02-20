@@ -25,6 +25,8 @@ target_compile_options(multiboot PRIVATE
 )
 target_link_options(multiboot PRIVATE -Wl,--gc-sections)
 
-set(GBA_MULTIBOOT_LDSCRIPT "${CMAKE_CURRENT_LIST_DIR}/../ldscripts/multiboot.ld" PARENT_SCOPE)
-set(GBA_MULTIBOOT_SPECS "${CMAKE_CURRENT_LIST_DIR}/../gba-runtime-nano.specs" PARENT_SCOPE)
-set(GBA_MULTIBOOT_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}" PARENT_SCOPE)
+target_link_options(multiboot INTERFACE
+    -T ${CMAKE_CURRENT_LIST_DIR}/../ldscripts/multiboot.ld
+    -specs=${CMAKE_CURRENT_LIST_DIR}/../gba-runtime-nano.specs
+    -B ${CMAKE_CURRENT_BINARY_DIR}
+)

@@ -25,6 +25,8 @@ target_compile_options(ereader PRIVATE
 )
 target_link_options(ereader PRIVATE -Wl,--gc-sections)
 
-set(GBA_EREADER_LDSCRIPT "${CMAKE_CURRENT_LIST_DIR}/../ldscripts/ereader.ld" PARENT_SCOPE)
-set(GBA_EREADER_SPECS "${CMAKE_CURRENT_LIST_DIR}/../gba-runtime-nano.specs" PARENT_SCOPE)
-set(GBA_EREADER_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}" PARENT_SCOPE)
+target_link_options(ereader INTERFACE
+    -T ${CMAKE_CURRENT_LIST_DIR}/../ldscripts/ereader.ld
+    -specs=${CMAKE_CURRENT_LIST_DIR}/../gba-runtime-nano.specs
+    -B ${CMAKE_CURRENT_BINARY_DIR}
+)

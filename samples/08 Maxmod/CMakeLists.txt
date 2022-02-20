@@ -51,8 +51,7 @@ gba_target_sources_compile_options(helloMaxmod
 # Include the directory where soundbank compiles to
 target_include_directories(helloMaxmod PRIVATE "${CMAKE_BINARY_DIR}")
 
-target_link_libraries(helloMaxmod PRIVATE tonc maxmod gbfs)
-gba_target_link_runtime_library(helloMaxmod rom)
+target_link_libraries(helloMaxmod PRIVATE rom tonc maxmod gbfs)
 
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
     gba_target_objcopy(helloMaxmod FIX_HEADER)

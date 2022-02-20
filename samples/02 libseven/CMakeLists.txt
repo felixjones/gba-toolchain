@@ -18,7 +18,6 @@ set_target_properties(helloSeven PROPERTIES SUFFIX ".elf")
 
 target_compile_options(helloSeven PRIVATE -std=c99 -ffunction-sections -fdata-sections -mthumb)
 
-target_link_libraries(helloSeven PRIVATE seven)
-gba_target_link_runtime_library(helloSeven rom)
+target_link_libraries(helloSeven PRIVATE rom seven)
 
 gba_target_objcopy(helloSeven FIX_HEADER)
