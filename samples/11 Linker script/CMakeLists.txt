@@ -12,6 +12,10 @@ cmake_minimum_required(VERSION 3.18)
 
 project(linker-script-sample ASM C CXX)
 
+if(USE_DEVKITARM)
+    message(FATAL_ERROR "This sample is not compatible with USE_DEVKITARM")
+endif()
+
 gba_add_library_subdirectory(tonc)
 
 add_executable(helloLinker crt0.s syscalls.c main.cpp)

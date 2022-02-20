@@ -11,6 +11,10 @@ cmake_minimum_required(VERSION 3.18)
 
 project(sample-ereader C)
 
+if(USE_DEVKITARM)
+    message(WARNING "e-Reader programs cannot exit to ROM with USE_DEVKITARM")
+endif()
+
 gba_add_library_subdirectory(ereader tonc)
 
 add_executable(helloDotCode main.c)

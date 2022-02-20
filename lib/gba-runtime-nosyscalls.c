@@ -14,6 +14,9 @@
 
 #undef errno
 extern int errno;
+#if defined(__DEVKITARM__)
+int errno; // devkitARM lacks errno
+#endif
 
 #define EWRAM_TOP 0x2040000
 
@@ -33,6 +36,13 @@ char* _sbrk(int incr) {
     heap_end += incr;
     return prev_heap_end;
 }
+
+#if defined(__DEVKITARM__)
+// devkitARM uses _sbrk_r
+char* _sbrk_r(__attribute__((unused)) void* reent, int incr) {
+    return _sbrk(incr);
+}
+#endif
 
 static int _gba_nosys() {
     errno = ENOSYS;

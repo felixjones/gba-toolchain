@@ -19,8 +19,15 @@ target_compile_options(rom PRIVATE
 )
 target_link_options(rom PRIVATE -Wl,--gc-sections)
 
+if(USE_DEVKITARM)
+    target_compile_definitions(rom PUBLIC __DEVKITARM__)
+    set(specs "${CMAKE_CURRENT_LIST_DIR}/../gba-runtime-devkitarm.specs")
+else()
+    set(specs "${CMAKE_CURRENT_LIST_DIR}/../gba-runtime-nano.specs")
+endif()
+
 target_link_options(rom INTERFACE
     -T ${CMAKE_CURRENT_LIST_DIR}/../ldscripts/rom.ld
-    -specs=${CMAKE_CURRENT_LIST_DIR}/../gba-runtime-nano.specs
+    -specs=${specs}
     -B ${CMAKE_CURRENT_BINARY_DIR}
 )
