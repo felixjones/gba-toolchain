@@ -495,6 +495,8 @@ function(_gba_find_gbafix)
                 set(hostOptions -DCMAKE_C_COMPILER=cc)
             endif()
 
+            message(STATUS "Compiling gbafix with host compiler")
+
             # Configure gbafix
             execute_process(
                 COMMAND ${CMAKE_COMMAND} .. -DCMAKE_INSTALL_PREFIX=.. ${hostOptions}
@@ -570,6 +572,8 @@ function(_gba_find_nedcmake)
             if(NOT WIN32)
                 set(hostOptions -DCMAKE_C_COMPILER=cc)
             endif()
+
+            message(STATUS "Compiling nedcmake with host compiler")
 
             # Configure nedcmake
             execute_process(
@@ -650,6 +654,8 @@ function(_gba_find_gbfs)
             if(NOT WIN32)
                 set(hostOptions -DCMAKE_C_COMPILER=cc)
             endif()
+
+            message(STATUS "Compiling gbfs with host compiler")
 
             # Configure gbfs
             execute_process(
@@ -743,6 +749,8 @@ function(_gba_find_mmutil)
             if(NOT WIN32)
                 set(hostOptions -DCMAKE_C_COMPILER=cc)
             endif()
+
+            message(STATUS "Compiling mmutil with host compiler")
 
             # Configure mmutil
             execute_process(
