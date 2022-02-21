@@ -58,16 +58,12 @@ Runtime library for regular GBA ROMs.
 
 The definition `__ROM_START_PADDING__=bytes-to-pad` can be used to insert padding after the ROM header, useful for inserting save type strings.
 
-Automatic copying of the `.ewram.base` and `.iwram.base` sections can be enabled with `__USE_EWRAM_BASE__` and `__USE_IWRAM_BASE__` respectively.
-
 ### libmultiboot
 
 Runtime library for Multiboot binaries. Multiboot binaries are usually transferred via GBA link cable from a host device to one or more connected GBA clients.
 
 If launched as a regular ROM (from emulator, or similar) libmultiboot will copy ROM contents to EWRAM before executing.
 The extra code for ROM copying can be removed by adding the `__NO_ROM_COPY__` definition.
-
-Automatic copying of the `.iwram.base` section can be enabled with `__USE_IWRAM_BASE__`.
 
 ### libereader
 
@@ -76,8 +72,6 @@ Runtime library for e-Reader binaries.
 e-Reader binaries have no header, however 4 bytes at `0x2000008` are clobbered by the e-Reader device ROM.
 
 An e-Reader binary can ´exit´ back to the e-Reader ROM.
-
-Automatic copying of the `.iwram.base` section can be enabled with `__USE_IWRAM_BASE__`.
 
 ## Tools
 
