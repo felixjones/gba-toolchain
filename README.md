@@ -120,7 +120,7 @@ Use an existing installation of the GNU Arm Embedded Toolchain.
 
 This can also be configured via the environment variable `ARM_GNU_TOOLCHAIN`.
 
-### -DUSE_CLANG=YES
+### -DUSE_CLANG=ON
 
 Changes the compiler from ARM GNU GCC to the host's Clang compiler. This requires [Clang](https://clang.llvm.org/) to be installed.
 
