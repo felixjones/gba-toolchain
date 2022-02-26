@@ -126,6 +126,12 @@ Changes the compiler from ARM GNU GCC to the host's Clang compiler. This require
 
 The GNU Arm Embedded Toolchain is still required for GCC linking, compiling assembly, objcopy, and for the C/C++ standard libraries.
 
+### -DUSE_DEVKITARM=ON
+
+Changes the compiler from GNU Arm Embedded Toolchain to an installation of devkitARM located at the `DEVKITARM` environment variable.
+
+This avoids downloading GNU Arm Embedded Toolchain and uses devkitARM's provided tools when available (can avoid downloading and compiling host tools). 
+
 ### -DDEPENDENCIES_URL=https://some.url.to/a/place/with/file.ini
 
 Overrides the initial URL used to download `dependecies.ini`.

@@ -462,6 +462,8 @@ function(_gba_find_gbafix)
         #   *NIX opt/local/
         #   GBA_TOOLCHAIN_TOOLS/tools
         set(searchPaths $ENV{Path})
+        list(APPEND searchPaths "$ENV{DEVKITPRO}/tools/bin")
+        list(APPEND searchPaths "$ENV{DEVKITARM}/../tools/bin")
         list(APPEND searchPaths "${HOST_LOCAL_DIRECTORY}")
         list(APPEND searchPaths "${GBA_TOOLCHAIN_TOOLS}/gbafix")
 
@@ -618,6 +620,8 @@ function(_gba_find_gbfs)
         #   *NIX opt/local/
         #   GBA_TOOLCHAIN_TOOLS/tools
         set(searchPaths $ENV{Path})
+        list(APPEND searchPaths "$ENV{DEVKITPRO}/tools/bin")
+        list(APPEND searchPaths "$ENV{DEVKITARM}/../tools/bin")
         list(APPEND searchPaths "${HOST_LOCAL_DIRECTORY}")
         list(APPEND searchPaths "${GBA_TOOLCHAIN_TOOLS}/gbfs")
 
@@ -717,6 +721,8 @@ function(_gba_find_mmutil)
         #   *NIX opt/local/
         #   GBA_TOOLCHAIN_TOOLS/tools
         set(searchPaths $ENV{Path})
+        list(APPEND searchPaths "$ENV{DEVKITPRO}/tools/bin")
+        list(APPEND searchPaths "$ENV{DEVKITARM}/../tools/bin")
         list(APPEND searchPaths "${HOST_LOCAL_DIRECTORY}")
         list(APPEND searchPaths "${GBA_TOOLCHAIN_TOOLS}/mmutil")
 

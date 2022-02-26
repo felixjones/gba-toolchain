@@ -14,6 +14,7 @@ cmake_minimum_required(VERSION 3.18)
 #====================
 
 option(USE_CLANG "Enable Clang compiler" OFF)
+option(USE_DEVKITARM "Use devkitARM provided compilers and tools" OFF)
 set(GBA_TOOLCHAIN_URL "https://github.com/felixjones/gba-toolchain/archive/refs/heads/3.0.zip" CACHE STRING "URL to download GBA toolchain")
 set(ARM_GNU_TOOLCHAIN "$ENV{ARM_GNU_TOOLCHAIN}" CACHE PATH "Path to ARM GNU toolchain")
 
@@ -286,15 +287,21 @@ include("${GBA_TOOLCHAIN_LIST_DIR}/cmake/Toolchain.cmake")
 # Find compilers
 #====================
 
-file(LOCK "${GBA_TOOLCHAIN_LOCK}" GUARD FILE)
-_find_arm_gnu()
-file(LOCK "${GBA_TOOLCHAIN_LOCK}" RELEASE)
+if(USE_DEVKITARM)
+    _find_devkitarm()
+    set(toolchain $ENV{DEVKITARM})
+else()
+    file(LOCK "${GBA_TOOLCHAIN_LOCK}" GUARD FILE)
+    _find_arm_gnu()
+    file(LOCK "${GBA_TOOLCHAIN_LOCK}" RELEASE)
+    set(toolchain ${ARM_GNU_TOOLCHAIN})
+endif()
 
 if(USE_CLANG)
     _find_clang()
-    message(STATUS "Using ARM GNU toolchain (${ARM_GNU_TOOLCHAIN}) with Clang ${CLANG_C_COMPILER_VERSION}")
+    message(STATUS "Using ARM GNU toolchain (${toolchain}) with Clang ${CLANG_C_COMPILER_VERSION}")
 else()
-    message(STATUS "Using ARM GNU toolchain (${ARM_GNU_TOOLCHAIN}) with GCC ${GNU_C_COMPILER_VERSION}")
+    message(STATUS "Using ARM GNU toolchain (${toolchain}) with GCC ${GNU_C_COMPILER_VERSION}")
 endif()
 
 #====================
