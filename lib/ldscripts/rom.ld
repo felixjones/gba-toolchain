@@ -11,7 +11,7 @@ For conditions of distribution and use, see copyright notice in LICENSE.md
 
 OUTPUT_FORMAT("elf32-littlearm")
 OUTPUT_ARCH(arm)
-ENTRY(_start)
+ENTRY(__start)
 
 MEMORY {
     ewram : ORIGIN = 0x2000000, LENGTH = 256K
@@ -114,7 +114,7 @@ SECTIONS {
 
         /* .data */
         PROVIDE_HIDDEN (__data_start = ABSOLUTE(.));
-        *(.data .data.* .gnu.linkonce.d.*)
+        EXCLUDE_FILE (*__atexit.* *__call_atexit.* *impure.* *lock.* *on_exit_args.*) *(.data .data.* .gnu.linkonce.d.*)
         . = ALIGN(4);
         PROVIDE_HIDDEN (__data_end = ABSOLUTE(.));
     } > iwram
@@ -140,7 +140,7 @@ SECTIONS {
 
     .bss (NOLOAD) : ALIGN(4) {
         PROVIDE_HIDDEN (__bss_start = ABSOLUTE(.));
-        *(.bss .bss.*)
+        EXCLUDE_FILE (*__atexit.* *__call_atexit.* *impure.* *lock.* *on_exit_args.*) *(.bss .bss.*)
         *(COMMON)
         . = ALIGN(4);
         PROVIDE_HIDDEN (__bss_end = ABSOLUTE(.));
@@ -161,6 +161,9 @@ SECTIONS {
         KEEP (*(SORT(.ewram.sorted.*)))
         *(.ewram .ewram.*)
         *.ewram.*(.data .data.* .text .text.*)
+
+        /* data sections not excluded from iwram */
+        *(.data .data.*)
         . = ALIGN(4);
     } > ewram
 
@@ -186,6 +189,9 @@ SECTIONS {
     .sbss (NOLOAD) : ALIGN(4) {
         PROVIDE_HIDDEN (__sbss_start = ABSOLUTE(.));
         *(.sbss .sbss.*)
+
+        /* bss sections not excluded from iwram */
+        *(.bss .bss.*)
         *(COMMON)
         . = ALIGN(4);
         PROVIDE_HIDDEN (__sbss_end = ABSOLUTE(.));
