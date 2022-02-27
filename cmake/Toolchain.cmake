@@ -142,6 +142,7 @@ function(_configure_toolchain)
     # Flags for all build types
     set(SHARED_C_FLAGS "-mabi=aapcs -march=armv4t -mcpu=arm7tdmi")
     set(SHARED_CXX_FLAGS "-mabi=aapcs -march=armv4t -mcpu=arm7tdmi -fno-exceptions") # nano is not compiled with C++ exceptions
+    set(SHARED_LINKER_FLAGS "-nostartfiles")
 
     if(USE_CLANG)
         if(USE_DEVKITARM)
@@ -213,11 +214,11 @@ function(_configure_toolchain)
     #====================
 
     if(USE_DEVKITARM)
-        set(CMAKE_EXE_LINKER_FLAGS_INIT "-L\"$ENV{DEVKITARM}/arm-none-eabi/lib/thumb\"" CACHE INTERNAL "" FORCE)
+        set(CMAKE_EXE_LINKER_FLAGS_INIT "${SHARED_LINKER_FLAGS} -L\"$ENV{DEVKITARM}/arm-none-eabi/lib/thumb\"" CACHE INTERNAL "" FORCE)
     else()
         # Unfortunately ARM GNU toolchain compiles with short enums
         # This causes a 32-bit enum warning to be emitted, even if all binaries use 32-bit enums
-        set(CMAKE_EXE_LINKER_FLAGS_INIT "-L\"${ARM_GNU_TOOLCHAIN}/arm-none-eabi/lib/thumb/nofp\" -Xlinker -no-enum-size-warning" CACHE INTERNAL "" FORCE)
+        set(CMAKE_EXE_LINKER_FLAGS_INIT "${SHARED_LINKER_FLAGS} -L\"${ARM_GNU_TOOLCHAIN}/arm-none-eabi/lib/thumb/nofp\" -Xlinker -no-enum-size-warning" CACHE INTERNAL "" FORCE)
     endif()
 
     set(CMAKE_LINKER "${GNU_C_COMPILER}" CACHE FILEPATH "Path to ld.")
