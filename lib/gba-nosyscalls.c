@@ -20,6 +20,12 @@ extern int errno;
 int errno; // devkitARM lacks errno
 #endif
 
+#if defined(__NO_FINI__)
+void atexit() {
+    return;
+}
+#endif
+
 pid_t _getpid() {
     return 0;
 }

@@ -76,6 +76,8 @@ _start:
     mov     r1, #0 // argv (NULL)
     ldr     r4, =main
     bl      .Lbx_r4
+
+#ifndef __NO_FINI__
     push    {r0, r1} // Push exit code (r1 for alignment)
 
     // Disable REG_IME by setting lowest bit to zero (using lowest bit of REG_IME)
@@ -88,6 +90,8 @@ _start:
     bl      .Lrcall_array
 
     pop     {r0, r1} // Pop exit code (r1 for alignment)
+#endif
+
     b       exit
 
     .thumb_func
@@ -111,6 +115,7 @@ _start:
     bl      .Lbx_r4
     b       .Lcall_array_loop
 
+#ifndef __NO_FINI__
     // rcall_array (r4 is used for .Lpop_r3_bx_r4, r5-r6 is used for array)
     .thumb_func
 .Lrcall_array:
@@ -122,12 +127,14 @@ _start:
     ldr     r4, [r6]
     bl      .Lbx_r4
     b       .Lrcall_array_loop
+#endif
 
     // exit
     .thumb_func
     .global exit
     .func exit
 exit:
+#ifndef __NO_FINI__
     push    {r0-r1} // Push exit code (r1 for alignment)
 
     // Disable REG_IME by setting lowest bit to zero (using lowest bit of REG_IME)
@@ -138,6 +145,7 @@ exit:
     ldr     r4, =__call_exitprocs
     bl      .Lbx_r4
     pop     {r0, r1} // Pop exit code (r1 for alignment)
+#endif
     // Fallthrough to _exit
 
     // _exit
@@ -153,5 +161,8 @@ _exit:
     // Reference _sbrk, _getpid to prevent removal
     .global _sbrk
     .global _getpid
+
+#ifndef __NO_FINI__
     // Reference __register_exitproc to enable static destructors atexit
     .global __register_exitproc
+#endif
