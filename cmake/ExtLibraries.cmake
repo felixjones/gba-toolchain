@@ -129,3 +129,28 @@ function(_gba_find_ext_agbabi)
         _gba_download("${agbabi_url}" "${GBA_TOOLCHAIN_LIST_DIR}/lib/agbabi" SHOW_PROGRESS)
     endif()
 endfunction()
+
+#! _gba_find_ext_minrt : Locate and download gba-minrt
+#
+function(_gba_find_ext_minrt)
+    if(NOT EXISTS "${GBA_TOOLCHAIN_LIST_DIR}/lib/gba-minrt/LICENSE.txt")
+        if(NOT EXISTS "${GBA_TOOLCHAIN_LIST_DIR}/dependencies.ini")
+            if(NOT DEPENDENCIES_URL)
+                message(FATAL_ERROR "Missing DEPENDENCIES_URL")
+            endif()
+
+            file(DOWNLOAD "${DEPENDENCIES_URL}" "${GBA_TOOLCHAIN_LIST_DIR}/dependencies.ini" SHOW_PROGRESS)
+        endif()
+
+        file(READ "${GBA_TOOLCHAIN_LIST_DIR}/dependencies.ini" iniFile)
+        _ini_read_section("${iniFile}" "gba-minrt" gba-minrt)
+
+        message(STATUS "Downloading gba-minrt from \"${gba-minrt_url}\" to \"${GBA_TOOLCHAIN_LIST_DIR}/lib/gba-minrt\"")
+        _gba_download("${gba-minrt_url}" "${GBA_TOOLCHAIN_LIST_DIR}/lib/gba-minrt" SHOW_PROGRESS)
+    endif()
+
+    if(EXISTS "${GBA_TOOLCHAIN_LIST_DIR}/lib/gba-minrt" AND NOT EXISTS "${GBA_TOOLCHAIN_LIST_DIR}/lib/gba-minrt/CMakeLists.txt")
+        file(COPY "${GBA_TOOLCHAIN_LIST_DIR}/cmake/MinrtCMakeLists.cmake" DESTINATION "${GBA_TOOLCHAIN_LIST_DIR}/lib/gba-minrt")
+        file(RENAME "${GBA_TOOLCHAIN_LIST_DIR}/lib/gba-minrt/MinrtCMakeLists.cmake" "${GBA_TOOLCHAIN_LIST_DIR}/lib/gba-minrt/CMakeLists.txt")
+    endif()
+endfunction()
