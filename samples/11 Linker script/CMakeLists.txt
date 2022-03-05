@@ -18,7 +18,7 @@ endif()
 
 gba_add_library_subdirectory(tonc)
 
-add_executable(helloLinker crt0.s syscalls.c main.cpp)
+add_executable(helloLinker crt0.s main.cpp sbrk.c)
 set_target_properties(helloLinker PROPERTIES SUFFIX ".elf")
 
 target_compile_options(helloLinker PRIVATE -mthumb -fexceptions -ffunction-sections -fdata-sections -Wall -Wextra)
@@ -26,7 +26,7 @@ target_compile_options(helloLinker PRIVATE -mthumb -fexceptions -ffunction-secti
 # Link options for linker script and .specs file
 target_link_options(helloLinker PRIVATE
     -T ${CMAKE_SOURCE_DIR}/gba-rom.ld
-    -specs=${CMAKE_SOURCE_DIR}/gba-exceptions.specs
+    -specs=${CMAKE_SOURCE_DIR}/gba-exceptions.specs -specs=${ARM_GNU_TOOLCHAIN}/arm-none-eabi/lib/nosys.specs
     -Wl,--gc-sections
 )
 

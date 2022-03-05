@@ -36,26 +36,3 @@ void _exit(__attribute__((unused)) int status) {
     SoftReset();
     __builtin_unreachable();
 }
-
-pid_t _getpid() {
-    return 0;
-}
-
-static int _gba_nosys() {
-    errno = ENOSYS;
-    return -1;
-}
-
-int _kill( int pid, int sig ) __attribute__((alias("_gba_nosys")));
-
-int _write( int file, char * ptr, int len ) __attribute__((alias("_gba_nosys")));
-
-int _close( int file ) __attribute__((alias("_gba_nosys")));
-
-int _fstat( int __fd, struct stat * __sbuf ) __attribute__((alias("_gba_nosys")));
-
-int _isatty( int file ) __attribute__((alias("_gba_nosys")));
-
-int _lseek( int file, int ptr, int dir ) __attribute__((alias("_gba_nosys")));
-
-int _read( int file, char * ptr, int len ) __attribute__((alias("_gba_nosys")));
