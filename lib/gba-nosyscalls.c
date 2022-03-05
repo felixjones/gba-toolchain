@@ -30,10 +30,16 @@ pid_t _getpid() {
     return 0;
 }
 
+void _noop() {}
+
+void __sync_synchronize() __attribute__((alias("_noop")));
+
 static int _gba_nosys() {
     errno = ENOSYS;
     return -1;
 }
+
+int _isatty(int fd) __attribute__((alias("_gba_nosys")));
 
 int _close(int fd) __attribute__((alias("_gba_nosys")));
 
