@@ -195,3 +195,8 @@ _exit:
     // Reference __register_exitproc to enable static destructors atexit
     .global __register_exitproc
 #endif
+
+    .thumb_func
+    .global __sync_synchronize
+__sync_synchronize:
+    bx      lr

@@ -10,7 +10,7 @@
 cmake_minimum_required(VERSION 3.1)
 project(multiboot ASM C)
 
-add_library(multiboot STATIC crt0.s ../gba-nosyscalls.c ../gba-sbrk.c)
+add_library(multiboot STATIC crt0.s ../gba-sbrk.c)
 
 if(CMAKE_C_COMPILER_ID STREQUAL "Clang")
     set(optimization -Oz)
@@ -28,7 +28,7 @@ target_include_directories(multiboot PRIVATE .)
 if(USE_DEVKITARM)
     target_compile_definitions(multiboot PUBLIC __DEVKITARM__)
 else()
-    set(specs "-specs=${CMAKE_CURRENT_LIST_DIR}/../gba-nano.specs")
+    set(specs "-specs=${ARM_GNU_TOOLCHAIN}/arm-none-eabi/lib/nano.specs" "-specs=${ARM_GNU_TOOLCHAIN}/arm-none-eabi/lib/nosys.specs")
 endif()
 
 target_link_options(multiboot INTERFACE

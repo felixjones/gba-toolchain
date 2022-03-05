@@ -14,6 +14,9 @@
 
 #undef errno
 extern int errno;
+#if defined(__DEVKITARM__)
+int errno __attribute__((section(".sbss.errno"))); // devkitARM lacks errno
+#endif
 
 #define EWRAM_TOP 0x2040000
 
