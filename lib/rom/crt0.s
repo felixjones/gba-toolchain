@@ -132,7 +132,6 @@ _start:
     // exit
     .thumb_func
     .global exit
-    .func exit
 exit:
 #ifndef __NO_FINI__
     push    {r0-r1} // Push exit code (r1 for alignment)
@@ -166,3 +165,8 @@ _exit:
     // Reference __register_exitproc to enable static destructors atexit
     .global __register_exitproc
 #endif
+
+    .thumb_func
+    .global __sync_synchronize
+__sync_synchronize:
+    bx      lr
