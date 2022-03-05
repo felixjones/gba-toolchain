@@ -52,6 +52,11 @@ A compiler runtime-library (`crt0.s`) and linker script (`lib/ldscripts`) is req
 
 gba-toolchain provides some optional runtime libraries for convenience.
 
+All runtimes support GNU destructors, finalizers, and C++ global static destructors.
+These come with a small EWRAM cost, but can be disabled with the definition `__NO_FINI__` (ideal for programs that never return or exit and thus do not need these features).
+
+The linker scripts for these runtimes will reserve a minimum of 512 bytes for stack space.
+
 ### librom
 
 Runtime library for regular GBA ROMs.
