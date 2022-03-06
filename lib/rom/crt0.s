@@ -33,6 +33,10 @@ __start:
     .arm
     .global _start
 _start:
+    // Disable REG_IME by setting lowest bit to zero (using lowest bit of REG_IME)
+    mov     r0, #0x4000000
+    str     r0, [r0, #0x208]
+
     // Enter thumb mode (bit 0 is set to 1)
     adr     r0, .Lthumb_start + 1
     bx      r0
