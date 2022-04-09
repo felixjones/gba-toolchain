@@ -7,11 +7,11 @@ int main(void)
     irqInitDefault();
     irqEnableFull(IRQ_VBLANK);
 
-    lcdInitMode3();
+    REG_DISPCNT = VIDEO_MODE_BITMAP | VIDEO_BG2_ENABLE;
 
-    MODE3_FRAME[80][120] = RGB5(31,  0,  0);
-    MODE3_FRAME[80][136] = RGB5( 0, 31,  0);
-    MODE3_FRAME[96][120] = RGB5( 0,  0, 31);
+    MODE3_FRAME[80][120] = COLOR_RED;
+    MODE3_FRAME[80][136] = COLOR_GREEN;
+    MODE3_FRAME[96][120] = COLOR_BLUE;
 
     while (1)
     {
