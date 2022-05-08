@@ -23,7 +23,7 @@ __start:
 #endif
 
     // Include header data (192 bytes)
-.include "../gba-header.s"
+#include "../gba-header.s"
 
     // _start
     .arm

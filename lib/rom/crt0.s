@@ -20,7 +20,7 @@ __start:
     b       _start
 
     // Include header data (192 bytes)
-.include "../gba-header.s"
+#include "../gba-header.s"
 
     // __ROM_START_PADDING__ bytes can be inserted before rom_start
     // This may be used for save strings
