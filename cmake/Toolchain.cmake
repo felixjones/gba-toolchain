@@ -49,6 +49,19 @@ function(_find_arm_gnu)
             _gba_download("${gnuArmUrl_${HOST_PLATFORM_NAME}}" "${armGnuToolchain}" SHOW_PROGRESS EXPECTED_MD5 "${gnuArmUrl_${HOST_PLATFORM_NAME}-md5}")
 
             set(ARM_GNU_TOOLCHAIN "${armGnuToolchain}" CACHE PATH "Path to ARM GNU toolchain" FORCE)
+
+            _ini_read_section("${iniFile}" "arm-none-eabi-gdb" gdbUrl)
+            if(gdbUrl_${HOST_PLATFORM_NAME})
+                find_program(gdbBinary NAMES "arm-none-eabi-gdb" PATHS "${armGnuToolchain}/bin")
+                execute_process(COMMAND "${gdbBinary}" -v OUTPUT_VARIABLE gdbVersion)
+
+                if("${gdbVersion}" STREQUAL "")
+                    get_filename_component(armGdb "${armGnuToolchain}/bin" ABSOLUTE)
+
+                    message(STATUS "Downloading arm-none-eabi-gdb toolchain from \"${gdbUrl_${HOST_PLATFORM_NAME}}\" to \"${armGdb}\"")
+                    _gba_download("${gdbUrl_${HOST_PLATFORM_NAME}}" "${armGdb}" SHOW_PROGRESS MERGE EXPECTED_MD5 "${gdbUrl_${HOST_PLATFORM_NAME}-md5}")
+                endif()
+            endif()
         endif()
     endif()
 
