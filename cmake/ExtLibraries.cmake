@@ -129,3 +129,23 @@ function(_gba_find_ext_agbabi)
         _gba_download("${agbabi_url}" "${GBA_TOOLCHAIN_LIST_DIR}/lib/agbabi" SHOW_PROGRESS)
     endif()
 endfunction()
+
+#! _gba_find_ext_gba_hpp : Locate and download gba-hpp
+#
+function(_gba_find_ext_gba_hpp)
+    if(NOT EXISTS "${GBA_TOOLCHAIN_LIST_DIR}/lib/gba-hpp/LICENSE.md")
+        if(NOT EXISTS "${GBA_TOOLCHAIN_LIST_DIR}/dependencies.ini")
+            if(NOT DEPENDENCIES_URL)
+                message(FATAL_ERROR "Missing DEPENDENCIES_URL")
+            endif()
+
+            file(DOWNLOAD "${DEPENDENCIES_URL}" "${GBA_TOOLCHAIN_LIST_DIR}/dependencies.ini" SHOW_PROGRESS)
+        endif()
+
+        file(READ "${GBA_TOOLCHAIN_LIST_DIR}/dependencies.ini" iniFile)
+        _ini_read_section("${iniFile}" "gba-hpp" gba_hpp)
+
+        message(STATUS "Downloading gba-hpp from \"${gba_hpp_url}\" to \"${GBA_TOOLCHAIN_LIST_DIR}/lib/gba-hpp\"")
+        _gba_download("${gba_hpp_url}" "${GBA_TOOLCHAIN_LIST_DIR}/lib/gba-hpp" SHOW_PROGRESS)
+    endif()
+endfunction()
