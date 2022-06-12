@@ -11,13 +11,14 @@ cmake_minimum_required(VERSION 3.18)
 
 project(libseven-sample C)
 
-gba_add_library_subdirectory(rom seven)
+# Also demonstrates using gba-minrt
+gba_add_library_subdirectory(gba-minrt seven)
 
 add_executable(helloSeven main.c)
 set_target_properties(helloSeven PROPERTIES SUFFIX ".elf")
 
 target_compile_options(helloSeven PRIVATE -std=c99 -ffunction-sections -fdata-sections -mthumb)
 
-target_link_libraries(helloSeven PRIVATE rom seven)
+target_link_libraries(helloSeven PRIVATE gba-minrt seven)
 
 gba_target_objcopy(helloSeven FIX_HEADER)

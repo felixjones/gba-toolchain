@@ -82,6 +82,12 @@ e-Reader binaries have no header, however 4 bytes at `0x2000008` are clobbered b
 
 An e-Reader binary can ´exit´ back to the e-Reader ROM.
 
+### gba-minrt
+
+An in-development, experimental minimal GBA runtime library. [github.com/LunarLambda/gba-minrt](https://github.com/LunarLambda/gba-minrt).
+
+Supports both ROM and Multiboot binaries.
+
 ## Tools
 
 **Tools require a host compiler** for building.
