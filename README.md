@@ -28,6 +28,10 @@ If a library is required by CMake, but is missing, it will be downloaded into th
 
 [libtonc](https://github.com/devkitPro/libtonc) is the classic GBA C development library. Includes a text rendering engine, [Tonc's Text Engine](https://www.coranac.com/tonc/text/tte.htm).
 
+### gba-hpp
+
+[gba-hpp](https://github.com/felixjones/gba-hpp) is a modern GBA C++20 development library, designed for type safety and compile-time optimizations.
+
 ### agbabi
 
 [agbabi](https://github.com/felixjones/agbabi) ARM embedded ABI functions optimized for GBA. Also provides additional, low-level GBA utility functions.
