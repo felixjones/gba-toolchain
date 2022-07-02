@@ -48,7 +48,7 @@ SECTIONS {
     } > ewram
 
     .text : ALIGN(4) {
-        *(.text .text.* .gnu.linkonce.t.*)
+        EXCLUDE_FILE (*.iwram.* *.iwram[0-9].*) *(.text .text.* .gnu.linkonce.t.*)
     } > ewram
 
     .preinit_array : ALIGN(4) {

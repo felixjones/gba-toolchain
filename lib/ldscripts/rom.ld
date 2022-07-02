@@ -49,7 +49,7 @@ SECTIONS {
     } > rom
 
     .text : ALIGN(4) {
-        *(.text .text.* .gnu.linkonce.t.*)
+        EXCLUDE_FILE (*.iwram.* *.ewram.* *.iwram[0-9].* *.ewram[0-9].*) *(.text .text.* .gnu.linkonce.t.*)
     } > rom
 
     .preinit_array : ALIGN(4) {
