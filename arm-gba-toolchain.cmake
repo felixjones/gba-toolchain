@@ -32,7 +32,7 @@ set(MMUTIL "$ENV{MMUTIL}" CACHE PATH "Path to mmutil binary")
 
 set(CMAKE_SYSTEM_NAME Generic CACHE INTERNAL "" FORCE)
 set(CMAKE_SYSTEM_PROCESSOR arm CACHE INTERNAL "" FORCE)
-set(GBA True)
+set(GBA ON)
 
 #====================
 # Try compile
