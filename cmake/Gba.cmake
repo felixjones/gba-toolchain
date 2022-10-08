@@ -322,7 +322,7 @@ function(gba_target_objcopy _target)
 
         add_custom_command(TARGET ${_target}
             POST_BUILD
-            COMMAND "${CMAKE_COMMAND}" -E echo "Fixing header ${objcopyOutput} ${gbafixArgs}"
+            COMMAND "${CMAKE_COMMAND}" -E echo "Fixing header ${objcopyOutput}" ${gbafixArgs}
             COMMAND "${GBAFIX}" "${objcopyOutput}" ${gbafixArgs}
         )
     endif()
