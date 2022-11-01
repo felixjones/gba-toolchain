@@ -11,11 +11,11 @@ cmake_minimum_required(VERSION 3.0)
 
 project(gba-minrt ASM)
 
-add_library(gba-minrt STATIC rt/crt0.s)
+add_library(gba-minrt STATIC src/crt0.s)
 
 target_link_options(gba-minrt INTERFACE
     -mthumb
-    -nostartfiles
+    -specs=lib/nocrt0.specs
     -specs=nano.specs -specs=nosys.specs
-    -Wl,-T,${CMAKE_CURRENT_LIST_DIR}/rt/rom.ld -L${CMAKE_CURRENT_LIST_DIR}/rt
+    -Wl,-T,${CMAKE_CURRENT_LIST_DIR}/lib/rom.ld -L${CMAKE_CURRENT_LIST_DIR}/lib
 )
