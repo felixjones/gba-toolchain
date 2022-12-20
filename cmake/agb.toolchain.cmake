@@ -53,6 +53,7 @@ function(find_arm_compiler lang binary)
     endif()
 
     if(NOT CMAKE_${lang}_COMPILER)
+        # TODO: Maybe fix up the /opt/devkitPro path for Windows?
         find_program(CMAKE_${lang}_COMPILER NAMES ${binary} PATHS ENV DEVKITARM "$ENV{DEVKITPRO}/devkitARM" PATH_SUFFIXES bin REQUIRED)
     endif()
 
@@ -69,7 +70,7 @@ execute_process(COMMAND "${SYSROOT_COMPILER}" -dumpversion OUTPUT_VARIABLE SYSRO
 # TODO: Try locate sysroot, this should be used to find the arm-none-eabi/thumb libraries and gcc/thumb libraries
 get_filename_component(SYSROOT_DIRECTORY "${SYSROOT_COMPILER}" DIRECTORY)
 unset(SYSROOT_COMPILER)
-if(SYSROOT_DIRECTORY MATCHES /bin/?$)
+if(SYSROOT_DIRECTORY MATCHES "/bin/?$")
     get_filename_component(SYSROOT_DIRECTORY "${SYSROOT_DIRECTORY}" DIRECTORY)
 endif()
 find_path(SYSROOT_DIRECTORY arm-none-eabi PATHS "${SYSROOT_DIRECTORY}" PATH_SUFFIXES lib REQUIRED)
@@ -82,4 +83,15 @@ set(CMAKE_CXX_COMPILER_TARGET arm-none-eabi CACHE INTERNAL "")
 
 set(CMAKE_C_STANDARD_INCLUDE_DIRECTORIES "${CMAKE_SYSROOT}/include" CACHE INTERNAL "")
 set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES "${CMAKE_SYSROOT}/include/c++/${SYSROOT_VERSION};${CMAKE_SYSROOT}/include/c++/${SYSROOT_VERSION}/arm-none-eabi/thumb" CACHE INTERNAL "") # TODO: Support using arm include for -marm sources
+
+execute_process(COMMAND "${CMAKE_C_COMPILER}" --version OUTPUT_VARIABLE SYSROOT_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
+if(SYSROOT_VERSION MATCHES "devkitARM")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D__DEVKITARM__")
+endif()
+execute_process(COMMAND "${CMAKE_CXX_COMPILER}" --version OUTPUT_VARIABLE SYSROOT_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
+if(SYSROOT_VERSION MATCHES "devkitARM")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D__DEVKITARM__")
+endif()
 unset(SYSROOT_VERSION)
+
+#TODO: CMAKE_<LANG>_STANDARD_LIBRARIES for librom, libmultiboot, etc?
