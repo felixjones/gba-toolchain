@@ -1,12 +1,12 @@
-cmake_minimum_required(VERSION 3.0)
-project(rom ASM)
+enable_language(ASM)
 
-add_library(rom STATIC crt0.s)
+add_library(librom STATIC crt0.s)
+set_target_properties(librom PROPERTIES PREFIX "")
 
 # Detect nano
-find_library(rom_NANO c_nano)
+find_library(librom_NANO c_nano)
 
-target_link_options(rom
+target_link_options(librom
     PRIVATE
         -Wl,--gc-sections
     INTERFACE
@@ -15,4 +15,4 @@ target_link_options(rom
         -specs=nosys.specs
 )
 
-unset(rom_NANO CACHE)
+unset(librom_NANO CACHE)

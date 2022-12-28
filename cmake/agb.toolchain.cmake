@@ -1,11 +1,7 @@
-cmake_minimum_required(VERSION 3.0)
+# Add toolchain's path to cmake modules
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
 
-if(AGB_TOOLCHAIN_INCLUDED)
-    return()
-endif(AGB_TOOLCHAIN_INCLUDED)
-set(AGB_TOOLCHAIN_INCLUDED ON)
-
-set(CMAKE_SYSTEM_NAME Generic CACHE INTERNAL "")
+set(CMAKE_SYSTEM_NAME AdvancedGameBoy CACHE INTERNAL "")
 set(CMAKE_SYSTEM_VERSION 1 CACHE INTERNAL "")
 set(CMAKE_SYSTEM_PROCESSOR armv4t CACHE INTERNAL "")
 
@@ -132,24 +128,38 @@ unset(SYSROOT_COMPILER)
 set(CMAKE_SYSROOT "${SYSROOT_DIRECTORY}/arm-none-eabi" CACHE INTERNAL "")
 unset(SYSROOT_DIRECTORY CACHE)
 
-# Set standard include directories
-set(CMAKE_C_STANDARD_INCLUDE_DIRECTORIES "${CMAKE_SYSROOT}/include" CACHE INTERNAL "")
-set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES "${CMAKE_SYSROOT}/include/c++/${SYSROOT_VERSION};${CMAKE_SYSROOT}/include/c++/${SYSROOT_VERSION}/arm-none-eabi/thumb" CACHE INTERNAL "") # TODO: Support using arm include for -marm sources
+# Find C++ include directories
+find_path(CXX_INCLUDE_DIRECTORIES "bits" PATHS "${CMAKE_SYSROOT}/include/c++/${SYSROOT_VERSION}/arm-none-eabi" PATH_SUFFIXES "thumb/nofp" "thumb")
+if(NOT CXX_INCLUDE_DIRECTORIES)
+    unset(CXX_INCLUDE_DIRECTORIES CACHE)
+endif()
+list(APPEND CXX_INCLUDE_DIRECTORIES "${CMAKE_SYSROOT}/include/c++/${SYSROOT_VERSION}")
+
+# TODO: Set standard include directories
+# set(CMAKE_C_STANDARD_INCLUDE_DIRECTORIES "${CMAKE_SYSROOT}/include" CACHE INTERNAL "")
+# set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES ${CMAKE_C_STANDARD_INCLUDE_DIRECTORIES} ${CXX_INCLUDE_DIRECTORIES} CACHE INTERNAL "")
+
+unset(CXX_INCLUDE_DIRECTORIES CACHE)
 
 # Set standard library search paths
 find_path(LIBRARY_PATH "libc.a" PATHS "${CMAKE_SYSROOT}" PATH_SUFFIXES "lib/thumb/nofp" "lib/thumb" "lib")
 if(LIBRARY_PATH)
     list(APPEND CMAKE_LIBRARY_PATH "${LIBRARY_PATH}")
-    unset(LIBRARY_PATH CACHE)
+endif()
+
+# Set newlib library search paths
+find_path(LIBRARY_PATH "libc.a" PATHS "${CMAKE_SYSROOT}/newlib" PATH_SUFFIXES "thumb/nofp" "thumb")
+if(LIBRARY_PATH)
+    list(APPEND CMAKE_LIBRARY_PATH "${LIBRARY_PATH}")
 endif()
 
 # Set libgcc library search paths
 find_path(LIBRARY_PATH "libgcc.a" PATHS "${CMAKE_SYSROOT}/../lib/gcc/arm-none-eabi/${SYSROOT_VERSION}" PATH_SUFFIXES "thumb/nofp" "thumb")
 if(LIBRARY_PATH)
     list(APPEND CMAKE_LIBRARY_PATH "${LIBRARY_PATH}")
-    unset(LIBRARY_PATH CACHE)
 endif()
 
+unset(LIBRARY_PATH CACHE)
 unset(SYSROOT_VERSION)
 
 # Set __DEVKITARM__ macro
@@ -162,3 +172,6 @@ if(GNU_VERSION MATCHES "devkitARM")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D__DEVKITARM__")
 endif()
 unset(GNU_VERSION)
+
+# Setup default linker flags
+set(CMAKE_EXE_LINKER_FLAGS "-nostartfiles" CACHE INTERNAL "")

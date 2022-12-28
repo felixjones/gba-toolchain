@@ -9,3 +9,4 @@ __start:
     .global _start
 _start:
     b       _start
+    @# TODO: Lots of stuff
