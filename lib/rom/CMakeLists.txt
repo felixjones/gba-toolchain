@@ -1,6 +1,9 @@
 enable_language(ASM)
 
-add_library(librom STATIC crt0.s)
+add_library(librom STATIC
+    crt0.s
+    rom.header.s
+)
 set_target_properties(librom PROPERTIES PREFIX "")
 
 # Detect nano
