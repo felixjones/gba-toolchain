@@ -13,7 +13,8 @@
       "binaryDir": "${sourceDir}/cmake-build-debug",
       "toolchainFile": "${sourceDir}/cmake/agb.toolchain.cmake",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug"
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/rom/debug"
       }
     },
     {
@@ -23,7 +24,8 @@
       "binaryDir": "${sourceDir}/cmake-build-release",
       "toolchainFile": "${sourceDir}/cmake/agb.toolchain.cmake",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release"
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/rom/release"
       }
     }
   ]
