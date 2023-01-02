@@ -71,6 +71,7 @@ SECTIONS {
     } > ewram
 
     PROVIDE_HIDDEN(end = ALIGN(__sbss_end, 4));
+    PROVIDE_HIDDEN(__end__ = end);
 
     PROVIDE_HIDDEN(__ewram_lma_end = ALIGN(__ewram_lma + (. - __ewram_start), 4));
     . = __ewram_lma_end;
