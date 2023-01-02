@@ -20,73 +20,21 @@ if(VERIFY)
     endif()
 endif()
 
-macro(normalize_hex value nibbles)
-    if(NOT "${${value}}" MATCHES "0x")
-        math(EXPR ${value} "${${value}}" OUTPUT_FORMAT HEXADECIMAL)
-    endif()
-    string(REGEX REPLACE "^0x" "" ${value} "${${value}}")
-    string(REPEAT "0" ${nibbles} padding)
-    set(${value} "${padding}${${value}}")
-    string(LENGTH "${${value}}" padding)
-    math(EXPR padding "${padding} - ${nibbles}")
-    string(SUBSTRING "${${value}}" ${padding} -1 ${value})
-endmacro()
-
-function(bwrite output hexString)
-    list(JOIN hexString "" hexString)
-    string(LENGTH "${hexString}" length)
-
-    macro(checksum sum hexString)
-        string(REGEX MATCHALL "([A-Fa-f0-9][A-Fa-f0-9])" bytes ${${hexString}})
-
-        set(${sum} 0)
-        foreach(byte ${bytes})
-            math(EXPR ${sum} "${${sum}} + 0x${byte}")
-        endforeach()
-        math(EXPR ${sum} "1 + ~${${sum}}" OUTPUT_FORMAT HEXADECIMAL)
-        normalize_hex(${sum} 2)
-    endmacro()
-
-    set(addrMajor 0)
-    set(addrMinor 0)
-    set(outputHex "")
-
-    set(idx 0)
-    while(idx LESS ${length})
-        if(addrMinor EQUAL 0)
-            normalize_hex(addrMajor 4)
-            set(extendedAddress "02000004${addrMajor}")
-            checksum(crc extendedAddress)
-            string(APPEND outputHex ":" "${extendedAddress}" "${crc}" "\n")
-            math(EXPR addrMajor "0x${addrMajor} + 1")
-        endif()
-
-        string(SUBSTRING "${hexString}" ${idx} 32 dataString) # 32 nibbles of hex data (16 bytes)
-        string(LENGTH "${dataString}" dataLength)
-        math(EXPR dataLength "${dataLength} / 2")
-        normalize_hex(dataLength 2)
-        normalize_hex(addrMinor 4)
-
-        set(dataString "${dataLength}${addrMinor}00${dataString}")
-        checksum(crc dataString)
-        string(APPEND outputHex ":" ${dataString} ${crc} "\n")
-
-        math(EXPR addrMinor "(0x${addrMinor} + 16) % 0x10000")
-        math(EXPR idx "${idx} + 32")
-    endwhile()
-    string(APPEND outputHex ":00000001ff\n")
-
-    string(REGEX REPLACE "[.].+$" ".hex" hexPath "${output}")
-    file(WRITE "${hexPath}" "${outputHex}")
-
-    execute_process(
-        COMMAND "${CMAKE_OBJCOPY}" -I ihex "${hexPath}" -O binary "${output}"
-    )
-
-    file(REMOVE "${hexPath}")
-endfunction()
+include("${CMAKE_CURRENT_LIST_DIR}/IHex.cmake")
 
 function(gbafix input)
+    macro(normalize_hex hex nibbleCount)
+        if(NOT "${${hex}}" MATCHES "0x")
+            math(EXPR ${hex} "${${hex}}" OUTPUT_FORMAT HEXADECIMAL)
+        endif()
+        string(REGEX REPLACE "^0x" "" ${hex} "${${hex}}")
+        string(REPEAT "0" ${nibbleCount} padding)
+        set(${hex} "${padding}${${hex}}")
+        string(LENGTH "${${hex}}" padding)
+        math(EXPR padding "${padding} - ${nibbleCount}")
+        string(SUBSTRING "${${hex}}" ${padding} -1 ${hex})
+    endmacro()
+
     macro(pad string length)
         string(LENGTH "${${string}}" stringLength)
         math(EXPR padLength "${length} - ${stringLength}")
@@ -121,5 +69,18 @@ function(gbafix input)
     file(READ "${input}" headerStart LIMIT 160 HEX) # Entry point + logo
     file(READ "${input}" binaryBody OFFSET 192 HEX) # Remaining ROM data
 
-    bwrite("${ARGS_OUTPUT}" "${headerStart}${header}${complement}0000${binaryBody}")
+    # Convert to Intel HEX format
+    ihex(outputHex RECORD_LENGTH 0xff "${headerStart}" "${header}" "${complement}" 0000 "${binaryBody}")
+
+    string(RANDOM ihexFile)
+    while(EXISTS "${ihexFile}.hex")
+        string(RANDOM ihexFile)
+    endwhile()
+
+    # Write ihex file and objcopy into output binary
+    file(WRITE "${ihexFile}.hex" "${outputHex}")
+    execute_process(
+        COMMAND "${CMAKE_OBJCOPY}" -I ihex "${ihexFile}.hex" -O binary "${ARGS_OUTPUT}"
+    )
+    file(REMOVE "${ihexFile}.hex")
 endfunction()
