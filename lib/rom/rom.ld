@@ -8,6 +8,10 @@ MEMORY {
     rom   : ORIGIN = 0x8000000, LENGTH = 32M
 }
 
+__sp_irq = ORIGIN(iwram) + LENGTH(iwram) - 0x60;
+__sp_usr = __sp_irq - 0xA0;
+__sp_usr_reserve = 0x200;
+
 SECTIONS {
     . = ORIGIN(rom);
 
@@ -24,8 +28,24 @@ SECTIONS {
         PROVIDE_HIDDEN(__iwram_swi0c = ABSOLUTE(SIZEOF(.iwram) / 4));
     } > rom
 
+    .init_array : {
+        PROVIDE_HIDDEN(__preinit_array_start = .);
+        KEEP(*(.preinit_array .preinit_array.*))
+        PROVIDE_HIDDEN(__preinit_array_end = .);
+
+        PROVIDE_HIDDEN(__init_array_start = .);
+        KEEP(*(.init_array .init_array.*))
+        PROVIDE_HIDDEN(__init_array_end = .);
+    } > rom
+
     .text : {
         *(.text .text.* .gnu.linkonce.t.*)
+    } > rom
+
+    .fini_array : {
+        PROVIDE_HIDDEN(__fini_array_start = .);
+        KEEP(*(.fini_array .fini_array.*))
+        PROVIDE_HIDDEN(__fini_array_end = .);
     } > rom
 
     .ARM.exidx : {
@@ -49,6 +69,8 @@ SECTIONS {
         . = ALIGN(32);
         PROVIDE_HIDDEN(__sbss_end = ABSOLUTE(.));
     } > ewram
+
+    PROVIDE_HIDDEN(end = ALIGN(__sbss_end, 4));
 
     PROVIDE_HIDDEN(__ewram_lma_end = ALIGN(__ewram_lma + (. - __ewram_start), 4));
     . = __ewram_lma_end;

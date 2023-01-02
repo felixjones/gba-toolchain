@@ -4,7 +4,7 @@ project(agb_devkit CXX)
 add_subdirectory(lib/rom)
 
 add_executable(my_game main.cpp)
-target_compile_options(my_game PRIVATE -mthumb -Wall -Wextra)
+target_compile_options(my_game PRIVATE -mthumb -Wpedantic -Wall -Wextra -Wconversion)
 target_link_libraries(my_game PRIVATE librom)
 
 set_target_properties(my_game PROPERTIES

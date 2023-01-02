@@ -124,6 +124,18 @@ endif()
 find_path(SYSROOT_DIRECTORY arm-none-eabi PATHS "${SYSROOT_COMPILER}" PATH_SUFFIXES lib REQUIRED)
 unset(SYSROOT_COMPILER)
 
+# Check for nano libs
+execute_process(COMMAND "${CMAKE_C_COMPILER}" -dumpversion OUTPUT_VARIABLE LIBGCC_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
+find_path(LIBGCC_DIRECTORY "gcc/arm-none-eabi/${LIBGCC_VERSION}" PATHS "${SYSROOT_DIRECTORY}" PATH_SUFFIXES lib)
+find_library(CMAKE_NANO c_nano g_nano stdc++_nano supc++_nano PATHS "${LIBGCC_DIRECTORY}/gcc/arm-none-eabi/${LIBGCC_VERSION}")
+if(CMAKE_NANO)
+    set(CMAKE_NANO ON CACHE INTERNAL "")
+else()
+    set(CMAKE_NANO OFF CACHE INTERNAL "")
+endif()
+unset(LIBGCC_VERSION)
+unset(LIBGCC_DIRECTORY CACHE)
+
 set(CMAKE_SYSROOT "${SYSROOT_DIRECTORY}/arm-none-eabi" CACHE INTERNAL "")
 unset(SYSROOT_DIRECTORY CACHE)
 
@@ -139,4 +151,4 @@ endif()
 unset(GNU_VERSION)
 
 # Setup default linker flags
-set(CMAKE_EXE_LINKER_FLAGS "-nostartfiles -mthumb" CACHE INTERNAL "")
+set(CMAKE_EXE_LINKER_FLAGS "-Wl,--no-warn-rwx-segments -nostartfiles -mthumb" CACHE INTERNAL "")

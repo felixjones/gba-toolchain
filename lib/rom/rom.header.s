@@ -43,6 +43,9 @@ __cart_header:
     @ Debug flags [4]
     .word   0x00000000
 
+    @ Dynamic shared object handle set to zero word (nullptr)
+    .global __dso_handle
+__dso_handle:
     .global __zero_word
 __zero_word:
     .word   0x00000000

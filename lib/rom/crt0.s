@@ -47,12 +47,37 @@ _start:
     ldr     r2, =__iwram_swi0c
     swi     #0xc
 
-    @ TODO: preinit init stuff
+    @ Using r4-r5 to avoid pushing r0-r3
+    @ init immediately follows preinit so we can join these arrays
+    ldr     r4, =__preinit_array_start
+    ldr     r5, =__init_array_end
+    bl      .Larray_call
 
     @ argc, argv
     mov     r0, #0
     mov     r1, #0
     bl      main
 
-    @ TODO: Something something
-    b       .Lstart
+    @ Using r4-r5 to avoid pushing r0-r3
+    ldr     r4, =__fini_array_start
+    ldr     r5, =__fini_array_end
+    bl      .Larray_call
+
+    @TODO: exit and _Exit
+
+    @ SoftReset
+    swi     #0x0
+
+.Larray_call:
+    push    {lr}
+    cmp     r4, r5
+    beq     .Larray_skip
+.Larray_loop:
+    ldm     r4!, {r0}
+    bl      .Larray_bx
+    cmp     r4, r5
+    bne     .Larray_loop
+.Larray_skip:
+    pop     {r0}
+.Larray_bx:
+    bx      r0
