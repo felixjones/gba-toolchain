@@ -81,3 +81,6 @@ _start:
     pop     {r0}
 .Larray_bx:
     bx      r0
+
+    @ Reference a symbol from syscalls.c to keep
+    .global _getpid

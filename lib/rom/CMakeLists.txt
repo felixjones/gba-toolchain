@@ -14,3 +14,9 @@ target_link_options(librom
         $<$<BOOL:${CMAKE_NANO}>:-specs=nano.specs>
         -specs=nosys.specs
 )
+
+execute_process(COMMAND "${CMAKE_C_COMPILER}" --version OUTPUT_VARIABLE GNU_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
+if(NOT GNU_VERSION MATCHES "devkitARM")
+    enable_language(C)
+    target_sources(librom PRIVATE syscalls.c)
+endif()

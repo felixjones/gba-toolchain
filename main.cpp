@@ -1,12 +1,6 @@
-[[gnu::section(".cart.backup"), maybe_unused]]
-const char save_string[] = "FLASH512_Vnnn";
-
-#include <vector>
-#include "test.hpp"
+void render();
 
 int main() {
-    auto res = test::multiply(3, 4);
-
-    auto a = std::vector<int>{};
-    a.push_back(res);
+    *(unsigned int*)0x04000000 = 0x0403;
+    render();
 }
