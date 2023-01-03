@@ -2,8 +2,11 @@
 const char save_string[] = "FLASH512_Vnnn";
 
 #include <vector>
+#include "test.hpp"
 
 int main() {
+    auto res = test::multiply(3, 4);
+
     auto a = std::vector<int>{};
-    a.emplace_back(54);
+    a.push_back(res);
 }

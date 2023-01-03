@@ -39,7 +39,7 @@ SECTIONS {
     } > rom
 
     .text : {
-        *(.text .text.* .gnu.linkonce.t.*)
+        *(EXCLUDE_FILE(*.iwram.* *.ewram.*) .text .text.* .gnu.linkonce.t.*)
     } > rom
 
     .fini_array : {
@@ -50,7 +50,6 @@ SECTIONS {
 
     .ARM.exidx : {
         PROVIDE_HIDDEN(__exidx_start = .);
-        *(.gnu.linkonce.armexidx.*)
         PROVIDE_HIDDEN(__exidx_end = .);
     } > rom
 
