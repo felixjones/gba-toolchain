@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="mGBA.exe" type="com.jetbrains.cidr.embedded.customgdbserver.type" factoryName="com.jetbrains.cidr.embedded.customgdbserver.factory" PROGRAM_PARAMS="-g &quot;$CMakeCurrentProductFile$&quot;" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="agb_devkit" TARGET_NAME="my_game" CONFIG_NAME="debug" version="1" RUN_TARGET_PROJECT_NAME="agb_devkit" RUN_TARGET_NAME="my_game">
-    <custom-gdb-server version="1" gdb-connect="localhost:2345" executable="C:\Program Files\mGBA\mGBA.exe" warmup-ms="100" download-type="NONE" reset-cmd="monitor reset" reset-type="NEVER">
+    <custom-gdb-server version="1" gdb-connect="localhost:2345" executable="E:\mGBA\mGBA.exe" warmup-ms="100" download-type="NONE" reset-cmd="monitor reset" reset-type="NEVER">
       <debugger kind="GDB" isBundled="true" />
     </custom-gdb-server>
     <method v="2">

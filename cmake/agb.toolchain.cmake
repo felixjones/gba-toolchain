@@ -121,6 +121,9 @@ set(CMAKE_ASM_COMPILER_TARGET arm-none-eabi CACHE INTERNAL "")
 set(CMAKE_C_COMPILER_TARGET arm-none-eabi CACHE INTERNAL "")
 set(CMAKE_CXX_COMPILER_TARGET arm-none-eabi CACHE INTERNAL "")
 
+# Find linker
+find_program(CMAKE_LINKER NAMES arm-none-eabi-ld PATHS ${COMPILER_SEARCH_PATHS} PATH_SUFFIXES bin REQUIRED)
+
 # Find C compiler in sysroot
 find_program(SYSROOT_COMPILER NAMES arm-none-eabi-gcc PATHS ${COMPILER_SEARCH_PATHS} PATH_SUFFIXES bin REQUIRED NO_CACHE)
 unset(COMPILER_SEARCH_PATHS)
@@ -160,4 +163,10 @@ endif()
 unset(GNU_VERSION)
 
 # Setup default linker flags
-set(CMAKE_EXE_LINKER_FLAGS "-Wl,--no-warn-rwx-segments -nostartfiles -mthumb" CACHE INTERNAL "")
+execute_process(COMMAND "${CMAKE_LINKER}" --help OUTPUT_VARIABLE LD_FLAGS OUTPUT_STRIP_TRAILING_WHITESPACE)
+if(LD_FLAGS MATCHES "[-][-]no[-]warn[-]rwx[-]segments")
+    set(CMAKE_EXE_LINKER_FLAGS "-Wl,--no-warn-rwx-segments -nostartfiles -mthumb" CACHE INTERNAL "")
+else()
+    set(CMAKE_EXE_LINKER_FLAGS "-nostartfiles -mthumb" CACHE INTERNAL "")
+endif()
+unset(LD_FLAGS)
