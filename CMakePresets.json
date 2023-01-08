@@ -11,10 +11,10 @@
       "displayName": "Debug",
       "generator": "Unix Makefiles",
       "binaryDir": "${sourceDir}/cmake-build-debug",
+      "installDir": "${sourceDir}/rom/debug",
       "toolchainFile": "${sourceDir}/cmake/agb.toolchain.cmake",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug",
-        "CMAKE_INSTALL_PREFIX": "${sourceDir}/rom/debug"
+        "CMAKE_BUILD_TYPE": "Debug"
       }
     },
     {
@@ -22,10 +22,10 @@
       "displayName": "Release",
       "generator": "Unix Makefiles",
       "binaryDir": "${sourceDir}/cmake-build-release",
+      "installDir": "${sourceDir}/rom/debug",
       "toolchainFile": "${sourceDir}/cmake/agb.toolchain.cmake",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release",
-        "CMAKE_INSTALL_PREFIX": "${sourceDir}/rom/release"
+        "CMAKE_BUILD_TYPE": "Release"
       }
     }
   ]

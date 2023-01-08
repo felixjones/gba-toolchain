@@ -1,6 +1,6 @@
 void render() {
     int t = 0, t3 = 0, t5 = 0;
-    while(1) {
+    while (true) {
         for (int y = 0; y < 160; ++y) {
             for (int x = 0; x < 240; ++x) {
                 ((unsigned short*) 0x06000000)[x + y * 240] =
