@@ -9,7 +9,7 @@
     {
       "name": "debug",
       "displayName": "Debug",
-      "generator": "Unix Makefiles",
+      "generator": "Ninja",
       "binaryDir": "${sourceDir}/cmake-build-debug",
       "installDir": "${sourceDir}/rom/debug",
       "toolchainFile": "${sourceDir}/cmake/agb.toolchain.cmake",
@@ -22,7 +22,7 @@
       "displayName": "Release",
       "generator": "Unix Makefiles",
       "binaryDir": "${sourceDir}/cmake-build-release",
-      "installDir": "${sourceDir}/rom/debug",
+      "installDir": "${sourceDir}/rom/release",
       "toolchainFile": "${sourceDir}/cmake/agb.toolchain.cmake",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"

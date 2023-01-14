@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.18)
 project(agb_devkit CXX)
 add_subdirectory(lib/rom)
 
+# TODO : projects for image converting (grit), gbfs, compression
 include(ExternalProject)
 ExternalProject_Add(
     libagbabi
@@ -13,6 +14,8 @@ ExternalProject_Add(
 ExternalProject_Get_Property(libagbabi SOURCE_DIR)
 link_directories("${CMAKE_BINARY_DIR}/lib")
 include_directories("${SOURCE_DIR}/include")
+
+# find_package(tonclib)
 
 add_executable(my_game main.cpp render.iwram.cpp)
 add_dependencies(my_game libagbabi)
