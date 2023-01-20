@@ -1,6 +1,8 @@
+#include <tonc.h>
+
 void render();
 
 int main() {
-    *(unsigned int*) 0x04000000 = 0x0403;
+    REG_DISPCNT = DCNT_BG2 | DCNT_MODE3;
     render();
 }

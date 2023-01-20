@@ -19,9 +19,20 @@ if(NOT libtonc)
         target_include_directories(tonc SYSTEM PUBLIC include)
 
         target_compile_options(tonc PRIVATE
-            -mthumb
             $<$<COMPILE_LANGUAGE:ASM>:-x assembler-with-cpp>
-            $<$<COMPILE_LANGUAGE:C>:-ffunction-sections -fdata-sections -Wall -Wextra -Wno-unused-parameter -Wno-char-subscripts -Wno-sign-compare -Wno-implicit-fallthrough -Wno-type-limits>
+            $<$<COMPILE_LANGUAGE:C>:-mthumb -O2
+                -fno-strict-aliasing
+                -fomit-frame-pointer
+                -ffunction-sections
+                -fdata-sections
+                -Wall
+                -Wextra
+                -Wno-unused-parameter
+                -Wno-char-subscripts
+                -Wno-sign-compare
+                -Wno-implicit-fallthrough
+                -Wno-type-limits
+            >
         )
 
         install(TARGETS tonc
@@ -48,7 +59,6 @@ if(NOT libtonc)
         SOURCE_DIR "${SOURCE_DIR}/source"
         CMAKE_ARGS --toolchain "${CMAKE_TOOLCHAIN_FILE}"
             -DCMAKE_INSTALL_PREFIX:PATH='${SOURCE_DIR}'
-            -DCMAKE_BUILD_TYPE:STRING='${CMAKE_BUILD_TYPE}'
         # Build
         BINARY_DIR "${SOURCE_DIR}/build"
         BUILD_COMMAND "${CMAKE_COMMAND}" --build .
