@@ -13,7 +13,6 @@ static int stub(void) {
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "bugprone-reserved-identifier"
-
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wattribute-alias"
 
@@ -34,5 +33,4 @@ int _read(int file, char *ptr, int len) __attribute__((alias("stub")));
 int _write(int file, char *ptr, int len) __attribute__((alias("stub")));
 
 #pragma GCC diagnostic pop
-
 #pragma clang diagnostic pop

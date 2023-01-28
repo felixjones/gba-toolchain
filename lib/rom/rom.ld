@@ -81,6 +81,7 @@ SECTIONS {
     .iwram : AT(__iwram_lma) ALIGN(32) {
         *(.iwram .iwram.*)
         *.iwram.*(.text .text.* .data .data.*)
+        *(.data .data.*)
         . = ALIGN(32);
     } > iwram
 
@@ -89,6 +90,7 @@ SECTIONS {
         *(.bss .bss.*)
         *(COMMON)
         . = ALIGN(32);
+        PROVIDE_HIDDEN(__bss_end = ABSOLUTE(.));
     } > iwram
 
     PROVIDE_HIDDEN(__iwram_lma_end = ALIGN(__iwram_lma + (. - __iwram_start), 4));

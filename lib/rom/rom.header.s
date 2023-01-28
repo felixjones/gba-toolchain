@@ -56,5 +56,10 @@ __zero_word:
     @ Checksum (calculated as 0x00 - 0x96 - 0x19)
     .byte   0x51
 
-    @ Zero hword [2]
+    @ Unused [6]
     .hword  0x0000
+    .word   0x00000000
+
+    @ GPIO
+    .word  0x00000000
+    .word  0x00000000

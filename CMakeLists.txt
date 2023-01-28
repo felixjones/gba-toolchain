@@ -1,12 +1,13 @@
 cmake_minimum_required(VERSION 3.18)
 
-project(agb_devkit CXX)
+project(agb_devkit ASM CXX)
+find_package(agbabi)
 find_package(librom)
 find_package(tonclib)
 
 add_executable(my_game main.cpp render.iwram.cpp)
 target_compile_options(my_game PRIVATE -mthumb -Wpedantic -Wall -Wextra -Wconversion)
-target_link_libraries(my_game PRIVATE librom tonclib)
+target_link_libraries(my_game PRIVATE agbabi librom tonclib)
 
 set_source_files_properties(render.iwram.cpp PROPERTIES COMPILE_FLAGS "-marm -O3")
 
