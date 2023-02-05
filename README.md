@@ -22,7 +22,7 @@ If a library is required by CMake, but is missing, it will be downloaded into th
 
 ### libseven
 
-[libseven](https://github.com/LunarLambda/libseven) is a modern GBA C development library that also provides commonly needed utility functions.
+[libseven](https://github.com/LunarLambda/sdk-seven) is a modern GBA C development library that also provides commonly needed utility functions.
 
 ### Tonclib/libtonc
 
@@ -82,9 +82,9 @@ e-Reader binaries have no header, however 4 bytes at `0x2000008` are clobbered b
 
 An e-Reader binary can ´exit´ back to the e-Reader ROM.
 
-### gba-minrt
+### minrt
 
-An in-development, experimental minimal GBA runtime library. [github.com/LunarLambda/gba-minrt](https://github.com/LunarLambda/gba-minrt).
+A minimal GBA runtime library. [github.com/LunarLambda/sdk-seven](https://github.com/LunarLambda/sdk-seven).
 
 Supports both ROM and Multiboot binaries.
 
@@ -145,7 +145,7 @@ The GNU Arm Embedded Toolchain is still required for GCC linking, compiling asse
 
 Changes the compiler from GNU Arm Embedded Toolchain to an installation of devkitARM located at the `DEVKITARM` environment variable.
 
-This avoids downloading GNU Arm Embedded Toolchain and uses devkitARM's provided tools when available (can avoid downloading and compiling host tools). 
+This avoids downloading GNU Arm Embedded Toolchain and uses devkitARM's provided tools when available (can avoid downloading and compiling host tools).
 
 ### -DDEPENDENCIES_URL=https://some.url.to/a/place/with/file.ini
 
