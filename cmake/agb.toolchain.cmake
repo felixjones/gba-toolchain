@@ -165,9 +165,9 @@ unset(GNU_VERSION)
 # Setup default linker flags
 execute_process(COMMAND "${CMAKE_LINKER}" --help OUTPUT_VARIABLE LD_FLAGS OUTPUT_STRIP_TRAILING_WHITESPACE)
 if(LD_FLAGS MATCHES "[-][-]no[-]warn[-]rwx[-]segments")
-    set(CMAKE_EXE_LINKER_FLAGS "-Wl,--no-warn-rwx-segments -nostartfiles -mthumb" CACHE INTERNAL "")
+    set(CMAKE_EXE_LINKER_FLAGS "-Wl,--no-warn-rwx-segments -nostartfiles" CACHE INTERNAL "")
 else()
-    set(CMAKE_EXE_LINKER_FLAGS "-nostartfiles -mthumb" CACHE INTERNAL "")
+    set(CMAKE_EXE_LINKER_FLAGS "-nostartfiles" CACHE INTERNAL "")
 endif()
 unset(LD_FLAGS)
 
