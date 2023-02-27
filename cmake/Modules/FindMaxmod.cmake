@@ -1,6 +1,6 @@
 include(ExternalProject)
 
-# find_library(libmm mm PATHS "$ENV{DEVKITPRO}/libgba/lib")
+find_library(libmm mm PATHS "$ENV{DEVKITPRO}/libgba/lib" "${MAXMOD_DIR}")
 
 if(NOT libmm)
     set(SOURCE_DIR "${CMAKE_SYSTEM_LIBRARY_PATH}/maxmod")
@@ -9,7 +9,7 @@ if(NOT libmm)
     file(MAKE_DIRECTORY "${SOURCE_DIR}/temp")
     file(WRITE "${SOURCE_DIR}/temp/CMakeLists.txt" [=[
         cmake_minimum_required(VERSION 3.18)
-        project(maxmod ASM C)
+        project(maxmod ASM)
 
         file(GLOB sources "source/*.s" "source_gba/*.s")
 

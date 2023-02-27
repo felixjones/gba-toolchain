@@ -1,6 +1,6 @@
 include(ExternalProject)
 
-find_library(libgba gba PATHS "$ENV{DEVKITPRO}/libgba/lib")
+find_library(libgba gba PATHS "$ENV{DEVKITPRO}/libgba/lib" "${LIBGBA_DIR}")
 
 if(NOT libgba)
     set(SOURCE_DIR "${CMAKE_SYSTEM_LIBRARY_PATH}/libgba")
