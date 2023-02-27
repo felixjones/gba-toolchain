@@ -9,7 +9,7 @@
     {
       "name": "debug",
       "displayName": "Debug",
-      "generator": "Ninja",
+      "generator": "Unix Makefiles",
       "binaryDir": "${sourceDir}/cmake-build-debug",
       "installDir": "${sourceDir}/rom/debug",
       "toolchainFile": "${sourceDir}/cmake/agb.toolchain.cmake",
