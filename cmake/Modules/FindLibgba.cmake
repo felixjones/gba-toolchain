@@ -53,12 +53,12 @@ if(NOT libgba)
         GIT_TAG "master"
         # Update
         UPDATE_COMMAND "${CMAKE_COMMAND}" -E copy
-        "${SOURCE_DIR}/temp/CMakeLists.txt"
-        "${SOURCE_DIR}/source/CMakeLists.txt"
+            "${SOURCE_DIR}/temp/CMakeLists.txt"
+            "${SOURCE_DIR}/source/CMakeLists.txt"
         # Configure
         SOURCE_DIR "${SOURCE_DIR}/source"
         CMAKE_ARGS --toolchain "${CMAKE_TOOLCHAIN_FILE}"
-        -DCMAKE_INSTALL_PREFIX:PATH='${SOURCE_DIR}'
+            -DCMAKE_INSTALL_PREFIX:PATH='${SOURCE_DIR}'
         # Build
         BINARY_DIR "${SOURCE_DIR}/build"
         BUILD_COMMAND "${CMAKE_COMMAND}" --build .
