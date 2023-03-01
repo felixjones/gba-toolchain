@@ -51,24 +51,42 @@ _start:
     @ init immediately follows preinit so we can join these arrays
     ldr     r4, =__preinit_array_start
     ldr     r5, =__init_array_end
-    bl      .Larray_call
+    bl      __array_call
 
     @ argc, argv
     mov     r0, #0
     mov     r1, #0
     bl      main
+    @ Fallthrough
+
+    .thumb
+    .global exit
+exit:
+    ldr     r1, =#0x4000208
+    str     r1, [r1] @ Disable REG_IME (lowest bit = 0)
+
+    mov     r1, #0 @ NULL
+    push    {r0} @ Push exit code
+    bl      __call_exitprocs
+    pop     {r0}
 
     @ Using r4-r5 to avoid pushing r0-r3
     ldr     r4, =__fini_array_start
     ldr     r5, =__fini_array_end
-    bl      .Larray_call
+    bl      __array_call
+    @ Fallthrough
 
-    @TODO: exit and _Exit
+    .thumb
+    .global _Exit
+_Exit:
+    ldr     r1, =#0x4000208
+    str     r1, [r1] @ Disable REG_IME (lowest bit = 0)
 
     @ SoftReset
     swi     #0x0
 
-.Larray_call:
+    .thumb
+__array_call:
     push    {lr}
     cmp     r4, r5
     beq     .Larray_skip
