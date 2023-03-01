@@ -16,7 +16,7 @@ if(NOT libposprintf)
         install(TARGETS posprintf
             LIBRARY DESTINATION lib
         )
-        install(FILES posprintf/posprintf.h
+        install(FILES "posprintf/posprintf.h"
             DESTINATION include
         )
     ]=])
