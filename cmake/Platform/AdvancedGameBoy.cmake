@@ -7,7 +7,10 @@ function(install_rom target)
         return()
     endif()
 
-    #TODO: Parse args for DESTINATION
+    cmake_parse_arguments(ARGS "" "DESTINATION" "" ${ARGN})
+    if(NOT ARGS_DESTINATION)
+        set(ARGS_DESTINATION ".")
+    endif()
 
     add_custom_command(TARGET ${target} PRE_BUILD
         COMMAND "${CMAKE_COMMAND}"
@@ -19,21 +22,22 @@ function(install_rom target)
             -P "${CMAKE_CURRENT_LIST_DIR}/cmake/GbaFix.cmake"
     )
 
-    install(TARGETS ${target} DESTINATION ".")
+    set(INSTALL_DESTINATION "${CMAKE_INSTALL_PREFIX}/${ARGS_DESTINATION}")
+    install(TARGETS ${target} DESTINATION "${ARGS_DESTINATION}")
     install(CODE "
         execute_process(
             COMMAND \"${CMAKE_OBJCOPY}\" -O binary \"$<TARGET_FILE_NAME:${target}>\" \"$<TARGET_FILE_BASE_NAME:${target}>.bin\"
-            WORKING_DIRECTORY \"${CMAKE_INSTALL_PREFIX}\"
+            WORKING_DIRECTORY \"${INSTALL_DESTINATION}\"
         )
 
         set(CMAKE_OBJCOPY \"${CMAKE_OBJCOPY}\")
         include(${CMAKE_CURRENT_LIST_DIR}/cmake/GbaFix.cmake)
-        gbafix(\"${CMAKE_INSTALL_PREFIX}/$<TARGET_FILE_BASE_NAME:${target}>.bin\"
+        gbafix(\"${INSTALL_DESTINATION}/$<TARGET_FILE_BASE_NAME:${target}>.bin\"
             TITLE \"$<TARGET_PROPERTY:${target},ROM_TITLE>\"
             ID \"$<TARGET_PROPERTY:${target},ROM_ID>\"
             MAKER \"$<TARGET_PROPERTY:${target},ROM_MAKER>\"
             VERSION \"$<TARGET_PROPERTY:${target},ROM_VERSION>\"
-            OUTPUT \"${CMAKE_INSTALL_PREFIX}/$<TARGET_FILE_BASE_NAME:${target}>.gba\"
+            OUTPUT \"${INSTALL_DESTINATION}/$<TARGET_FILE_BASE_NAME:${target}>.gba\"
         )
     ")
 endfunction()
