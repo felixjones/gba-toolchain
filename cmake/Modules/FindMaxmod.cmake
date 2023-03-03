@@ -1,6 +1,6 @@
 include(ExternalProject)
 
-find_library(libmm mm PATHS "$ENV{DEVKITPRO}/libgba/lib" "${CMAKE_SYSTEM_LIBRARY_PATH}/maxmod/lib" "${MAXMOD_DIR}")
+find_library(libmm mm PATHS "$ENV{DEVKITPRO}/libgba" "${CMAKE_SYSTEM_LIBRARY_PATH}/maxmod" "${MAXMOD_DIR}" PATH_SUFFIXES lib)
 
 if(NOT libmm)
     set(SOURCE_DIR "${CMAKE_SYSTEM_LIBRARY_PATH}/maxmod")

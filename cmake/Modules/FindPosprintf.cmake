@@ -1,6 +1,6 @@
 include(ExternalProject)
 
-find_library(libposprintf posprintf PATHS "${CMAKE_SYSTEM_LIBRARY_PATH}/posprintf/lib" "${POSPRINTF_DIR}")
+find_library(libposprintf posprintf PATHS "${CMAKE_SYSTEM_LIBRARY_PATH}/posprintf" "${POSPRINTF_DIR}" PATH_SUFFIXES lib)
 
 if(NOT libposprintf)
     set(SOURCE_DIR "${CMAKE_SYSTEM_LIBRARY_PATH}/posprintf")

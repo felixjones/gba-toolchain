@@ -1,6 +1,6 @@
 include(ExternalProject)
 
-find_library(libagbabi agbabi PATHS "${CMAKE_SYSTEM_LIBRARY_PATH}/agbabi/lib" "${AGBABI_DIR}")
+find_library(libagbabi agbabi PATHS "${CMAKE_SYSTEM_LIBRARY_PATH}/agbabi" "${AGBABI_DIR}" PATH_SUFFIXES lib)
 
 if(NOT libagbabi)
     set(SOURCE_DIR "${CMAKE_SYSTEM_LIBRARY_PATH}/agbabi")

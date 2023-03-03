@@ -1,6 +1,6 @@
 include(ExternalProject)
 
-find_library(libseven seven PATHS "$ENV{DEVKITPRO}/libseven/lib" "${CMAKE_SYSTEM_LIBRARY_PATH}/libseven/lib" "${LIBSEVEN_DIR}")
+find_library(libseven seven PATHS "$ENV{DEVKITPRO}/libseven" "${CMAKE_SYSTEM_LIBRARY_PATH}/libseven" "${LIBSEVEN_DIR}" PATH_SUFFIXES lib)
 
 if(NOT libseven)
     set(SOURCE_DIR "${CMAKE_SYSTEM_LIBRARY_PATH}/libseven")

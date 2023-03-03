@@ -1,6 +1,6 @@
 include(ExternalProject)
 
-find_library(libtonc tonc PATHS "$ENV{DEVKITPRO}/libtonc/lib" "${CMAKE_SYSTEM_LIBRARY_PATH}/tonclib/lib" "${TONCLIB_DIR}")
+find_library(libtonc tonc PATHS "$ENV{DEVKITPRO}/libtonc" "${CMAKE_SYSTEM_LIBRARY_PATH}/tonclib" "${TONCLIB_DIR}" PATH_SUFFIXES lib)
 
 if(NOT libtonc)
     set(SOURCE_DIR "${CMAKE_SYSTEM_LIBRARY_PATH}/tonclib")
