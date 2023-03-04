@@ -20,14 +20,6 @@ if(NOT libmm)
         target_compile_options(maxmod PRIVATE
             -DSYS_GBA -DUSE_IWRAM
             $<$<COMPILE_LANGUAGE:ASM>:-x assembler-with-cpp>
-            $<$<COMPILE_LANGUAGE:C>:-mthumb -O2
-                -fno-strict-aliasing
-                -fomit-frame-pointer
-                -ffunction-sections
-                -fdata-sections
-                -Wall
-                -Wextra
-            >
         )
 
         install(TARGETS maxmod
