@@ -20,5 +20,12 @@ set_target_properties(my_game PROPERTIES
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL AdvancedGameBoy)
+    add_gbfs_archive(assets ASM test.txt)
+    set_target_properties(assets PROPERTIES OUTPUT_NAME resources)
+    set_source_files_properties(resources.s PROPERTIES GENERATED TRUE)
+
+    add_dependencies(my_game assets)
+    target_sources(my_game PRIVATE resources.s)
+
     install_rom(my_game)
 endif()

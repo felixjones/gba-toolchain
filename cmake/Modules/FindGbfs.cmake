@@ -2,8 +2,9 @@ include(FetchContent)
 
 find_library(libgbfs gbfs PATHS "$ENV{DEVKITPRO}/gbfs" "${CMAKE_SYSTEM_LIBRARY_PATH}/gbfs" "${GBFS_DIR}" PATH_SUFFIXES lib)
 find_program(CMAKE_GBFS_PROGRAM gbfs PATHS "$ENV{DEVKITPRO}/tools" "${CMAKE_SYSTEM_LIBRARY_PATH}/gbfs" "${GBFS_DIR}" PATH_SUFFIXES bin)
+find_program(CMAKE_BIN2S_PROGRAM bin2s PATHS "$ENV{DEVKITPRO}/tools" "${CMAKE_SYSTEM_LIBRARY_PATH}/gbfs" "${GBFS_DIR}" PATH_SUFFIXES bin)
 
-if(NOT libgbfs OR NOT CMAKE_GBFS_PROGRAM)
+if(NOT libgbfs OR NOT CMAKE_GBFS_PROGRAM OR NOT CMAKE_BIN2S_PROGRAM)
     set(SOURCE_DIR "${CMAKE_SYSTEM_LIBRARY_PATH}/gbfs")
 
     file(MAKE_DIRECTORY "${SOURCE_DIR}/temp")
@@ -40,12 +41,13 @@ if(NOT libgbfs OR NOT CMAKE_GBFS_PROGRAM)
             endif()
         else()
             add_executable(gbfs "tools/gbfs.c")
+            add_executable(bin2s "tools/bin2s.c")
 
             if(CMAKE_GENERATOR MATCHES "Visual Studio")
                 target_sources(gbfs PRIVATE "tools/djbasename.c")
             endif()
 
-            install(TARGETS gbfs DESTINATION bin)
+            install(TARGETS gbfs bin2s DESTINATION bin)
         endif()
     ]=])
 
@@ -79,7 +81,7 @@ if(NOT libgbfs OR NOT CMAKE_GBFS_PROGRAM)
         find_library(libgbfs gbfs PATHS "${SOURCE_DIR}/build")
     endif()
 
-    if(NOT CMAKE_GBFS_PROGRAM)
+    if(NOT CMAKE_GBFS_PROGRAM OR NOT CMAKE_BIN2S_PROGRAM)
         FetchContent_GetProperties(gbfs_proj)
         if(NOT gbfs_proj_POPULATED)
             FetchContent_Populate(gbfs_proj)
@@ -97,9 +99,9 @@ if(NOT libgbfs OR NOT CMAKE_GBFS_PROGRAM)
         else()
             # Build
             execute_process(
-                    COMMAND ${CMAKE_COMMAND} --build tools --config Release
-                    WORKING_DIRECTORY "${SOURCE_DIR}/build"
-                    RESULT_VARIABLE cmakeResult
+                COMMAND ${CMAKE_COMMAND} --build tools --config Release
+                WORKING_DIRECTORY "${SOURCE_DIR}/build"
+                RESULT_VARIABLE cmakeResult
             )
 
             if(cmakeResult EQUAL "1")
@@ -107,15 +109,16 @@ if(NOT libgbfs OR NOT CMAKE_GBFS_PROGRAM)
             else()
                 # Install
                 execute_process(
-                        COMMAND ${CMAKE_COMMAND} --install tools --prefix "${SOURCE_DIR}" --config Release
-                        WORKING_DIRECTORY "${SOURCE_DIR}/build"
-                        RESULT_VARIABLE cmakeResult
+                    COMMAND ${CMAKE_COMMAND} --install tools --prefix "${SOURCE_DIR}" --config Release
+                    WORKING_DIRECTORY "${SOURCE_DIR}/build"
+                    RESULT_VARIABLE cmakeResult
                 )
 
                 if(cmakeResult EQUAL "1")
                     message(WARNING "Failed to install gbfs")
                 else()
                     find_program(CMAKE_GBFS_PROGRAM gbfs PATHS "${SOURCE_DIR}/bin")
+                    find_program(CMAKE_BIN2S_PROGRAM bin2s PATHS "${SOURCE_DIR}/bin")
                 endif()
             endif()
         endif()
@@ -135,8 +138,67 @@ if(NOT CMAKE_GBFS_PROGRAM)
     message(WARNING "gbfs not found: Please set `-DCMAKE_GBFS_PROGRAM:FILEPATH=<path/to/bin/gbfs>`")
 endif()
 
-function(add_gbfs)
+if(NOT CMAKE_BIN2S_PROGRAM)
+    message(WARNING "bin2s not found: Please set `-DCMAKE_BIN2S_PROGRAM:FILEPATH=<path/to/bin/bin2s>`")
+endif()
 
+function(add_gbfs_archive target)
+    set(options
+        ASM
+        EXCLUDE_FROM_ALL
+    )
+    cmake_parse_arguments(ARGS "${options}" "" "" ${ARGN})
+
+    string(CONCAT TARGET_FILE_NO_SUFFIX
+        $<TARGET_PROPERTY:${target},OUTPUT_DIRECTORY>
+        /
+        $<TARGET_PROPERTY:${target},PREFIX>
+        $<TARGET_PROPERTY:${target},OUTPUT_NAME>
+    )
+    string(CONCAT TARGET_FILE
+        ${TARGET_FILE_NO_SUFFIX}
+        $<TARGET_PROPERTY:${target},SUFFIX>
+    )
+
+    set(SOURCES $<TARGET_PROPERTY:${target},SOURCES>)
+
+    if(NOT ARGS_EXCLUDE_FROM_ALL)
+        set(INCLUDE_WITH_ALL ALL)
+    endif()
+
+    if(ARGS_ASM)
+        set(ASM_COMMAND
+            COMMAND "${CMAKE_COMMAND}" -E rename ${TARGET_FILE} ${TARGET_FILE_NO_SUFFIX}.gbfs
+            COMMAND "${CMAKE_BIN2S_PROGRAM}" ${TARGET_FILE_NO_SUFFIX}.gbfs > ${TARGET_FILE}
+        )
+        set(SUFFIX ".s")
+    else()
+        set(SUFFIX ".gbfs")
+    endif()
+
+    # TODO: Find a bug reference for the below hack
+    string(REGEX REPLACE "([][+.*()^])" "\\\\\\1" SOURCES_BUG_FIX "${CMAKE_BINARY_DIR}/CMakeFiles/${target}")
+
+    add_custom_target(${target} ${INCLUDE_WITH_ALL}
+        COMMAND "${CMAKE_GBFS_PROGRAM}" ${TARGET_FILE} $<FILTER:${SOURCES},EXCLUDE,${SOURCES_BUG_FIX}>
+        ${ASM_COMMAND}
+        SOURCES $<FILTER:${SOURCES},EXCLUDE,${SOURCES_BUG_FIX}>
+        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+        VERBATIM
+        COMMAND_EXPAND_LISTS
+    )
+
+    if(ARGS_UNPARSED_ARGUMENTS)
+        set(INIT_SOURCES SOURCES ${ARGS_UNPARSED_ARGUMENTS})
+    endif()
+
+    set_target_properties(${target} PROPERTIES
+        ${INIT_SOURCES}
+        OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
+        OUTPUT_NAME "${target}"
+        SUFFIX "${SUFFIX}"
+        TARGET_FILE ${TARGET_FILE}
+    )
 endfunction()
 
 unset(libgbfs CACHE)
