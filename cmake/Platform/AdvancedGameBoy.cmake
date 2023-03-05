@@ -7,7 +7,8 @@ function(install_rom target)
         return()
     endif()
 
-    cmake_parse_arguments(ARGS "" "DESTINATION" "" ${ARGN})
+    set(multiValueArgs CONCAT_TARGETS CONCAT_FILES)
+    cmake_parse_arguments(ARGS "" "DESTINATION" "${multiValueArgs}" ${ARGN})
     if(NOT ARGS_DESTINATION)
         set(ARGS_DESTINATION ".")
     endif()
@@ -21,6 +22,18 @@ function(install_rom target)
             -D ROM_VERSION=$<TARGET_PROPERTY:${target},ROM_VERSION>
             -P "${CMAKE_CURRENT_LIST_DIR}/cmake/GbaFix.cmake"
     )
+
+    foreach(concatTarget ${ARGS_CONCAT_TARGETS})
+        if(NOT TARGET ${concatTarget})
+            message(FATAL_ERROR "No target \"${concatTarget}\"")
+            return()
+        endif()
+
+        add_dependencies(${target} ${concatTarget})
+        list(APPEND appendFiles $<TARGET_GENEX_EVAL:${concatTarget},$<TARGET_PROPERTY:${concatTarget},TARGET_FILE>>)
+    endforeach()
+
+    list(APPEND appendFiles ${ARGS_CONCAT_FILES})
 
     set(INSTALL_DESTINATION "${CMAKE_INSTALL_PREFIX}/${ARGS_DESTINATION}")
     install(TARGETS ${target} DESTINATION "${ARGS_DESTINATION}")
@@ -39,5 +52,11 @@ function(install_rom target)
             VERSION \"$<TARGET_PROPERTY:${target},ROM_VERSION>\"
             OUTPUT \"${INSTALL_DESTINATION}/$<TARGET_FILE_BASE_NAME:${target}>.gba\"
         )
+
+        set(appendFiles ${appendFiles})
+        if(appendFiles)
+            include(${CMAKE_CURRENT_LIST_DIR}/cmake/Concat.cmake)
+            binconcat(\"${INSTALL_DESTINATION}/$<TARGET_FILE_BASE_NAME:${target}>.gba\" \${appendFiles})
+        endif()
     ")
 endfunction()
