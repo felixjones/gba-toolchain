@@ -94,4 +94,5 @@ SECTIONS {
     } > iwram
 
     PROVIDE_HIDDEN(__iwram_lma_end = ALIGN(__iwram_lma + (. - __iwram_start), 4));
+    PROVIDE_HIDDEN(__rom_end = __iwram_lma_end);
 }
