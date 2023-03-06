@@ -87,6 +87,13 @@ if(NOT libgbfs OR NOT CMAKE_GBFS_PROGRAM OR NOT CMAKE_BIN2S_PROGRAM)
             FetchContent_Populate(gbfs_proj)
         endif()
 
+        if(CMAKE_HOST_WIN32)
+            find_program(CMAKE_GBFS_PROGRAM gbfs PATHS "${SOURCE_DIR}/source/tools")
+            find_program(CMAKE_BIN2S_PROGRAM bin2s PATHS "${SOURCE_DIR}/source/tools")
+        endif()
+    endif()
+
+    if(NOT CMAKE_GBFS_PROGRAM OR NOT CMAKE_BIN2S_PROGRAM)
         # Configure
         execute_process(
             COMMAND ${CMAKE_COMMAND} -S . -B "${SOURCE_DIR}/build/tools"
