@@ -62,3 +62,29 @@ function(install_rom target)
         endif()
     ")
 endfunction()
+
+set(ASSET_SCRIPT "${CMAKE_CURRENT_LIST_DIR}/../Asset.cmake")
+
+function(add_asset_library target)
+    cmake_parse_arguments(ARGS "" "PREFIX" "" ${ARGN})
+
+    set(ASSETS $<TARGET_GENEX_EVAL:${target},$<TARGET_PROPERTY:${target},ASSETS>>)
+
+    add_custom_command(
+        OUTPUT ${target}.asset.s
+        COMMAND "${CMAKE_COMMAND}" -D PREFIX=${ARGS_PREFIX} "-DINPUTS=${ASSETS}" "-DOUTPUT=${CMAKE_BINARY_DIR}/${target}.asset.s" -P "${ASSET_SCRIPT}"
+        DEPENDS ${ASSETS}
+        VERBATIM
+        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    )
+
+    enable_language(ASM)
+    set_source_files_properties(${target}.asset.s PROPERTIES GENERATED TRUE)
+    add_library(${target} OBJECT ${target}.asset.s)
+
+    if(ARGS_UNPARSED_ARGUMENTS)
+        set_target_properties(${target} PROPERTIES
+            ASSETS "${ARGS_UNPARSED_ARGUMENTS}"
+        )
+    endif()
+endfunction()

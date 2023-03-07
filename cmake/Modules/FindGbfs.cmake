@@ -174,6 +174,8 @@ function(add_gbfs_archive target)
     endif()
 
     if(ARGS_ASM)
+        enable_language(ASM) # For dependant targets
+
         set(ASM_COMMAND
             COMMAND "${CMAKE_COMMAND}" -E rename ${TARGET_FILE} ${TARGET_FILE_NO_SUFFIX}.gbfs
             COMMAND "${CMAKE_BIN2S_PROGRAM}" ${TARGET_FILE_NO_SUFFIX}.gbfs > ${TARGET_FILE}
