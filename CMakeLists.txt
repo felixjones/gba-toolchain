@@ -21,10 +21,8 @@ set_target_properties(my_game PROPERTIES
 
 if(CMAKE_SYSTEM_NAME STREQUAL AdvancedGameBoy)
     add_gbfs_archive(assets ASM test.txt)
-
     set_target_properties(assets PROPERTIES
         OUTPUT_NAME resources
-        SUFFIX .s
     )
     set_source_files_properties(resources.s PROPERTIES GENERATED TRUE)
 
