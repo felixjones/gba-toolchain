@@ -6,6 +6,10 @@ set(CMAKE_SYSTEM_VERSION 1 CACHE INTERNAL "")
 set(CMAKE_SYSTEM_PROCESSOR armv4t CACHE INTERNAL "")
 
 if(CMAKE_HOST_SYSTEM_NAME MATCHES "Windows")
+    if(CMAKE_GENERATOR MATCHES "Visual Studio")
+        message(FATAL_ERROR "Toolchain is not compatible with Visual Studio (Use -G Ninja or -G Unix Makefiles)")
+    endif()
+
     # Fixup devkitPro default environment paths for Windows
     # This is not guaranteed to produce a correct path for devkitPro
     string(REGEX REPLACE "^/opt/" "C:/" DEVKITPRO "$ENV{DEVKITPRO}")

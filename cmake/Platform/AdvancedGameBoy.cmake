@@ -1,6 +1,9 @@
 set(CMAKE_EXECUTABLE_FORMAT ELF CACHE INTERNAL "")
 set(CMAKE_EXECUTABLE_SUFFIX .elf CACHE INTERNAL "")
 
+set(GBAFIX_SCRIPT "${CMAKE_CURRENT_LIST_DIR}/../GbaFix.cmake")
+set(CONCAT_SCRIPT "${CMAKE_CURRENT_LIST_DIR}/../Concat.cmake")
+
 function(install_rom target)
     if(NOT TARGET ${target})
         message(FATAL_ERROR "No target \"${target}\"")
@@ -19,7 +22,7 @@ function(install_rom target)
             -D ROM_ID=$<TARGET_PROPERTY:${target},ROM_ID>
             -D ROM_MAKER=$<TARGET_PROPERTY:${target},ROM_MAKER>
             -D ROM_VERSION=$<TARGET_PROPERTY:${target},ROM_VERSION>
-            -P "${CMAKE_CURRENT_LIST_DIR}/cmake/GbaFix.cmake"
+            -P "${GBAFIX_SCRIPT}"
     )
 
     cmake_parse_arguments(CONCAT_ARGS "" "ALIGN" "" ${ARGS_CONCAT})
@@ -46,7 +49,7 @@ function(install_rom target)
         )
 
         set(CMAKE_OBJCOPY \"${CMAKE_OBJCOPY}\")
-        include(${CMAKE_CURRENT_LIST_DIR}/cmake/GbaFix.cmake)
+        include(\"${GBAFIX_SCRIPT}\")
         gbafix(\"${INSTALL_DESTINATION}/$<TARGET_FILE_BASE_NAME:${target}>.bin\"
             TITLE \"$<TARGET_PROPERTY:${target},ROM_TITLE>\"
             ID \"$<TARGET_PROPERTY:${target},ROM_ID>\"
@@ -57,7 +60,7 @@ function(install_rom target)
 
         set(appendFiles ${appendFiles})
         if(appendFiles)
-            include(${CMAKE_CURRENT_LIST_DIR}/cmake/Concat.cmake)
+            include(\"${CONCAT_SCRIPT}\")
             binconcat(${CONCAT_ARGS_ALIGN} \"${INSTALL_DESTINATION}/$<TARGET_FILE_BASE_NAME:${target}>.gba\" \${appendFiles})
         endif()
     ")
