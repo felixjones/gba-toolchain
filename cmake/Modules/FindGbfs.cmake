@@ -43,7 +43,7 @@ if(NOT libgbfs OR NOT CMAKE_GBFS_PROGRAM OR NOT CMAKE_BIN2S_PROGRAM)
             add_executable(gbfs "tools/gbfs.c")
             add_executable(bin2s "tools/bin2s.c")
 
-            if(CMAKE_GENERATOR MATCHES "Visual Studio")
+            if(MSVC)
                 target_sources(gbfs PRIVATE "tools/djbasename.c")
             endif()
 
@@ -197,17 +197,18 @@ function(add_gbfs_archive target)
         COMMAND_EXPAND_LISTS
     )
 
-    if(ARGS_UNPARSED_ARGUMENTS)
-        set(INIT_SOURCES SOURCES ${ARGS_UNPARSED_ARGUMENTS})
-    endif()
-
     set_target_properties(${target} PROPERTIES
-        ${INIT_SOURCES}
         OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
         OUTPUT_NAME "${target}"
         SUFFIX "${SUFFIX}"
         TARGET_FILE ${TARGET_FILE}
     )
+
+    if(ARGS_UNPARSED_ARGUMENTS)
+        set_target_properties(${target} PROPERTIES
+            SOURCES "${ARGS_UNPARSED_ARGUMENTS}"
+        )
+    endif()
 endfunction()
 
 unset(libgbfs CACHE)

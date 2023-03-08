@@ -21,6 +21,7 @@ foreach(arg ${INPUTS})
     string(LENGTH ${data} size)
     split(data 32)
 
+    get_filename_component(arg "${arg}" NAME)
     string(REGEX REPLACE "[^a-zA-Z0-0_]" "_" arg "${arg}")
     string(PREPEND arg "${PREFIX}")
 

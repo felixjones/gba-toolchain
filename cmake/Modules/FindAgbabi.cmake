@@ -14,7 +14,7 @@ if(NOT libagbabi)
         # Download
         DOWNLOAD_DIR "${SOURCE_DIR}/download"
         GIT_REPOSITORY "https://github.com/felixjones/agbabi.git"
-        GIT_TAG "v2.1.0"
+        GIT_TAG "v2.1.2"
         # Configure
         SOURCE_DIR "${SOURCE_DIR}/source"
         CMAKE_ARGS --toolchain "${CMAKE_TOOLCHAIN_FILE}"

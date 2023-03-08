@@ -14,7 +14,7 @@ if(NOT libseven)
         # Download
         DOWNLOAD_DIR "${SOURCE_DIR}/download"
         GIT_REPOSITORY "https://github.com/LunarLambda/sdk-seven.git"
-        GIT_TAG "main"
+        GIT_TAG "v0.20.1"
         # Configure
         SOURCE_DIR "${SOURCE_DIR}/source"
         SOURCE_SUBDIR "libseven"
