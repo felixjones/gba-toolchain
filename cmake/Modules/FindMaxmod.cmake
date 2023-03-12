@@ -109,6 +109,7 @@ if(NOT CMAKE_MMUTIL_PROGRAM)
         PREFIX "${SOURCE_DIR}"
         TMP_DIR "${SOURCE_DIR}/temp/mmutil"
         STAMP_DIR "${SOURCE_DIR}/stamp/mmutil"
+        SOURCE_DIR "${SOURCE_DIR}/source/mmutil"
         # Download
         DOWNLOAD_DIR "${SOURCE_DIR}/download/mmutil"
         GIT_REPOSITORY "https://github.com/devkitPro/mmutil.git"
@@ -117,16 +118,6 @@ if(NOT CMAKE_MMUTIL_PROGRAM)
         UPDATE_COMMAND "${CMAKE_COMMAND}" -E copy_if_different
             "${SOURCE_DIR}/temp/mmutil/CMakeLists.txt"
             "${SOURCE_DIR}/source/mmutil/CMakeLists.txt"
-        # Configure
-        SOURCE_DIR "${SOURCE_DIR}/source/mmutil"
-        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH='${SOURCE_DIR}'
-            -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-        # Build
-        BINARY_DIR "${SOURCE_DIR}/build/mmutil"
-        BUILD_COMMAND "${CMAKE_COMMAND}" --build .
-        BUILD_BYPRODUCTS "${SOURCE_DIR}/bin/mmutil${CMAKE_EXECUTABLE_SUFFIX}"
-        # Install
-        INSTALL_DIR "${SOURCE_DIR}"
     )
 
     FetchContent_MakeAvailable(mmutil_proj)

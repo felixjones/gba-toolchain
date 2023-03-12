@@ -55,6 +55,7 @@ if(NOT libgbfs OR NOT CMAKE_GBFS_PROGRAM OR NOT CMAKE_BIN2S_PROGRAM)
         PREFIX "${SOURCE_DIR}"
         TMP_DIR "${SOURCE_DIR}/temp"
         STAMP_DIR "${SOURCE_DIR}/stamp"
+        SOURCE_DIR "${SOURCE_DIR}/source"
         # Download
         DOWNLOAD_DIR "${SOURCE_DIR}/download"
         URL "http://pineight.com/gba/gbfs.zip"
@@ -63,17 +64,6 @@ if(NOT libgbfs OR NOT CMAKE_GBFS_PROGRAM OR NOT CMAKE_BIN2S_PROGRAM)
         UPDATE_COMMAND "${CMAKE_COMMAND}" -E copy_if_different
             "${SOURCE_DIR}/temp/CMakeLists.txt"
             "${SOURCE_DIR}/source/CMakeLists.txt"
-        # Configure
-        SOURCE_DIR "${SOURCE_DIR}/source"
-        CMAKE_ARGS --toolchain "${CMAKE_TOOLCHAIN_FILE}"
-            -DCMAKE_INSTALL_PREFIX:PATH='${SOURCE_DIR}'
-            -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-        # Build
-        BINARY_DIR "${SOURCE_DIR}/build"
-        BUILD_COMMAND "${CMAKE_COMMAND}" --build .
-        BUILD_BYPRODUCTS "${SOURCE_DIR}/build/libgbfs.a"
-        # Install
-        INSTALL_DIR "${SOURCE_DIR}"
     )
 
     if(NOT libgbfs)
