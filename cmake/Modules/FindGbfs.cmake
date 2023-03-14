@@ -172,20 +172,27 @@ function(add_gbfs_archive target)
         )
         set(SUFFIX ".s")
     else()
+        set(ASM_COMMAND)
         set(SUFFIX ".gbfs")
     endif()
 
     # TODO: Find a bug reference for the below hack
     string(REGEX REPLACE "([][+.*()^])" "\\\\\\1" SOURCES_BUG_FIX "${CMAKE_BINARY_DIR}/CMakeFiles/${target}")
 
-    add_custom_target(${target} ${INCLUDE_WITH_ALL}
-        COMMAND "${CMAKE_GBFS_PROGRAM}" ${TARGET_FILE} $<FILTER:${SOURCES},EXCLUDE,${SOURCES_BUG_FIX}>
+    file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/_stamp")
+    set(STAMP "${CMAKE_BINARY_DIR}/_stamp/${target}.stamp")
+
+    add_custom_command(OUTPUT ${STAMP}
+        COMMAND "${CMAKE_GBFS_PROGRAM}" ${TARGET_FILE} $<FILTER:${SOURCES},EXCLUDE,${SOURCES_BUG_FIX}|[.]rule>
         ${ASM_COMMAND}
-        SOURCES $<FILTER:${SOURCES},EXCLUDE,${SOURCES_BUG_FIX}>
+        COMMAND "${CMAKE_COMMAND}" -E touch ${STAMP}
+        DEPENDS $<FILTER:${SOURCES},EXCLUDE,${SOURCES_BUG_FIX}|[.]rule>
         WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
         VERBATIM
         COMMAND_EXPAND_LISTS
     )
+
+    add_custom_target(${target} ${INCLUDE_WITH_ALL} DEPENDS ${STAMP})
 
     set_target_properties(${target} PROPERTIES
         OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
