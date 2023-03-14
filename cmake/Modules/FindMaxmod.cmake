@@ -165,14 +165,11 @@ endif()
 function(add_maxmod_soundbank target)
     cmake_parse_arguments(ARGS "" "" "" ${ARGN})
 
-    string(CONCAT TARGET_FILE_NO_SUFFIX
+    string(CONCAT TARGET_FILE
         $<TARGET_PROPERTY:${target},OUTPUT_DIRECTORY>
         /
         $<TARGET_PROPERTY:${target},PREFIX>
         $<TARGET_PROPERTY:${target},OUTPUT_NAME>
-    )
-    string(CONCAT TARGET_FILE
-        ${TARGET_FILE_NO_SUFFIX}
         $<TARGET_PROPERTY:${target},SUFFIX>
     )
     string(CONCAT TARGET_INCLUDE_DIR
@@ -190,14 +187,19 @@ function(add_maxmod_soundbank target)
 
     string(REGEX REPLACE "([][+.*()^])" "\\\\\\1" SOURCES_BUG_FIX "${CMAKE_BINARY_DIR}/CMakeFiles/${target}")
 
-    add_custom_target(${target}
+    file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/_stamp")
+    set(STAMP "${CMAKE_BINARY_DIR}/_stamp/${target}.stamp")
+
+    add_custom_command(OUTPUT ${STAMP}
         COMMAND "${CMAKE_COMMAND}" -E make_directory ${TARGET_INCLUDE_DIR}
-        COMMAND "${CMAKE_MMUTIL_PROGRAM}" "-o${TARGET_FILE}" "-h${TARGET_HEADER}" $<FILTER:${SOURCES},EXCLUDE,${SOURCES_BUG_FIX}>
-        SOURCES $<FILTER:${SOURCES},EXCLUDE,${SOURCES_BUG_FIX}>
+        COMMAND "${CMAKE_MMUTIL_PROGRAM}" -o${TARGET_FILE} -h${TARGET_HEADER} $<FILTER:${SOURCES},EXCLUDE,${SOURCES_BUG_FIX}>
+        COMMAND "${CMAKE_COMMAND}" -E touch ${STAMP}
         WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
         VERBATIM
         COMMAND_EXPAND_LISTS
     )
+
+    add_custom_target(${target} DEPENDS ${STAMP})
 
     set_target_properties(${target} PROPERTIES
         OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
