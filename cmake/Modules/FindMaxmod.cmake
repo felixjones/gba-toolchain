@@ -163,7 +163,7 @@ if(NOT CMAKE_MMUTIL_PROGRAM)
 endif()
 
 function(add_maxmod_soundbank target)
-    cmake_parse_arguments(ARGS "" "" "" ${ARGN})
+    cmake_parse_arguments(ARGS "EXCLUDE_FROM_ALL" "" "" ${ARGN})
 
     string(CONCAT TARGET_FILE
         $<TARGET_PROPERTY:${target},OUTPUT_DIRECTORY>
@@ -185,6 +185,10 @@ function(add_maxmod_soundbank target)
 
     set(SOURCES $<TARGET_PROPERTY:${target},SOURCES>)
 
+    if(NOT ARGS_EXCLUDE_FROM_ALL)
+        set(INCLUDE_WITH_ALL ALL)
+    endif()
+
     string(REGEX REPLACE "([][+.*()^])" "\\\\\\1" SOURCES_BUG_FIX "${CMAKE_BINARY_DIR}/CMakeFiles/${target}")
 
     file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/_stamp")
@@ -198,9 +202,10 @@ function(add_maxmod_soundbank target)
         WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
         VERBATIM
         COMMAND_EXPAND_LISTS
+        COMMENT "Generating ${target}"
     )
 
-    add_custom_target(${target} DEPENDS ${STAMP})
+    add_custom_target(${target} ${INCLUDE_WITH_ALL} DEPENDS ${STAMP})
 
     set_target_properties(${target} PROPERTIES
         OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"

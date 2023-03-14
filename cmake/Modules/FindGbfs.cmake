@@ -190,6 +190,7 @@ function(add_gbfs_archive target)
         WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
         VERBATIM
         COMMAND_EXPAND_LISTS
+        COMMENT "Generating ${target}"
     )
 
     add_custom_target(${target} ${INCLUDE_WITH_ALL} DEPENDS ${STAMP})
