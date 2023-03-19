@@ -5,6 +5,7 @@ if(PALETTE)
             --in-image "${INPUT}"
             --out-data "${PREFIX}${OUTPUT}${SUFFIX}"
             --mode gba
+            ${PARAMS}
         )
     endforeach()
 endif()
@@ -18,6 +19,7 @@ if(TILES)
             --in-palette "${INPUT_PALETTE}"
             --out-data "${PREFIX}${OUTPUT}${SUFFIX}"
             --mode gba
+            ${PARAMS}
         )
     endforeach()
 endif()
@@ -33,6 +35,7 @@ if(MAP)
             --in-tiles "${INPUT_TILES}"
             --out-data "${PREFIX}${OUTPUT}${SUFFIX}"
             --mode gba
+            ${PARAMS}
         )
     endforeach()
 endif()

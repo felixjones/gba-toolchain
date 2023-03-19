@@ -90,6 +90,7 @@ function(add_superfamiconv_graphics target)
     if(ARGS_PALETTE)
         list(APPEND commands COMMAND "${CMAKE_COMMAND}" -DPALETTE=ON
             "-DPROGRAM=${CMAKE_SUPERFAMICONV_PROGRAM}"
+            "-DPARAMS=$<TARGET_PROPERTY:${target},ARGS_PALETTE>"
             "-DPREFIX=$<TARGET_GENEX_EVAL:${target},$<TARGET_PROPERTY:${target},PREFIX_PALETTE>>"
             "-DSUFFIX=$<TARGET_PROPERTY:${target},SUFFIX_PALETTE>"
             "-DINPUTS=$<FILTER:${SOURCES},EXCLUDE,${SOURCES_BUG_FIX}|[.]rule>"
@@ -99,6 +100,7 @@ function(add_superfamiconv_graphics target)
     if(ARGS_TILES)
         list(APPEND commands COMMAND "${CMAKE_COMMAND}" -DTILES=ON
             "-DPROGRAM=${CMAKE_SUPERFAMICONV_PROGRAM}"
+            "-DPARAMS=$<TARGET_PROPERTY:${target},ARGS_TILES>"
             "-DPREFIX=$<TARGET_GENEX_EVAL:${target},$<TARGET_PROPERTY:${target},PREFIX_TILES>>"
             "-DSUFFIX=$<TARGET_PROPERTY:${target},SUFFIX_TILES>"
             "-DINPUTS=$<FILTER:${SOURCES},EXCLUDE,${SOURCES_BUG_FIX}|[.]rule>"
@@ -110,6 +112,7 @@ function(add_superfamiconv_graphics target)
     if(ARGS_MAP)
         list(APPEND commands COMMAND "${CMAKE_COMMAND}" -DMAP=ON
             "-DPROGRAM=${CMAKE_SUPERFAMICONV_PROGRAM}"
+            "-DPARAMS=$<TARGET_PROPERTY:${target},ARGS_MAP>"
             "-DPREFIX=$<TARGET_GENEX_EVAL:${target},$<TARGET_PROPERTY:${target},PREFIX_MAP>>"
             "-DSUFFIX=$<TARGET_PROPERTY:${target},SUFFIX_MAP>"
             "-DINPUTS=$<FILTER:${SOURCES},EXCLUDE,${SOURCES_BUG_FIX}|[.]rule>"
@@ -141,6 +144,9 @@ function(add_superfamiconv_graphics target)
         SUFFIX_PALETTE ".palette"
         SUFFIX_TILES ".tiles"
         SUFFIX_MAP ".map"
+        ARGS_PALETTE ""
+        ARGS_TILES ""
+        ARGS_MAP ""
     )
 
     if(ARGS_UNPARSED_ARGUMENTS)
