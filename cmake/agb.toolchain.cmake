@@ -88,6 +88,10 @@ function(find_arm_compiler lang binary)
         else()
             message(FATAL_ERROR "Unknown compiler ${CMAKE_${lang}_COMPILER}")
         endif()
+
+        execute_process(COMMAND "${CMAKE_${lang}_COMPILER}" -dumpversion OUTPUT_VARIABLE version OUTPUT_STRIP_TRAILING_WHITESPACE)
+        set(CMAKE_${lang}_COMPILER_VERSION "${version}" CACHE INTERNAL "")
+        set(CMAKE_${lang}_COMPILER_FORCED ON CACHE INTERNAL "")
     endmacro()
 
     if(CMAKE_${lang}_COMPILER)
