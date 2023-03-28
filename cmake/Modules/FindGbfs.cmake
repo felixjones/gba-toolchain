@@ -25,6 +25,7 @@ if(NOT libgbfs OR NOT CMAKE_GBFS_PROGRAM OR NOT CMAKE_BIN2S_PROGRAM)
                     -Wpedantic
                     -Wconversion
                     -Wno-sign-conversion
+                    -Wno-stringop-truncation
                 >
             )
 
