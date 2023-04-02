@@ -1,33 +1,32 @@
 cmake_minimum_required(VERSION 3.18)
 
-project(agb_devkit ASM CXX)
+include(FetchContent)
+
+FetchContent_declare(gcem
+    GIT_REPOSITORY "https://github.com/kthohr/gcem.git"
+    GIT_TAG "v1.16.0"
+    CMAKE_ARGS --toolchain "${CMAKE_TOOLCHAIN_FILE}"
+)
+FetchContent_MakeAvailable(gcem)
+
+project(agb_devkit CXX)
 find_package(agbabi)
 find_package(librom)
-find_package(tonclib)
-find_package(gbfs)
+find_package(libseven)
 
-add_executable(my_game main.cpp render.iwram.cpp)
+add_executable(my_game main.cpp)
 target_compile_options(my_game PRIVATE -mthumb -Wpedantic -Wall -Wextra -Wconversion)
-target_link_libraries(my_game PRIVATE agbabi librom tonclib gbfs)
+target_link_libraries(my_game PRIVATE agbabi librom libseven gcem)
 
-set_source_files_properties(render.iwram.cpp PROPERTIES COMPILE_FLAGS "-marm -O3")
+target_compile_features(my_game PRIVATE cxx_std_20)
 
 set_target_properties(my_game PROPERTIES
-    ROM_TITLE "My Game"
-    ROM_ID AMGE
+    ROM_TITLE "Wall 3D"
+    ROM_ID AW3E
     ROM_MAKER FJ
     ROM_VERSION 1
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL AdvancedGameBoy)
-    add_gbfs_archive(assets ASM test.txt)
-    set_target_properties(assets PROPERTIES
-        OUTPUT_NAME resources
-    )
-    set_source_files_properties(resources.s PROPERTIES GENERATED TRUE)
-
-    add_dependencies(my_game assets)
-    target_sources(my_game PRIVATE resources.s)
-
     install_rom(my_game)
 endif()
