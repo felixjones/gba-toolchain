@@ -69,7 +69,7 @@ constexpr auto normalize_radian(T radian) noexcept -> T {
     while (radian >= two_pi) {
         radian -= two_pi;
     }
-    return T{};
+    return radian;
 }
 
 }
@@ -78,7 +78,7 @@ struct angle {
     constexpr angle() noexcept = default;
 
     template <std::floating_point T>
-    constexpr explicit angle(T radian) noexcept : data{static_cast<int>(normalize_radian(radian) / (2 * std::numbers::pi_v<double>) * 0xffffffff)} {}
+    constexpr explicit angle(T radian) noexcept : data{static_cast<int>(normalize_radian(radian) / (2 * std::numbers::pi_v<double>) * 0xffffffffLLU)} {}
 
     template <std::integral T>
     constexpr angle(std::nullptr_t, T t) noexcept : data{static_cast<int>(t)} {}
@@ -95,6 +95,11 @@ struct angle {
 
     constexpr angle operator-() const noexcept {
         return {nullptr, -data};
+    }
+
+    constexpr angle& operator+=(angle rhs) noexcept {
+        data += rhs.data;
+        return *this;
     }
 
     int data;
