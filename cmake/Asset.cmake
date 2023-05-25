@@ -22,7 +22,7 @@ foreach(arg ${INPUTS})
     split(data 32)
 
     get_filename_component(arg "${arg}" NAME)
-    string(REGEX REPLACE "[^a-zA-Z0-0_]" "_" arg "${arg}")
+    string(REGEX REPLACE "[^a-zA-Z0-9_]" "_" arg "${arg}")
     string(PREPEND arg "${PREFIX}")
 
     string(APPEND source "
