@@ -6,7 +6,7 @@ else()
     FetchContent_Declare(gba-hpp DOWNLOAD_EXTRACT_TIMESTAMP ON
         SOURCE_DIR "${CMAKE_SYSTEM_LIBRARY_PATH}/gba-hpp"
         GIT_REPOSITORY "https://github.com/felixjones/gba-hpp.git"
-        GIT_TAG "main"
+        GIT_TAG "dev"
     )
 
     FetchContent_MakeAvailable(gba-hpp)
