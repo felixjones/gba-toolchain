@@ -141,12 +141,6 @@ if(NOT CMAKE_BIN2S_PROGRAM)
 endif()
 
 function(add_gbfs_archive target)
-    set(options
-        ASM
-        EXCLUDE_FROM_ALL
-    )
-    cmake_parse_arguments(ARGS "${options}" "" "" ${ARGN})
-
     string(CONCAT TARGET_FILE_NO_SUFFIX
         $<TARGET_PROPERTY:${target},OUTPUT_DIRECTORY>
         /
@@ -158,56 +152,36 @@ function(add_gbfs_archive target)
         $<TARGET_PROPERTY:${target},SUFFIX>
     )
 
-    set(SOURCES $<TARGET_PROPERTY:${target},SOURCES>)
-
-    if(NOT ARGS_EXCLUDE_FROM_ALL)
-        set(INCLUDE_WITH_ALL ALL)
-    endif()
-
-    if(ARGS_ASM)
-        enable_language(ASM) # For dependant targets
-
-        set(ASM_COMMAND
-            COMMAND "${CMAKE_COMMAND}" -E rename ${TARGET_FILE} ${TARGET_FILE_NO_SUFFIX}.gbfs
-            COMMAND "${CMAKE_BIN2S_PROGRAM}" ${TARGET_FILE_NO_SUFFIX}.gbfs > ${TARGET_FILE}
-        )
-        set(SUFFIX ".s")
-    else()
-        set(ASM_COMMAND)
-        set(SUFFIX ".gbfs")
-    endif()
+    set(ASSETS $<TARGET_PROPERTY:${target},ASSETS>)
 
     # TODO: Find a bug reference for the below hack
     string(REGEX REPLACE "([][+.*()^])" "\\\\\\1" SOURCES_BUG_FIX "${CMAKE_BINARY_DIR}/CMakeFiles/${target}")
 
-    file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/_stamp")
-    set(STAMP "${CMAKE_BINARY_DIR}/_stamp/${target}.stamp")
-
-    add_custom_command(OUTPUT ${STAMP}
-        COMMAND "${CMAKE_GBFS_PROGRAM}" ${TARGET_FILE} $<FILTER:${SOURCES},EXCLUDE,${SOURCES_BUG_FIX}|[.]rule>
-        ${ASM_COMMAND}
-        COMMAND "${CMAKE_COMMAND}" -E touch ${STAMP}
-        DEPENDS $<FILTER:${SOURCES},EXCLUDE,${SOURCES_BUG_FIX}|[.]rule>
+    add_custom_command(
+        OUTPUT ${target}.gbfs.s
+        COMMAND "${CMAKE_GBFS_PROGRAM}" ${TARGET_FILE} $<FILTER:${ASSETS},EXCLUDE,${SOURCES_BUG_FIX}|[.]rule>
+        COMMAND "${CMAKE_BIN2S_PROGRAM}" ${TARGET_FILE} > ${CMAKE_BINARY_DIR}/${target}.gbfs.s
+        DEPENDS $<FILTER:${ASSETS},EXCLUDE,${SOURCES_BUG_FIX}|[.]rule>
         WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
         VERBATIM
         COMMAND_EXPAND_LISTS
         COMMENT "Generating ${target}"
     )
 
-    add_custom_target(${target} ${INCLUDE_WITH_ALL} DEPENDS ${STAMP})
+    enable_language(ASM)
+    set_source_files_properties(${target}.gbfs.s PROPERTIES GENERATED TRUE)
+    add_library(${target} OBJECT ${target}.gbfs.s)
 
     set_target_properties(${target} PROPERTIES
         OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
         OUTPUT_NAME "${target}"
-        SUFFIX "${SUFFIX}"
+        SUFFIX ".gbfs"
         TARGET_FILE ${TARGET_FILE}
     )
 
-    if(ARGS_UNPARSED_ARGUMENTS)
-        set_target_properties(${target} PROPERTIES
-            SOURCES "${ARGS_UNPARSED_ARGUMENTS}"
-        )
-    endif()
+    set_target_properties(${target} PROPERTIES
+        ASSETS "${ARGN}"
+    )
 endfunction()
 
 unset(libgbfs CACHE)
