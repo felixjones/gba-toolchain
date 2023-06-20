@@ -143,14 +143,11 @@ endif()
 function(add_gbfs_archive target)
     set(ASSETS $<TARGET_PROPERTY:${target},ASSETS>)
 
-    # TODO: Find a bug reference for the below hack
-    string(REGEX REPLACE "([][+.*()^])" "\\\\\\1" ASSETS_BUG_FIX "${CMAKE_BINARY_DIR}/CMakeFiles/${target}")
-
     add_custom_command(
         OUTPUT ${target}.gbfs ${target}.gbfs.s
-        COMMAND "${CMAKE_GBFS_PROGRAM}" ${CMAKE_BINARY_DIR}/${target}.gbfs $<FILTER:${ASSETS},EXCLUDE,${ASSETS_BUG_FIX}|[.]rule>
+        COMMAND "${CMAKE_GBFS_PROGRAM}" ${CMAKE_BINARY_DIR}/${target}.gbfs ${ASSETS}
         COMMAND "${CMAKE_BIN2S_PROGRAM}" ${CMAKE_BINARY_DIR}/${target}.gbfs > ${CMAKE_BINARY_DIR}/${target}.gbfs.s
-        DEPENDS $<FILTER:${ASSETS},EXCLUDE,${ASSETS_BUG_FIX}|[.]rule>
+        DEPENDS ${ASSETS}
         WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
         VERBATIM
         COMMAND_EXPAND_LISTS

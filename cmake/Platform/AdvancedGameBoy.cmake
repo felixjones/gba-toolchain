@@ -85,7 +85,6 @@ function(add_asset_library target)
     )
 
     enable_language(ASM)
-    set_source_files_properties(${target}.asset.s PROPERTIES GENERATED TRUE)
     add_library(${target} OBJECT ${target}.asset.s)
 
     if(ARGS_UNPARSED_ARGUMENTS)

@@ -167,13 +167,10 @@ function(add_maxmod_soundbank target)
 
     set(ASSETS $<TARGET_PROPERTY:${target},ASSETS>)
 
-    # TODO: Find a bug reference for the below hack
-    string(REGEX REPLACE "([][+.*()^])" "\\\\\\1" ASSETS_BUG_FIX "${CMAKE_BINARY_DIR}/CMakeFiles/${target}")
-
     add_custom_command(
         OUTPUT ${target}.bin soundbank/${target}.h
-        COMMAND "${CMAKE_MMUTIL_PROGRAM}" -o${CMAKE_BINARY_DIR}/${target}.bin -h${CMAKE_BINARY_DIR}/soundbank/${target}.h $<FILTER:${ASSETS},EXCLUDE,${ASSETS_BUG_FIX}|[.]rule>
-        DEPENDS $<FILTER:${ASSETS},EXCLUDE,${ASSETS_BUG_FIX}|[.]rule>
+        COMMAND "${CMAKE_MMUTIL_PROGRAM}" -o${CMAKE_BINARY_DIR}/${target}.bin -h${CMAKE_BINARY_DIR}/soundbank/${target}.h ${ASSETS}
+        DEPENDS ${ASSETS}
         WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
         VERBATIM
         COMMAND_EXPAND_LISTS
