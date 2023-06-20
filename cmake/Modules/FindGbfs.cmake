@@ -141,27 +141,16 @@ if(NOT CMAKE_BIN2S_PROGRAM)
 endif()
 
 function(add_gbfs_archive target)
-    string(CONCAT TARGET_FILE_NO_SUFFIX
-        $<TARGET_PROPERTY:${target},OUTPUT_DIRECTORY>
-        /
-        $<TARGET_PROPERTY:${target},PREFIX>
-        $<TARGET_PROPERTY:${target},OUTPUT_NAME>
-    )
-    string(CONCAT TARGET_FILE
-        ${TARGET_FILE_NO_SUFFIX}
-        $<TARGET_PROPERTY:${target},SUFFIX>
-    )
-
     set(ASSETS $<TARGET_PROPERTY:${target},ASSETS>)
 
     # TODO: Find a bug reference for the below hack
-    string(REGEX REPLACE "([][+.*()^])" "\\\\\\1" SOURCES_BUG_FIX "${CMAKE_BINARY_DIR}/CMakeFiles/${target}")
+    string(REGEX REPLACE "([][+.*()^])" "\\\\\\1" ASSETS_BUG_FIX "${CMAKE_BINARY_DIR}/CMakeFiles/${target}")
 
     add_custom_command(
-        OUTPUT ${target}.gbfs.s
-        COMMAND "${CMAKE_GBFS_PROGRAM}" ${TARGET_FILE} $<FILTER:${ASSETS},EXCLUDE,${SOURCES_BUG_FIX}|[.]rule>
-        COMMAND "${CMAKE_BIN2S_PROGRAM}" ${TARGET_FILE} > ${CMAKE_BINARY_DIR}/${target}.gbfs.s
-        DEPENDS $<FILTER:${ASSETS},EXCLUDE,${SOURCES_BUG_FIX}|[.]rule>
+        OUTPUT ${target}.gbfs ${target}.gbfs.s
+        COMMAND "${CMAKE_GBFS_PROGRAM}" ${CMAKE_BINARY_DIR}/${target}.gbfs $<FILTER:${ASSETS},EXCLUDE,${ASSETS_BUG_FIX}|[.]rule>
+        COMMAND "${CMAKE_BIN2S_PROGRAM}" ${CMAKE_BINARY_DIR}/${target}.gbfs > ${CMAKE_BINARY_DIR}/${target}.gbfs.s
+        DEPENDS $<FILTER:${ASSETS},EXCLUDE,${ASSETS_BUG_FIX}|[.]rule>
         WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
         VERBATIM
         COMMAND_EXPAND_LISTS
@@ -169,15 +158,7 @@ function(add_gbfs_archive target)
     )
 
     enable_language(ASM)
-    set_source_files_properties(${target}.gbfs.s PROPERTIES GENERATED TRUE)
-    add_library(${target} OBJECT ${target}.gbfs.s)
-
-    set_target_properties(${target} PROPERTIES
-        OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
-        OUTPUT_NAME "${target}"
-        SUFFIX ".gbfs"
-        TARGET_FILE ${TARGET_FILE}
-    )
+    add_library(${target} OBJECT ${target}.gbfs ${target}.gbfs.s)
 
     set_target_properties(${target} PROPERTIES
         ASSETS "${ARGN}"

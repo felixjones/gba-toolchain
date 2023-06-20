@@ -163,41 +163,25 @@ if(NOT CMAKE_MMUTIL_PROGRAM)
 endif()
 
 function(add_maxmod_soundbank target)
-    string(CONCAT TARGET_FILE
-        $<TARGET_PROPERTY:${target},OUTPUT_DIRECTORY>
-        /
-        $<TARGET_PROPERTY:${target},PREFIX>
-        $<TARGET_PROPERTY:${target},OUTPUT_NAME>
-        $<TARGET_PROPERTY:${target},SUFFIX>
-    )
+    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/soundbank)
 
     set(ASSETS $<TARGET_PROPERTY:${target},ASSETS>)
-    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/include/soundbank)
-    set(HEADER_FILE ${CMAKE_BINARY_DIR}/include/soundbank/${target}.h)
 
     # TODO: Find a bug reference for the below hack
-    string(REGEX REPLACE "([][+.*()^])" "\\\\\\1" SOURCES_BUG_FIX "${CMAKE_BINARY_DIR}/CMakeFiles/${target}")
+    string(REGEX REPLACE "([][+.*()^])" "\\\\\\1" ASSETS_BUG_FIX "${CMAKE_BINARY_DIR}/CMakeFiles/${target}")
 
     add_custom_command(
-        OUTPUT ${HEADER_FILE}
-        COMMAND "${CMAKE_MMUTIL_PROGRAM}" -o${TARGET_FILE} -h${HEADER_FILE} $<FILTER:${ASSETS},EXCLUDE,${SOURCES_BUG_FIX}|[.]rule>
-        DEPENDS $<FILTER:${ASSETS},EXCLUDE,${SOURCES_BUG_FIX}|[.]rule>
+        OUTPUT ${target}.bin soundbank/${target}.h
+        COMMAND "${CMAKE_MMUTIL_PROGRAM}" -o${CMAKE_BINARY_DIR}/${target}.bin -h${CMAKE_BINARY_DIR}/soundbank/${target}.h $<FILTER:${ASSETS},EXCLUDE,${ASSETS_BUG_FIX}|[.]rule>
+        DEPENDS $<FILTER:${ASSETS},EXCLUDE,${ASSETS_BUG_FIX}|[.]rule>
         WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
         VERBATIM
         COMMAND_EXPAND_LISTS
         COMMENT "Generating ${target}"
     )
 
-    add_library(${target} INTERFACE)
-    target_include_directories(${target} INTERFACE ${CMAKE_BINARY_DIR}/include)
-    target_sources(${target} PRIVATE ${HEADER_FILE})
-
-    set_target_properties(${target} PROPERTIES
-        OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
-        OUTPUT_NAME "${target}"
-        SUFFIX ".bin"
-        TARGET_FILE ${TARGET_FILE}
-    )
+    add_library(${target} OBJECT ${CMAKE_BINARY_DIR}/${target}.bin)
+    target_include_directories(${target} INTERFACE ${CMAKE_BINARY_DIR})
 
     set_target_properties(${target} PROPERTIES
         ASSETS "${ARGN}"
