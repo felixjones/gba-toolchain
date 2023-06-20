@@ -163,8 +163,6 @@ if(NOT CMAKE_MMUTIL_PROGRAM)
 endif()
 
 function(add_maxmod_soundbank target)
-    cmake_parse_arguments(ARGS "EXCLUDE_FROM_ALL" "" "" ${ARGN})
-
     string(CONCAT TARGET_FILE
         $<TARGET_PROPERTY:${target},OUTPUT_DIRECTORY>
         /
@@ -172,52 +170,36 @@ function(add_maxmod_soundbank target)
         $<TARGET_PROPERTY:${target},OUTPUT_NAME>
         $<TARGET_PROPERTY:${target},SUFFIX>
     )
-    string(CONCAT TARGET_INCLUDE_DIR
-        $<TARGET_PROPERTY:${target},OUTPUT_DIRECTORY>
-        /include/
-    )
-    string(CONCAT TARGET_HEADER
-        ${TARGET_INCLUDE_DIR}
-        $<TARGET_PROPERTY:${target},PREFIX>
-        $<TARGET_PROPERTY:${target},OUTPUT_NAME>
-        .h
-    )
 
-    set(SOURCES $<TARGET_PROPERTY:${target},SOURCES>)
+    set(ASSETS $<TARGET_PROPERTY:${target},ASSETS>)
+    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/include/soundbank)
+    set(HEADER_FILE ${CMAKE_BINARY_DIR}/include/soundbank/${target}.h)
 
-    if(NOT ARGS_EXCLUDE_FROM_ALL)
-        set(INCLUDE_WITH_ALL ALL)
-    endif()
-
+    # TODO: Find a bug reference for the below hack
     string(REGEX REPLACE "([][+.*()^])" "\\\\\\1" SOURCES_BUG_FIX "${CMAKE_BINARY_DIR}/CMakeFiles/${target}")
 
-    file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/_stamp")
-    set(STAMP "${CMAKE_BINARY_DIR}/_stamp/${target}.stamp")
-
-    add_custom_command(OUTPUT ${STAMP}
-        COMMAND "${CMAKE_COMMAND}" -E make_directory ${TARGET_INCLUDE_DIR}
-        COMMAND "${CMAKE_MMUTIL_PROGRAM}" -o${TARGET_FILE} -h${TARGET_HEADER} $<FILTER:${SOURCES},EXCLUDE,${SOURCES_BUG_FIX}|[.]rule>
-        COMMAND "${CMAKE_COMMAND}" -E touch ${STAMP}
-        DEPENDS $<FILTER:${SOURCES},EXCLUDE,${SOURCES_BUG_FIX}|[.]rule>
+    add_custom_command(
+        OUTPUT ${HEADER_FILE}
+        COMMAND "${CMAKE_MMUTIL_PROGRAM}" -o${TARGET_FILE} -h${HEADER_FILE} $<FILTER:${ASSETS},EXCLUDE,${SOURCES_BUG_FIX}|[.]rule>
+        DEPENDS $<FILTER:${ASSETS},EXCLUDE,${SOURCES_BUG_FIX}|[.]rule>
         WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
         VERBATIM
         COMMAND_EXPAND_LISTS
         COMMENT "Generating ${target}"
     )
 
-    add_custom_target(${target} ${INCLUDE_WITH_ALL} DEPENDS ${STAMP})
+    add_library(${target} INTERFACE)
+    target_include_directories(${target} INTERFACE ${CMAKE_BINARY_DIR}/include)
+    target_sources(${target} PRIVATE ${HEADER_FILE})
 
     set_target_properties(${target} PROPERTIES
         OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
         OUTPUT_NAME "${target}"
         SUFFIX ".bin"
         TARGET_FILE ${TARGET_FILE}
-        TARGET_INCLUDE_DIR ${TARGET_INCLUDE_DIR}
     )
 
-    if(ARGS_UNPARSED_ARGUMENTS)
-        set_target_properties(${target} PROPERTIES
-            SOURCES "${ARGS_UNPARSED_ARGUMENTS}"
-        )
-    endif()
+    set_target_properties(${target} PROPERTIES
+        ASSETS "${ARGN}"
+    )
 endfunction()
