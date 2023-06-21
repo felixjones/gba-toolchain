@@ -70,7 +70,7 @@ function(add_superfamiconv_graphics target)
 
     cmake_parse_arguments(ARGS "${oneValueArgs}" "" "" ${ARGN})
 
-    if(NOT ARGS_PALETTE OR NOT ARGS_TILES OR NOT ARGS_MAP)
+    if(NOT ARGS_PALETTE AND NOT ARGS_TILES AND NOT ARGS_MAP)
         message(FATAL_ERROR "add_superfamiconv_graphics requires PALETTE, TILES, or MAP")
     endif()
 
