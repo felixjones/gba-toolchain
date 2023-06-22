@@ -65,6 +65,7 @@ function(add_superfamiconv_graphics target)
         PALETTE
         TILES
         MAP
+        SPRITE_MODE
     )
 
     cmake_parse_arguments(ARGS "${options}" "" "" ${ARGN})
@@ -111,6 +112,7 @@ function(add_superfamiconv_graphics target)
             DEPENDS ${ARGS_UNPARSED_ARGUMENTS} ${paletteOutputs}
             COMMAND "${CMAKE_COMMAND}" -DTILES=ON
                 "-DPROGRAM=${CMAKE_SUPERFAMICONV_PROGRAM}"
+                "-DPARAMS=$<IF:$<BOOL:${ARGS_SPRITE_MODE}>,--no-discard,${ARGS_TILES}>"
                 "-DPREFIX=${CMAKE_BINARY_DIR}/"
                 -DSUFFIX=.tiles
                 "-DPREFIX_PALETTE=${CMAKE_BINARY_DIR}/"
