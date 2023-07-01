@@ -61,97 +61,104 @@ endif()
 set(SUPERFAMICONV_SCRIPT "${CMAKE_CURRENT_LIST_DIR}/../SuperFamiconv.cmake")
 
 function(add_superfamiconv_graphics target)
-    set(oneValueArgs
-        EXCLUDE_FROM_ALL
+    set(options
         PALETTE
         TILES
         MAP
     )
 
-    cmake_parse_arguments(ARGS "${oneValueArgs}" "" "" ${ARGN})
+    cmake_parse_arguments(ARGS "${options}" "" "" ${ARGN})
 
     if(NOT ARGS_PALETTE AND NOT ARGS_TILES AND NOT ARGS_MAP)
         message(FATAL_ERROR "add_superfamiconv_graphics requires PALETTE, TILES, or MAP")
     endif()
 
-    set(SOURCES $<TARGET_PROPERTY:${target},SOURCES>)
-
-    if(NOT ARGS_EXCLUDE_FROM_ALL)
-        set(INCLUDE_WITH_ALL ALL)
-    endif()
-
-    # TODO: Find a bug reference for the below hack
-    string(REGEX REPLACE "([][+.*()^])" "\\\\\\1" SOURCES_BUG_FIX "${CMAKE_BINARY_DIR}/CMakeFiles/${target}")
-
-    file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/_stamp")
-    set(STAMP "${CMAKE_BINARY_DIR}/_stamp/${target}.stamp")
-
     set(commands)
+    set(outputs)
+
     if(ARGS_PALETTE)
-        list(APPEND commands COMMAND "${CMAKE_COMMAND}" -DPALETTE=ON
-            "-DPROGRAM=${CMAKE_SUPERFAMICONV_PROGRAM}"
-            "-DPARAMS=$<TARGET_PROPERTY:${target},ARGS_PALETTE>"
-            "-DPREFIX=$<TARGET_GENEX_EVAL:${target},$<TARGET_PROPERTY:${target},PREFIX_PALETTE>>"
-            "-DSUFFIX=$<TARGET_PROPERTY:${target},SUFFIX_PALETTE>"
-            "-DINPUTS=$<FILTER:${SOURCES},EXCLUDE,${SOURCES_BUG_FIX}|[.]rule>"
-            -P ${SUPERFAMICONV_SCRIPT}
+        set(paletteOutputs)
+        foreach(input ${ARGS_UNPARSED_ARGUMENTS})
+            get_filename_component(output "${input}" NAME_WE)
+            list(APPEND paletteOutputs "${output}.palette")
+        endforeach()
+        list(APPEND outputs ${paletteOutputs})
+
+        add_custom_command(
+            OUTPUT ${paletteOutputs}
+            DEPENDS ${ARGS_UNPARSED_ARGUMENTS}
+            COMMAND "${CMAKE_COMMAND}" -DPALETTE=ON
+                "-DPROGRAM=${CMAKE_SUPERFAMICONV_PROGRAM}"
+                "-DPREFIX=${CMAKE_BINARY_DIR}/"
+                -DSUFFIX=.palette
+                "-DINPUTS=${ARGS_UNPARSED_ARGUMENTS}"
+                -P "${SUPERFAMICONV_SCRIPT}"
+            WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+            VERBATIM
         )
     endif()
+
     if(ARGS_TILES)
-        list(APPEND commands COMMAND "${CMAKE_COMMAND}" -DTILES=ON
-            "-DPROGRAM=${CMAKE_SUPERFAMICONV_PROGRAM}"
-            "-DPARAMS=$<TARGET_PROPERTY:${target},ARGS_TILES>"
-            "-DPREFIX=$<TARGET_GENEX_EVAL:${target},$<TARGET_PROPERTY:${target},PREFIX_TILES>>"
-            "-DSUFFIX=$<TARGET_PROPERTY:${target},SUFFIX_TILES>"
-            "-DINPUTS=$<FILTER:${SOURCES},EXCLUDE,${SOURCES_BUG_FIX}|[.]rule>"
-            "-DPREFIX_PALETTE=$<TARGET_GENEX_EVAL:${target},$<TARGET_PROPERTY:${target},PREFIX_PALETTE>>"
-            "-DSUFFIX_PALETTE=$<TARGET_PROPERTY:${target},SUFFIX_PALETTE>"
-            -P ${SUPERFAMICONV_SCRIPT}
+        set(tilesOutputs)
+        foreach(input ${ARGS_UNPARSED_ARGUMENTS})
+            get_filename_component(output "${input}" NAME_WE)
+            list(APPEND tilesOutputs "${output}.tiles")
+        endforeach()
+        list(APPEND outputs ${tilesOutputs})
+
+        add_custom_command(
+            OUTPUT ${tilesOutputs}
+            DEPENDS ${ARGS_UNPARSED_ARGUMENTS} ${paletteOutputs}
+            COMMAND "${CMAKE_COMMAND}" -DTILES=ON
+                "-DPROGRAM=${CMAKE_SUPERFAMICONV_PROGRAM}"
+                "-DPREFIX=${CMAKE_BINARY_DIR}/"
+                -DSUFFIX=.tiles
+                "-DPREFIX_PALETTE=${CMAKE_BINARY_DIR}/"
+                -DSUFFIX_PALETTE=.palette
+                "-DINPUTS=${ARGS_UNPARSED_ARGUMENTS}"
+                -P "${SUPERFAMICONV_SCRIPT}"
+            WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+            VERBATIM
         )
     endif()
+
     if(ARGS_MAP)
-        list(APPEND commands COMMAND "${CMAKE_COMMAND}" -DMAP=ON
-            "-DPROGRAM=${CMAKE_SUPERFAMICONV_PROGRAM}"
-            "-DPARAMS=$<TARGET_PROPERTY:${target},ARGS_MAP>"
-            "-DPREFIX=$<TARGET_GENEX_EVAL:${target},$<TARGET_PROPERTY:${target},PREFIX_MAP>>"
-            "-DSUFFIX=$<TARGET_PROPERTY:${target},SUFFIX_MAP>"
-            "-DINPUTS=$<FILTER:${SOURCES},EXCLUDE,${SOURCES_BUG_FIX}|[.]rule>"
-            "-DPREFIX_PALETTE=$<TARGET_GENEX_EVAL:${target},$<TARGET_PROPERTY:${target},PREFIX_PALETTE>>"
-            "-DSUFFIX_PALETTE=$<TARGET_PROPERTY:${target},SUFFIX_PALETTE>"
-            "-DPREFIX_TILES=$<TARGET_GENEX_EVAL:${target},$<TARGET_PROPERTY:${target},PREFIX_TILES>>"
-            "-DSUFFIX_TILES=$<TARGET_PROPERTY:${target},SUFFIX_TILES>"
-            -P ${SUPERFAMICONV_SCRIPT}
+        set(mapOutputs)
+        foreach(input ${ARGS_UNPARSED_ARGUMENTS})
+            get_filename_component(output "${input}" NAME_WE)
+            list(APPEND mapOutputs "${output}.map")
+        endforeach()
+        list(APPEND outputs ${mapOutputs})
+
+        add_custom_command(
+            OUTPUT ${mapOutputs}
+            DEPENDS ${ARGS_UNPARSED_ARGUMENTS} ${tilesOutputs} ${paletteOutputs}
+            COMMAND "${CMAKE_COMMAND}" -DTILES=ON
+                "-DPROGRAM=${CMAKE_SUPERFAMICONV_PROGRAM}"
+                "-DPREFIX=${CMAKE_BINARY_DIR}/"
+                -DSUFFIX=.map
+                "-DPREFIX_PALETTE=${CMAKE_BINARY_DIR}/"
+                -DSUFFIX_PALETTE=.palette
+                "-DPREFIX_TILES=${CMAKE_BINARY_DIR}/"
+                -DSUFFIX_TILES=.tiles
+                "-DINPUTS=${ARGS_UNPARSED_ARGUMENTS}"
+                -P "${SUPERFAMICONV_SCRIPT}"
+            WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+            VERBATIM
         )
     endif()
 
-    add_custom_command(OUTPUT ${STAMP}
-        ${commands}
-        COMMAND "${CMAKE_COMMAND}" -E touch ${STAMP}
-        DEPENDS $<FILTER:${SOURCES},EXCLUDE,${SOURCES_BUG_FIX}|[.]rule>
-        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-        VERBATIM
-        COMMENT "Generating ${target}"
-    )
+    add_custom_target(${target} DEPENDS "${outputs}")
 
-    add_custom_target(${target} ${INCLUDE_WITH_ALL} DEPENDS ${STAMP})
+    set(binaryOutput)
+    foreach(output ${outputs})
+        list(APPEND binaryOutput "${CMAKE_BINARY_DIR}/${output}")
+    endforeach()
 
     set_target_properties(${target} PROPERTIES
-        OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
-        OUTPUT_NAME "${target}"
-        PREFIX_PALETTE "$<TARGET_PROPERTY:${target},OUTPUT_DIRECTORY>/"
-        PREFIX_TILES "$<TARGET_PROPERTY:${target},OUTPUT_DIRECTORY>/"
-        PREFIX_MAP "$<TARGET_PROPERTY:${target},OUTPUT_DIRECTORY>/"
-        SUFFIX_PALETTE ".palette"
-        SUFFIX_TILES ".tiles"
-        SUFFIX_MAP ".map"
-        ARGS_PALETTE ""
-        ARGS_TILES ""
-        ARGS_MAP ""
+        OUTPUT_FILES "${binaryOutput}"
+        PALETTE_FILES "${paletteOutputs}"
+        TILES_FILES "${tilesOutputs}"
+        MAP_FILES "${mapOutputs}"
     )
-
-    if(ARGS_UNPARSED_ARGUMENTS)
-        set_target_properties(${target} PROPERTIES
-            SOURCES "${ARGS_UNPARSED_ARGUMENTS}"
-        )
-    endif()
 endfunction()

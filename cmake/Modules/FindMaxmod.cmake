@@ -173,7 +173,6 @@ function(add_maxmod_soundbank target)
         WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
         VERBATIM
         COMMAND_EXPAND_LISTS
-        COMMENT "Generating ${target}"
     )
 
     add_library(${target} INTERFACE)

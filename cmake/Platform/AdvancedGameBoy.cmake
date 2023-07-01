@@ -81,7 +81,6 @@ function(add_asset_library target)
         DEPENDS ${ASSETS}
         VERBATIM
         WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-        COMMENT "Generating ${target}"
     )
 
     enable_language(ASM)
