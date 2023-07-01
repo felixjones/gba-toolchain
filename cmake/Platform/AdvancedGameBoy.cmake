@@ -76,8 +76,8 @@ function(add_asset_library target)
     set(ASSETS $<TARGET_GENEX_EVAL:${target},$<TARGET_PROPERTY:${target},ASSETS>>)
 
     add_custom_command(
-        OUTPUT ${target}.asset.s
-        COMMAND "${CMAKE_COMMAND}" -D PREFIX=${ARGS_PREFIX} "-DINPUTS=${ASSETS}" "-DOUTPUT=${CMAKE_BINARY_DIR}/${target}.asset.s" -P "${ASSET_SCRIPT}"
+        OUTPUT ${target}.s
+        COMMAND "${CMAKE_COMMAND}" -D PREFIX=${ARGS_PREFIX} "-DINPUTS=${ASSETS}" "-DOUTPUT=${CMAKE_BINARY_DIR}/${target}.s" -P "${ASSET_SCRIPT}"
         DEPENDS ${ASSETS}
         VERBATIM
         WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
@@ -85,7 +85,7 @@ function(add_asset_library target)
     )
 
     enable_language(ASM)
-    add_library(${target} OBJECT ${target}.asset.s)
+    add_library(${target} OBJECT ${target}.s)
 
     if(ARGS_UNPARSED_ARGUMENTS)
         set_target_properties(${target} PROPERTIES

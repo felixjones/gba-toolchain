@@ -141,24 +141,26 @@ if(NOT CMAKE_BIN2S_PROGRAM)
 endif()
 
 function(add_gbfs_archive target)
-    set(ASSETS $<TARGET_PROPERTY:${target},ASSETS>)
+    set(ASSETS $<TARGET_GENEX_EVAL:${target},$<TARGET_PROPERTY:${target},ASSETS>>)
 
     add_custom_command(
-        OUTPUT ${target}.gbfs ${target}.gbfs.s
-        COMMAND "${CMAKE_GBFS_PROGRAM}" ${CMAKE_BINARY_DIR}/${target}.gbfs ${ASSETS}
-        COMMAND "${CMAKE_BIN2S_PROGRAM}" ${CMAKE_BINARY_DIR}/${target}.gbfs > ${CMAKE_BINARY_DIR}/${target}.gbfs.s
+        OUTPUT ${target}.s
+        BYPRODUCTS ${target}.gbfs
+        COMMAND "${CMAKE_GBFS_PROGRAM}" "${CMAKE_BINARY_DIR}/${target}.gbfs" ${ASSETS}
+        COMMAND "${CMAKE_BIN2S_PROGRAM}" "${CMAKE_BINARY_DIR}/${target}.gbfs" > "${CMAKE_BINARY_DIR}/${target}.s"
         DEPENDS ${ASSETS}
-        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
         VERBATIM
         COMMAND_EXPAND_LISTS
+        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
         COMMENT "Generating ${target}"
     )
 
     enable_language(ASM)
-    add_library(${target} OBJECT ${target}.gbfs ${target}.gbfs.s)
+    add_library(${target} OBJECT ${target}.s)
 
     set_target_properties(${target} PROPERTIES
         ASSETS "${ARGN}"
+        GBFS_FILE "${target}.gbfs"
     )
 endfunction()
 
