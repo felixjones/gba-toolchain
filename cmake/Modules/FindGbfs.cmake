@@ -158,9 +158,11 @@ function(add_gbfs_archive target)
     enable_language(ASM)
     add_library(${target} OBJECT ${target}.s)
 
+    install(FILES "${CMAKE_BINARY_DIR}/${target}.gbfs" DESTINATION .)
+
     set_target_properties(${target} PROPERTIES
         ASSETS "${ARGN}"
-        GBFS_FILE "${target}.gbfs"
+        GBFS_FILE "${CMAKE_BINARY_DIR}/${target}.gbfs"
     )
 endfunction()
 

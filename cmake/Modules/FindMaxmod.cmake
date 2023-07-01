@@ -176,10 +176,11 @@ function(add_maxmod_soundbank target)
         COMMENT "Generating ${target}"
     )
 
-    add_library(${target} OBJECT ${CMAKE_BINARY_DIR}/${target}.bin)
+    add_library(${target} INTERFACE)
     target_include_directories(${target} INTERFACE ${CMAKE_BINARY_DIR})
 
     set_target_properties(${target} PROPERTIES
         ASSETS "${ARGN}"
+        BIN_FILE "${CMAKE_BINARY_DIR}/${target}.bin"
     )
 endfunction()
