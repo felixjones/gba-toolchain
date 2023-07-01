@@ -163,12 +163,11 @@ if(NOT CMAKE_MMUTIL_PROGRAM)
 endif()
 
 function(add_maxmod_soundbank target)
-    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/soundbank)
-
     set(ASSETS $<TARGET_PROPERTY:${target},ASSETS>)
 
     add_custom_command(
         OUTPUT ${target}.bin soundbank/${target}.h
+        COMMAND "${CMAKE_COMMAND}" -E make_directory "${CMAKE_BINARY_DIR}/soundbank"
         COMMAND "${CMAKE_MMUTIL_PROGRAM}" -o${CMAKE_BINARY_DIR}/${target}.bin -h${CMAKE_BINARY_DIR}/soundbank/${target}.h ${ASSETS}
         DEPENDS ${ASSETS}
         WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
