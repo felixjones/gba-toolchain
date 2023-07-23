@@ -46,15 +46,8 @@ SECTIONS {
 
     .ARM.exidx : {
         PROVIDE_HIDDEN(__exidx_start = .);
+        *(.ARM.exidx.* .gnu.linkonce.armexidx.*)
         PROVIDE_HIDDEN(__exidx_end = .);
-    } > rom
-
-    .text : {
-        EXCLUDE_FILE(*.iwram.* *.ewram.* *.iwram[0-9].* *.ewram[0-9].*) *(.text .text.* .gnu.linkonce.t.*)
-    } > rom
-
-    .rodata : {
-        EXCLUDE_FILE(*.iwram.* *.ewram.* *.iwram[0-9].* *.ewram[0-9].*) *(.rodata .rodata.* .gnu.linkonce.r.*)
     } > rom
 
     PROVIDE_HIDDEN(__ewram_overlay_start = ORIGIN(ewram));
@@ -119,8 +112,8 @@ SECTIONS {
     .iwram : AT(__iwram_lma) {
         KEEP(*(SORT(.iwram.sorted.*)))
         *(.iwram .iwram.*)
-        *.iwram.*(.text .text.* .data .data.* .rodata .rodata.*)
-        KEEP(*(.data .data.*))
+        *.iwram.*(.data .data.* .text .text.* .rodata .rodata.*)
+        *(.data .data.* .gnu.linkonce.d.*)
         . = ALIGN(32);
     } > iwram
 
@@ -134,5 +127,15 @@ SECTIONS {
         PROVIDE_HIDDEN(__bss_end = ABSOLUTE(.));
     } > iwram
 
-    PROVIDE_HIDDEN(__rom_end = ALIGN(__iwram_lma_end, 256));
+    . = __iwram_lma_end;
+
+    .text : {
+        EXCLUDE_FILE(*.iwram.* *.ewram.* *.iwram[0-9].* *.ewram[0-9].*) *(.text .text.* .gnu.linkonce.t.*)
+    }
+
+    .rodata : {
+        EXCLUDE_FILE(*.iwram.* *.ewram.* *.iwram[0-9].* *.ewram[0-9].*) *(.rodata .rodata.* .gnu.linkonce.r.*)
+    }
+
+    PROVIDE_HIDDEN(__rom_end = ALIGN(__iwram_lma_end + SIZEOF(.text) + SIZEOF(.rodata), 256));
 }
