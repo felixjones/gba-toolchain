@@ -35,6 +35,7 @@ function(install_rom target)
 
     foreach(concat ${CONCAT_ARGS_UNPARSED_ARGUMENTS})
         if(NOT TARGET ${concat})
+            get_filename_component(concat "${concat}" ABSOLUTE)
             list(APPEND appendFiles ${concat})
         else()
             add_dependencies(${target} ${concat})
