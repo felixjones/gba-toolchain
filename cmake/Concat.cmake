@@ -1,7 +1,15 @@
+#===============================================================================
+#
+# CMake script for several binary concatenation functions
+#
+# Copyright (C) 2021-2023 gba-toolchain contributors
+# For conditions of distribution and use, see copyright notice in LICENSE.md
+#
+#===============================================================================
+
 include("${CMAKE_CURRENT_LIST_DIR}/IHex.cmake")
 
 # Returns a file intended for temporary storage
-# Avoids overwriting existing files by appending a counter
 function(maketmp outvar basename)
     get_filename_component(basename "${basename}" ABSOLUTE)
     if(NOT EXISTS "${basename}")

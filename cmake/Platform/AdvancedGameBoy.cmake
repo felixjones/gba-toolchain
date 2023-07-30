@@ -1,3 +1,45 @@
+#===============================================================================
+#
+# Provides the CMake function `install_rom` for installing a GBA .elf archive into a .gba ROM file
+#
+#   The GBA header is configured with the `ROM_TITLE`, `ROM_ID`, `ROM_MAKER`, and `ROM_VERSION` target properties
+#   The optional `CONCAT` parameter allows for concatenating binary data to the .gba file
+#   When using `CONCAT`, the optional `ALIGN` parameter sets a byte alignment for the concatenated binary data
+#
+#   Example:
+#   ```cmake
+#   set_target_properties(my_executable PROPERTIES
+#       ROM_TITLE "My Title"
+#       ROM_ID AXYE
+#       ROM_MAKER ZW
+#       ROM_VERSION 1
+#   )
+#   install_rom(my_executable CONCAT ALIGN 0x100
+#       binary_file.bin
+#       another_binary_file.bin
+#       $<TARGET_PROPERTY:my_gbfs_target,GBFS_FILE>
+#   )
+#   ```
+#
+# Provides the CMake function `add_asset_library` for archiving assets files to a `.s` assembly file
+#
+#   asset library targets convert the input files into a `.s` assembly file, available by linking with the target
+#
+#   Example:
+#   ```cmake
+#   add_asset_library(my_assets
+#       path/to/my/file.bin
+#       path/to/another/file.txt
+#       $<TARGET_PROPERTY:my_superfamiconv_target,OUTPUT_FILES>
+#   )
+#   target_link_libraries(my_executable PRIVATE my_assets)
+#   ```
+#
+# Copyright (C) 2021-2023 gba-toolchain contributors
+# For conditions of distribution and use, see copyright notice in LICENSE.md
+#
+#===============================================================================
+
 foreach(suffix "" _ASM _C _CXX)
     set(CMAKE_EXECUTABLE_FORMAT${suffix} ELF CACHE INTERNAL "")
     set(CMAKE_EXECUTABLE_SUFFIX${suffix} .elf CACHE INTERNAL "")

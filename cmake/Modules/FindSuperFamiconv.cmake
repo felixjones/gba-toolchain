@@ -1,3 +1,36 @@
+#===============================================================================
+#
+# Provides the CMake function `add_superfamiconv_graphics` for adding a superfamiconv assets target
+#
+#   The `OUTPUT_FILES` property can be used as file dependencies
+#
+#   Example:
+#   ```cmake
+#   # Generate palettes & tiles for sprites
+#   add_superfamiconv_graphics(sprites PALETTE TILES SPRITE_MODE
+#       path/to/my/sprite.png
+#       path/to/another/sprite.png
+#   )
+#   get_target_property(sprite_files sprites OUTPUT_FILES)
+#
+#   # Generate palettes, tiles & maps for backgrounds
+#   add_superfamiconv_graphics(backgrounds PALETTE TILES MAP
+#       path/to/my/background.png
+#       path/to/another/background.png
+#   )
+#   get_target_property(background_files backgrounds OUTPUT_FILES)
+#
+#   # Or individually access the palettes, tiles, maps
+#   get_target_property(background_palettes backgrounds PALETTE_FILES)
+#   get_target_property(background_tiles backgrounds TILES_FILES)
+#   get_target_property(background_maps backgrounds MAP_FILES)
+#   ```
+#
+# Copyright (C) 2021-2023 gba-toolchain contributors
+# For conditions of distribution and use, see copyright notice in LICENSE.md
+#
+#===============================================================================
+
 include(FetchContent)
 
 find_program(CMAKE_SUPERFAMICONV_PROGRAM superfamiconv PATHS "${CMAKE_SYSTEM_LIBRARY_PATH}/superfamiconv" "${SUPERFAMICONV_DIR}" PATH_SUFFIXES bin)

@@ -1,3 +1,12 @@
+#===============================================================================
+#
+# CMake script implementation of gbafix
+#
+# Copyright (C) 2021-2023 gba-toolchain contributors
+# For conditions of distribution and use, see copyright notice in LICENSE.md
+#
+#===============================================================================
+
 if(VERIFY)
     string(LENGTH "${ROM_TITLE}" titleLength)
     if (${titleLength} GREATER 12)

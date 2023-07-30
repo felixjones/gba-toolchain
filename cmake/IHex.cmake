@@ -1,3 +1,13 @@
+#===============================================================================
+#
+# CMake script for converting string hex to ihex format
+#   ihex files can be converted to binary with `objcopy`
+#
+# Copyright (C) 2021-2023 gba-toolchain contributors
+# For conditions of distribution and use, see copyright notice in LICENSE.md
+#
+#===============================================================================
+
 function(ihex output)
     set(oneValueArgs RECORD_LENGTH)
     cmake_parse_arguments(ARGS "" "${oneValueArgs}" "" ${ARGN})

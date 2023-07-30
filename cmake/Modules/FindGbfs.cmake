@@ -1,3 +1,29 @@
+#===============================================================================
+#
+# Provides the CMake function `add_gbfs_archive` for adding a gbfs archive target
+#
+#   gbfs targets will also convert their `.gbfs` archive to a `.s` assembly file, available by linking with the target
+#   The `GBFS_FILE` property can be used as a file dependency
+#
+#   Example:
+#   ```cmake
+#   add_gbfs_archive(my_archive path/to/my/asset.bin path/to/another/file.txt)
+#   target_link_libraries(my_executable PRIVATE my_archive)
+#   get_target_property(archive_gbfs_path my_archive GBFS_FILE)
+#   install(my_archive)
+#   ```
+#   ```c
+#   typedef unsigned short u16;
+#   typedef unsigned int u32;
+#   #include <gbfs.h>
+#   extern const GBFS_FILE my_archive_gbfs[];
+#   ```
+#
+# Copyright (C) 2021-2023 gba-toolchain contributors
+# For conditions of distribution and use, see copyright notice in LICENSE.md
+#
+#===============================================================================
+
 include(FetchContent)
 
 find_library(libgbfs gbfs PATHS "$ENV{DEVKITPRO}/gbfs" "${CMAKE_SYSTEM_LIBRARY_PATH}/gbfs" "${GBFS_DIR}" PATH_SUFFIXES lib)

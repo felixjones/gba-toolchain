@@ -1,3 +1,12 @@
+#===============================================================================
+#
+# CMake script for running the `superfamiconv` tool on image files
+#
+# Copyright (C) 2021-2023 gba-toolchain contributors
+# For conditions of distribution and use, see copyright notice in LICENSE.md
+#
+#===============================================================================
+
 if(PALETTE)
     foreach(INPUT ${INPUTS})
         get_filename_component(OUTPUT "${INPUT}" NAME_WE)

@@ -1,3 +1,12 @@
+#===============================================================================
+#
+# CMake script for generating .s files from binary assets
+#
+# Copyright (C) 2021-2023 gba-toolchain contributors
+# For conditions of distribution and use, see copyright notice in LICENSE.md
+#
+#===============================================================================
+
 if(NOT INPUTS OR NOT OUTPUT)
     return()
 endif()

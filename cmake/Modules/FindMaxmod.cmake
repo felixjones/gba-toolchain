@@ -1,3 +1,26 @@
+#===============================================================================
+#
+# Provides the CMake function `add_maxmod_soundbank` for adding a maxmod soundbank target
+#
+#   maxmod targets also provide a header file in a `soundbanks/` subdirectory, available by linking with the target
+#   The `BIN_FILE` property can be used as a file dependency
+#
+#   Example:
+#   ```cmake
+#   add_maxmod_soundbank(my_soundbank path/to/my/music.xm path/to/other/sound.wav)
+#   target_link_libraries(my_executable PRIVATE my_soundbank)
+#   get_target_property(soundbank_bin_path my_soundbank BIN_FILE)
+#   ```
+#   ```c
+#   #include <maxmod.h>
+#   #include <soundbank/my_soundbank.h>
+#   ```
+#
+# Copyright (C) 2021-2023 gba-toolchain contributors
+# For conditions of distribution and use, see copyright notice in LICENSE.md
+#
+#===============================================================================
+
 include(ExternalProject)
 
 find_library(libmm mm PATHS "$ENV{DEVKITPRO}/libgba" "${CMAKE_SYSTEM_LIBRARY_PATH}/maxmod" "${MAXMOD_DIR}" PATH_SUFFIXES lib)

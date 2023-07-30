@@ -1,3 +1,10 @@
+#===============================================================================
+#
+# Copyright (C) 2021-2023 gba-toolchain contributors
+# For conditions of distribution and use, see copyright notice in LICENSE.md
+#
+#===============================================================================
+
 include(ExternalProject)
 
 find_library(libseven seven PATHS "$ENV{DEVKITPRO}/libseven" "${CMAKE_SYSTEM_LIBRARY_PATH}/libseven" "${LIBSEVEN_DIR}" PATH_SUFFIXES lib)
