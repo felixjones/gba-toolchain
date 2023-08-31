@@ -183,7 +183,7 @@ function(add_superfamiconv_graphics target)
         )
     endif()
 
-    add_custom_target(${target} DEPENDS "${outputs}")
+    add_custom_target(${target} DEPENDS ${outputs})
 
     set(binaryOutput)
     foreach(output ${outputs})

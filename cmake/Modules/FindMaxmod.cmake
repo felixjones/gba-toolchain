@@ -143,7 +143,7 @@ if(NOT CMAKE_MMUTIL_PROGRAM)
             "${SOURCE_DIR}/source/mmutil/CMakeLists.txt"
     )
 
-    FetchContent_MakeAvailable(mmutil_proj)
+    FetchContent_Populate(mmutil_proj)
 
     # Configure
     execute_process(

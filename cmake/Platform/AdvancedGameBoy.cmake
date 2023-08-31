@@ -111,6 +111,7 @@ function(install_rom target)
     ")
 endfunction()
 
+find_program(CMAKE_BIN2S_PROGRAM bin2s PATHS "$ENV{DEVKITPRO}/tools" "${CMAKE_SYSTEM_LIBRARY_PATH}/gbfs" "${GBFS_DIR}" PATH_SUFFIXES bin)
 set(ASSET_SCRIPT "${CMAKE_CURRENT_LIST_DIR}/../Asset.cmake")
 
 function(add_asset_library target)
@@ -118,15 +119,25 @@ function(add_asset_library target)
 
     set(ASSETS $<TARGET_GENEX_EVAL:${target},$<TARGET_PROPERTY:${target},ASSETS>>)
 
-    add_custom_command(
-        OUTPUT ${target}.s
-        COMMAND "${CMAKE_COMMAND}" -D PREFIX=${ARGS_PREFIX} "-DINPUTS=${ASSETS}" "-DOUTPUT=${CMAKE_BINARY_DIR}/${target}.s" -P "${ASSET_SCRIPT}"
-        DEPENDS ${ASSETS}
-        VERBATIM
-        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-    )
+    if(NOT CMAKE_BIN2S_PROGRAM)
+        add_custom_command(
+            OUTPUT ${target}.s
+            COMMAND "${CMAKE_COMMAND}" -D PREFIX=${ARGS_PREFIX} "-DINPUTS=${ASSETS}" "-DOUTPUT=${CMAKE_BINARY_DIR}/${target}.s" -P "${ASSET_SCRIPT}"
+            DEPENDS ${ASSETS}
+            VERBATIM
+            WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+        )
+    else()
+        add_custom_command(
+            OUTPUT ${target}.s
+            COMMAND "${CMAKE_BIN2S_PROGRAM}" "${ASSETS}" > "${CMAKE_BINARY_DIR}/${target}.s"
+            DEPENDS ${ASSETS}
+            VERBATIM
+            COMMAND_EXPAND_LISTS
+            WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+        )
+    endif()
 
-    enable_language(ASM)
     add_library(${target} OBJECT ${target}.s)
 
     if(ARGS_UNPARSED_ARGUMENTS)

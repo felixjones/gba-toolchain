@@ -24,6 +24,8 @@
 #
 #===============================================================================
 
+enable_language(ASM)
+
 include(FetchContent)
 
 find_library(libgbfs gbfs PATHS "$ENV{DEVKITPRO}/gbfs" "${CMAKE_SYSTEM_LIBRARY_PATH}/gbfs" "${GBFS_DIR}" PATH_SUFFIXES lib)
@@ -179,7 +181,6 @@ function(add_gbfs_archive target)
         WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
     )
 
-    enable_language(ASM)
     add_library(${target} OBJECT ${target}.s)
 
     install(FILES "${CMAKE_BINARY_DIR}/${target}.gbfs" DESTINATION .)
