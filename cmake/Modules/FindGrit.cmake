@@ -238,7 +238,11 @@ function(add_grit_tilemap target type)
     list(APPEND opts ${optGfx} ${optPal} ${optMap})
 
     if(ARGS_OPTIONS_FILE)
-        list(APPEND opts "-ff${inpath}/${ARGS_OPTIONS_FILE}")
+        if(IS_ABSOLUTE ${ARGS_OPTIONS_FILE})
+            list(APPEND opts "-ff${ARGS_OPTIONS_FILE}")
+        else()
+            list(APPEND opts "-ff${inpath}/${ARGS_OPTIONS_FILE}")
+        endif()
     endif()
 
     # Setup the output files
@@ -278,7 +282,11 @@ function(add_grit_tilemap target type)
         if(arg MATCHES "[$][<][A-Z_]+[:].+[>]")
             list(APPEND input "${arg}") # Copy any valid generator expression
         else()
-            list(APPEND input "${inpath}/${arg}")
+            if(IS_ABSOLUTE ${arg})
+                list(APPEND input "${arg}")
+            else()
+                list(APPEND input "${inpath}/${arg}")
+            endif()
             # Parse the file and expected output types to produce output names
             get_filename_component(arg "${arg}" NAME_WE)
             append_output(${arg} NOT)
@@ -395,7 +403,11 @@ function(add_grit_bitmap target type)
     list(APPEND opts ${optGfx} ${optPal})
 
     if(ARGS_OPTIONS_FILE)
-        list(APPEND opts "-ff${inpath}/${ARGS_OPTIONS_FILE}")
+        if(IS_ABSOLUTE ARGS_OPTIONS_FILE)
+            list(APPEND opts "-ff${ARGS_OPTIONS_FILE}")
+        else()
+            list(APPEND opts "-ff${inpath}/${ARGS_OPTIONS_FILE}")
+        endif()
     endif()
 
     # Setup the output files
@@ -432,7 +444,11 @@ function(add_grit_bitmap target type)
         if(arg MATCHES "[$][<][A-Z_]+[:].+[>]")
             list(APPEND input "${arg}") # Copy any valid generator expression
         else()
-            list(APPEND input "${inpath}/${arg}")
+            if(IS_ABSOLUTE ${arg})
+                list(APPEND input "${arg}")
+            else()
+                list(APPEND input "${inpath}/${arg}")
+            endif()
             # Parse the file and expected output types to produce output names
             get_filename_component(arg "${arg}" NAME_WE)
             append_output(${arg} NOT)
