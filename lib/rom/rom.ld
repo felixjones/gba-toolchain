@@ -145,6 +145,7 @@ SECTIONS {
 
     .rodata : {
         EXCLUDE_FILE(*.iwram.* *.ewram.* *.iwram[0-9].* *.ewram[0-9].*) *(.rodata .rodata.* .gnu.linkonce.r.*)
+        *(.rom .rom.*)
     }
 
     PROVIDE_HIDDEN(__rom_end = ALIGN(256));
