@@ -68,16 +68,16 @@ SECTIONS {
     . = __iwram_overlay_lma;
 
     OVERLAY : NOCROSSREFS AT(__iwram_overlay_lma) {
-        .iwram0 { *(.iwram0 .iwram0.*) *.iwram0.*(.text .text.* .rodata .rodata.*) }
-        .iwram1 { *(.iwram1 .iwram1.*) *.iwram1.*(.text .text.* .rodata .rodata.*) }
-        .iwram2 { *(.iwram2 .iwram2.*) *.iwram2.*(.text .text.* .rodata .rodata.*) }
-        .iwram3 { *(.iwram3 .iwram3.*) *.iwram3.*(.text .text.* .rodata .rodata.*) }
-        .iwram4 { *(.iwram4 .iwram4.*) *.iwram4.*(.text .text.* .rodata .rodata.*) }
-        .iwram5 { *(.iwram5 .iwram5.*) *.iwram5.*(.text .text.* .rodata .rodata.*) }
-        .iwram6 { *(.iwram6 .iwram6.*) *.iwram6.*(.text .text.* .rodata .rodata.*) }
-        .iwram7 { *(.iwram7 .iwram7.*) *.iwram7.*(.text .text.* .rodata .rodata.*) }
-        .iwram8 { *(.iwram8 .iwram8.*) *.iwram8.*(.text .text.* .rodata .rodata.*) }
-        .iwram9 { *(.iwram9 .iwram9.*) *.iwram9.*(.text .text.* .rodata .rodata.*) }
+        .iwram0 { *(.iwram0 .iwram0.*) *.iwram0.*(.text .text.*) }
+        .iwram1 { *(.iwram1 .iwram1.*) *.iwram1.*(.text .text.*) }
+        .iwram2 { *(.iwram2 .iwram2.*) *.iwram2.*(.text .text.*) }
+        .iwram3 { *(.iwram3 .iwram3.*) *.iwram3.*(.text .text.*) }
+        .iwram4 { *(.iwram4 .iwram4.*) *.iwram4.*(.text .text.*) }
+        .iwram5 { *(.iwram5 .iwram5.*) *.iwram5.*(.text .text.*) }
+        .iwram6 { *(.iwram6 .iwram6.*) *.iwram6.*(.text .text.*) }
+        .iwram7 { *(.iwram7 .iwram7.*) *.iwram7.*(.text .text.*) }
+        .iwram8 { *(.iwram8 .iwram8.*) *.iwram8.*(.text .text.*) }
+        .iwram9 { *(.iwram9 .iwram9.*) *.iwram9.*(.text .text.*) }
     } > iwram
 
     PROVIDE_HIDDEN(__iwram_start = ALIGN(4));
@@ -86,7 +86,7 @@ SECTIONS {
     .iwram : AT(__iwram_lma) {
         KEEP(*(SORT(.iwram.sorted.*)))
         *(.iwram .iwram.*)
-        *.iwram.*(.data .data.* .text .text.* .rodata .rodata.*)
+        *.iwram.*(.data .data.* .text .text.*)
         *(.data .data.* .gnu.linkonce.d.*)
         . = ALIGN(32);
     } > iwram
@@ -108,7 +108,7 @@ SECTIONS {
     }
 
     .rodata : {
-        EXCLUDE_FILE(*.iwram.* *.iwram[0-9].*) *(.rodata .rodata.* .gnu.linkonce.r.*)
+        *(.rodata .rodata.* .gnu.linkonce.r.*)
     }
 
     PROVIDE_HIDDEN(end = ALIGN(__iwram_lma_end + SIZEOF(.text) + SIZEOF(.rodata), 32));
