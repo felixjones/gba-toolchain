@@ -1,6 +1,6 @@
 #===============================================================================
 #
-# Provides the CMake function `add_grit_graphics` for adding a grit assets target
+# Provides the CMake functions `add_grit_bitmap` and `add_grit_tilemap` for adding a grit assets target
 #
 # Copyright (C) 2021-2023 gba-toolchain contributors
 # For conditions of distribution and use, see copyright notice in LICENSE.md
@@ -77,7 +77,7 @@ if(NOT CMAKE_GRIT_PROGRAM)
         # Download
         DOWNLOAD_DIR "${SOURCE_DIR}/download"
         GIT_REPOSITORY "https://github.com/devkitPro/grit.git"
-        GIT_TAG "v0.9.2"
+        GIT_TAG "master"
         # Update
         UPDATE_COMMAND "${CMAKE_COMMAND}" -E copy_if_different
             "${SOURCE_DIR}/temp/CMakeLists.txt"
