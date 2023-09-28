@@ -85,19 +85,19 @@ CMake modules are made available with the `find_package` function.
 
 For more information on CMake `find_package` see: [cmake-commands find_package](https://cmake.org/cmake/help/latest/command/find_package.html)
 
-| Package       | Module                  | Description                                                                                                                    | Additional CMake functions                |
-|---------------|-------------------------|--------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------|
-| librom        | FindLibrom.cmake        | ROM runtime library for standard .gba ROMs                                                                                     |                                           |
-| libmultiboot  | FindLibmultiboot.cmake  | Multiboot runtime library for executables transferred via GBA MultiBoot                                                        |                                           |
-| gba-hpp       | FindGba-Hpp.cmake       | C++20 GBA development library ([more info](https://github.com/felixjones/gba-hpp))                                             |                                           |
-| libseven      | FindLibseven.cmake      | Modern C GBA development library from sdk-seven ([more info](https://github.com/LunarLambda/sdk-seven))                        |                                           |
-| libgba        | FindLibgba.cmake        | C GBA development library from devkitPro ([more info](https://github.com/devkitPro/libgba))                                    |                                           |
-| tonclib       | FindTonclib.cmake       | Classic C GBA development library from Coranac ([more info](https://www.coranac.com/man/tonclib/main.htm))                     |                                           |
-| gbfs          | FindGbfs.cmake          | Archive format for the GBA ([more info](https://pineight.com/gba/#gbfs))                                                       | `add_gbfs_archive`                        |
-| maxmod        | FindMaxmod.cmake        | GBA music and sound solution ([more info](https://maxmod.devkitpro.org/))                                                      | `add_maxmod_soundbank`                    |
-| superfamiconv | FindSuperfamiconv.cmake | Tile graphics converter ([more info](https://github.com/Optiroc/SuperFamiconv))                                                | `add_superfamiconv_graphics`              |
-| agbabi        | FindAgbabi.cmake        | Library functions optimized for the GBA ([more info](https://github.com/felixjones/agbabi))                                    |                                           |
-| posprintf     | FindPosprintf.cmake     | Partial implementation of `sprintf` optimized for the GBA ([more info](http://www.danposluns.com/gbadev/posprintf/index.html)) |                                           |
-| grit          | FindGrit.cmake          | Bitmap and Tile graphics converter ([more info](https://www.coranac.com/man/grit/html/grit.htm))                               | `add_grit_bitmap`<br />`add_grit_tilemap` |
+| Package       | Module                  | Description                                                                                                                    | Additional CMake functions                                       |
+|---------------|-------------------------|--------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------|
+| librom        | FindLibrom.cmake        | ROM runtime library for standard .gba ROMs                                                                                     |                                                                  |
+| libmultiboot  | FindLibmultiboot.cmake  | Multiboot runtime library for executables transferred via GBA MultiBoot                                                        |                                                                  |
+| gba-hpp       | FindGba-Hpp.cmake       | C++20 GBA development library ([more info](https://github.com/felixjones/gba-hpp))                                             |                                                                  |
+| libseven      | FindLibseven.cmake      | Modern C GBA development library from sdk-seven ([more info](https://github.com/LunarLambda/sdk-seven))                        |                                                                  |
+| libgba        | FindLibgba.cmake        | C GBA development library from devkitPro ([more info](https://github.com/devkitPro/libgba))                                    |                                                                  |
+| tonclib       | FindTonclib.cmake       | Classic C GBA development library from Coranac ([more info](https://www.coranac.com/man/tonclib/main.htm))                     |                                                                  |
+| gbfs          | FindGbfs.cmake          | Archive format for the GBA ([more info](https://pineight.com/gba/#gbfs))                                                       | `add_gbfs_archive`                                               |
+| maxmod        | FindMaxmod.cmake        | GBA music and sound solution ([more info](https://maxmod.devkitpro.org/))                                                      | `add_maxmod_soundbank`                                           |
+| superfamiconv | FindSuperfamiconv.cmake | Tile graphics converter ([more info](https://github.com/Optiroc/SuperFamiconv))                                                | `add_superfamiconv_graphics`                                     |
+| agbabi        | FindAgbabi.cmake        | Library functions optimized for the GBA ([more info](https://github.com/felixjones/agbabi))                                    |                                                                  |
+| posprintf     | FindPosprintf.cmake     | Partial implementation of `sprintf` optimized for the GBA ([more info](http://www.danposluns.com/gbadev/posprintf/index.html)) |                                                                  |
+| grit          | FindGrit.cmake          | Bitmap and Tile graphics converter ([more info](https://www.coranac.com/man/grit/html/grit.htm))                               | `add_grit_bitmap`<br />`add_grit_sprite`<br />`add_grit_tilemap` |
 
 **Important**: Some modules may have external dependencies that may require tools to be compiled with a host compiler.

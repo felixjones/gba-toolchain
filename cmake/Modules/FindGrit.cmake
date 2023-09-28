@@ -130,13 +130,13 @@ endif()
 
 function(add_grit_tilemap target type)
     file(RELATIVE_PATH inpath "${CMAKE_BINARY_DIR}" "${CMAKE_SOURCE_DIR}")
-    set(outpath "${CMAKE_BINARY_DIR}")
 
     set(oneValueArgs
         SHARED_PREFIX # File to use for shared output (default is target name when sharing is used)
         LOG_LEVEL # 1, 2, or 3 (default is 1)
         DATA_TYPE # Default data type (individual options can override this) u8, u16, or u32
         OPTIONS_FILE # File to read in additional options
+        OUTPUT_DIRECTORY
     )
     set(multiValueArgs
         GRAPHICS
@@ -154,6 +154,12 @@ function(add_grit_tilemap target type)
     list(APPEND ARGS_UNPARSED_ARGUMENTS ${ARGS_MAP_UNPARSED_ARGUMENTS})
     list(APPEND ARGS_UNPARSED_ARGUMENTS ${ARGS_--})
     set(ARGN ${ARGS_UNPARSED_ARGUMENTS})
+
+    if(ARGS_OUTPUT_DIRECTORY)
+        set(outpath "${ARGS_OUTPUT_DIRECTORY}")
+    else()
+        set(outpath "${CMAKE_BINARY_DIR}")
+    endif()
 
     # Tilemap options
 
@@ -314,9 +320,13 @@ function(add_grit_tilemap target type)
     endif()
 endfunction()
 
+function(add_grit_sprite target type)
+    set(args MAP EXCLUDE ${ARGN})
+    add_grit_tilemap(${target} ${type} ${args})
+endfunction()
+
 function(add_grit_bitmap target type)
     file(RELATIVE_PATH inpath "${CMAKE_BINARY_DIR}" "${CMAKE_SOURCE_DIR}")
-    set(outpath "${CMAKE_BINARY_DIR}")
 
     set(oneValueArgs
         SHARED_PREFIX # File to use for shared output (default is target name when sharing is used)
@@ -338,6 +348,12 @@ function(add_grit_bitmap target type)
     list(APPEND ARGS_UNPARSED_ARGUMENTS ${ARGS_PAL_UNPARSED_ARGUMENTS})
     list(APPEND ARGS_UNPARSED_ARGUMENTS ${ARGS_--})
     set(ARGN ${ARGS_UNPARSED_ARGUMENTS})
+
+    if(ARGS_OUTPUT_DIRECTORY)
+        set(outpath "${ARGS_OUTPUT_DIRECTORY}")
+    else()
+        set(outpath "${CMAKE_BINARY_DIR}")
+    endif()
 
     # Bitmap options
 
