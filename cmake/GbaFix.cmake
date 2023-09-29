@@ -23,9 +23,11 @@ if(VERIFY)
         message(FATAL_ERROR "ROM_MAKER \"${ROM_MAKER}\" must not be more than 2 characters")
     endif()
 
-    math(EXPR HEX_VERSION "${ROM_VERSION}" OUTPUT_FORMAT HEXADECIMAL)
-    if(${HEX_VERSION} LESS 0 OR ${HEX_VERSION} GREATER 255)
-        message(FATAL_ERROR "ROM_VERSION \"${ROM_VERSION}\" must be between 0 and 255")
+    if(ROM_VERSION)
+        math(EXPR HEX_VERSION "${ROM_VERSION}" OUTPUT_FORMAT HEXADECIMAL)
+        if(${HEX_VERSION} LESS 0 OR ${HEX_VERSION} GREATER 255)
+            message(FATAL_ERROR "ROM_VERSION \"${ROM_VERSION}\" must be between 0 and 255")
+        endif()
     endif()
 endif()
 
@@ -56,6 +58,10 @@ function(gbafix input)
 
     set(oneValueArgs OUTPUT TITLE ID MAKER VERSION)
     cmake_parse_arguments(ARGS "" "${oneValueArgs}" "" ${ARGN})
+
+    if(NOT ARGS_VERSION)
+        set(ARGS_VERSION 0)
+    endif()
 
     string(HEX "${ARGS_TITLE}" title)
     pad(title 24)
