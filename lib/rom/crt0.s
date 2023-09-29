@@ -77,6 +77,8 @@ exit:
     bl      __call_exitprocs
     pop     {r0}
 
+    .global _fini
+_fini:
     @ Using r4-r5 to avoid pushing r0-r3
     ldr     r4, =__fini_array_start
     ldr     r5, =__fini_array_end
