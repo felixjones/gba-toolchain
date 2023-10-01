@@ -13,7 +13,7 @@ if(NOT libseven)
     set(SOURCE_DIR "${CMAKE_SYSTEM_LIBRARY_PATH}/libseven")
 
     file(MAKE_DIRECTORY "${SOURCE_DIR}/include")
-
+    file(MAKE_DIRECTORY "${SOURCE_DIR}/temp")
     ExternalProject_Add(libseven_proj
         PREFIX "${SOURCE_DIR}"
         TMP_DIR "${SOURCE_DIR}/temp"

@@ -31,6 +31,7 @@ if(VERIFY)
     endif()
 endif()
 
+include("${CMAKE_CURRENT_LIST_DIR}/Concat.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/IHex.cmake")
 
 function(gbafix input)
@@ -82,10 +83,9 @@ function(gbafix input)
     normalize_hex(complement 2)
 
     file(READ "${input}" headerStart LIMIT 160 HEX) # Entry point + logo
-    file(READ "${input}" binaryBody OFFSET 192 HEX) # Remaining ROM data
 
     # Convert to Intel HEX format
-    ihex(outputHex RECORD_LENGTH 0xff "${headerStart}" "${header}" "${complement}" 0000 "${binaryBody}")
+    ihex(outputHex RECORD_LENGTH 0xff "${headerStart}" "${header}" "${complement}" 0000)
 
     string(RANDOM ihexFile)
     while(EXISTS "${ihexFile}.hex")
@@ -98,4 +98,25 @@ function(gbafix input)
         COMMAND "${CMAKE_OBJCOPY}" -I ihex "${ihexFile}.hex" -O binary "${ARGS_OUTPUT}"
     )
     file(REMOVE "${ihexFile}.hex")
+
+    # Retrieve remaining bytes
+    string(RANDOM body)
+    while(EXISTS "${body}.bin")
+        string(RANDOM body)
+    endwhile()
+
+    if(CMAKE_HOST_SYSTEM_NAME MATCHES "Windows")
+        execute_process(
+            COMMAND powershell -Command "& { $content = Get-Content -Path \"${input}\" -Encoding Byte -ReadCount 0; $trimmedContent = $content[192..($content.Length - 1)]; Set-Content -Path \"${body}.bin\" -Value $trimmedContent -Encoding Byte; }"
+        )
+    elseif(CMAKE_HOST_SYSTEM_NAME MATCHES "Linux" OR CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
+        execute_process(
+            COMMAND dd if=${input} of=${body}.bin bs=1 skip=192
+        )
+    else()
+        message(FATAL_ERROR "Trimming ROM body not implemented")
+    endif()
+
+    binappend("${ARGS_OUTPUT}" "${CMAKE_BINARY_DIR}/${body}.bin")
+    file(REMOVE "${CMAKE_BINARY_DIR}/${body}.bin")
 endfunction()

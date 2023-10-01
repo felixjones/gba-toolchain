@@ -21,6 +21,10 @@ __sp_irq = ORIGIN(iwram) + LENGTH(iwram) - 0x60;
 __sp_usr = __sp_irq - 0xA0;
 __sp_usr_reserve = 0x200;
 
+PROVIDE_HIDDEN(__eheap_end = ORIGIN(ewram) + LENGTH(ewram));
+PROVIDE_HIDDEN(__iwram_start__ = ORIGIN(iwram));
+PROVIDE_HIDDEN(__iwram_top = ORIGIN(iwram) + LENGTH(iwram));
+
 SECTIONS {
     . = ORIGIN(rom);
 
@@ -93,10 +97,12 @@ SECTIONS {
         *(.sbss .sbss.*)
         . = ALIGN(32);
         PROVIDE_HIDDEN(__sbss_end = ABSOLUTE(.));
+        PROVIDE_HIDDEN(__sbss_end__ = __sbss_end);
     } > ewram
 
     PROVIDE_HIDDEN(end = ALIGN(__sbss_end, 4));
     PROVIDE_HIDDEN(__end__ = end);
+    PROVIDE_HIDDEN(__eheap_start = __end__);
 
     PROVIDE_HIDDEN(__iwram_overlay_start = ORIGIN(iwram));
     PROVIDE_HIDDEN(__iwram_overlay_lma = __ewram_lma_end);
