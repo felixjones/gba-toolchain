@@ -97,7 +97,7 @@ endif()
 
 unset(libmm CACHE)
 
-find_program(CMAKE_MMUTIL_PROGRAM mmutil PATHS "$ENV{DEVKITPRO}/tools" "${CMAKE_SYSTEM_LIBRARY_PATH}/maxmod" "${MMUTIL_DIR}" PATH_SUFFIXES bin)
+find_program(CMAKE_MMUTIL_PROGRAM mmutil mmutil.exe PATHS "$ENV{DEVKITPRO}/tools" "${CMAKE_SYSTEM_LIBRARY_PATH}/maxmod" "${MMUTIL_DIR}" PATH_SUFFIXES bin)
 
 if(NOT CMAKE_MMUTIL_PROGRAM)
     set(SOURCE_DIR "${CMAKE_SYSTEM_LIBRARY_PATH}/maxmod")

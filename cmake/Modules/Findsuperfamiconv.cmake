@@ -33,7 +33,7 @@
 
 include(FetchContent)
 
-find_program(CMAKE_SUPERFAMICONV_PROGRAM superfamiconv PATHS "${CMAKE_SYSTEM_LIBRARY_PATH}/superfamiconv" "${SUPERFAMICONV_DIR}" PATH_SUFFIXES bin)
+find_program(CMAKE_SUPERFAMICONV_PROGRAM superfamiconv superfamiconv.exe PATHS "${CMAKE_SYSTEM_LIBRARY_PATH}/superfamiconv" "${SUPERFAMICONV_DIR}" PATH_SUFFIXES bin)
 
 if(NOT CMAKE_SUPERFAMICONV_PROGRAM)
     set(SOURCE_DIR "${CMAKE_SYSTEM_LIBRARY_PATH}/superfamiconv")

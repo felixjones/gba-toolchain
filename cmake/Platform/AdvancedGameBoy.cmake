@@ -111,7 +111,7 @@ function(install_rom target)
     ")
 endfunction()
 
-find_program(CMAKE_BIN2S_PROGRAM bin2s PATHS "$ENV{DEVKITPRO}/tools" "${CMAKE_SYSTEM_LIBRARY_PATH}/gbfs" "${GBFS_DIR}" PATH_SUFFIXES bin)
+find_program(CMAKE_BIN2S_PROGRAM bin2s bin2s.exe PATHS "$ENV{DEVKITPRO}/tools" "${CMAKE_SYSTEM_LIBRARY_PATH}/gbfs" "${GBFS_DIR}" PATH_SUFFIXES bin)
 set(ASSET_SCRIPT "${CMAKE_CURRENT_LIST_DIR}/../Asset.cmake")
 
 function(add_asset_library target)

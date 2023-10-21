@@ -12,7 +12,7 @@ enable_language(ASM C)
 
 include(FetchContent)
 
-find_program(CMAKE_GRIT_PROGRAM grit PATHS "$ENV{DEVKITPRO}/tools" "${CMAKE_SYSTEM_LIBRARY_PATH}/grit" "${GRIT_DIR}" PATH_SUFFIXES bin)
+find_program(CMAKE_GRIT_PROGRAM grit grit.exe PATHS "$ENV{DEVKITPRO}/tools" "${CMAKE_SYSTEM_LIBRARY_PATH}/grit" "${GRIT_DIR}" PATH_SUFFIXES bin)
 
 if(NOT CMAKE_GRIT_PROGRAM)
     set(SOURCE_DIR "${CMAKE_SYSTEM_LIBRARY_PATH}/grit")
