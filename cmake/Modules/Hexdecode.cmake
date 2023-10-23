@@ -61,7 +61,15 @@ endif()
 # Try if powershell is available
 find_program(POWERSHELL_EXECUTABLE NAMES powershell pwsh)
 if(POWERSHELL_EXECUTABLE)
-    execute_process(COMMAND "${POWERSHELL_EXECUTABLE}" -Command "$hexString = '${hexes}'; $byteArray = for ($i = 0; $i -lt $hexString.length; $i+=2) {[Convert]::ToByte($hexString.Substring($i, 2), 16)}; [IO.File]::WriteAllBytes('${outfile}', $byteArray)")
+    execute_process(
+        COMMAND "${POWERSHELL_EXECUTABLE}" -Command "
+            $hexString = '${hexes}';
+            $byteArray = for ($i = 0; $i -lt $hexString.length; $i+=2) {
+                [Convert]::ToByte($hexString.Substring($i, 2), 16)
+            };
+            [IO.File]::WriteAllBytes('${outfile}', $byteArray)
+        "
+    )
     return()
 endif()
 
