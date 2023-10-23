@@ -37,13 +37,12 @@ if(argc LESS 2)
     message(FATAL_ERROR "hexdecode requires at least 2 arguments.")
 endif()
 
-list(GET CMAKE_ARGN 0 outfile)
-list(SUBLIST CMAKE_ARGN 1 -1 hexes)
+list(POP_FRONT CMAKE_ARGN outfile) # First arg is output
 
 cmake_policy(POP)
 
 # Join all hex lists
-string(JOIN "" hexes ${hexes})
+string(JOIN "" hexes ${CMAKE_ARGN})
 
 # Decode hexes into outfile
 
@@ -75,18 +74,11 @@ endif()
 
 # Try if IHex and objcopy are available (SLOW!)
 include("${CMAKE_CURRENT_LIST_DIR}/IHex.cmake" OPTIONAL RESULT_VARIABLE IHEX_INCLUDED)
+include("${CMAKE_CURRENT_LIST_DIR}/Mktemp.cmake" OPTIONAL RESULT_VARIABLE MKTEMP_INCLUDED)
 find_program(OBJCOPY_EXECUTABLE NAMES objcopy)
-if(IHEX_INCLUDED AND OBJCOPY_EXECUTABLE)
+if(IHEX_INCLUDED AND MKTEMP_INCLUDED AND OBJCOPY_EXECUTABLE)
     ihex(outputHex RECORD_LENGTH 0xff ${hexes})
-
-    # Ideally use Mktemp, else create a random file that hopefully doesn't exist
-    include("${CMAKE_CURRENT_LIST_DIR}/Mktemp.cmake" OPTIONAL RESULT_VARIABLE MKTEMP_INCLUDED)
-    if(MKTEMP_INCLUDED)
-        mktemp(tmpfile)
-    else()
-        string(RANDOM LENGTH 8 tmpfile)
-        file(WRITE ${tmpfile} "")
-    endif()
+    mktemp(tmpfile)
 
     file(WRITE "${tmpfile}" "${outputHex}")
     execute_process(COMMAND "${OBJCOPY_EXECUTABLE}" -I ihex "${tmpfile}" -O binary "${outfile}")
