@@ -45,8 +45,9 @@ foreach(suffix "" _ASM _C _CXX)
     set(CMAKE_EXECUTABLE_SUFFIX${suffix} .elf CACHE INTERNAL "")
 endforeach()
 
-set(GBAFIX_SCRIPT "${CMAKE_CURRENT_LIST_DIR}/../GbaFix.cmake")
-set(CONCAT_SCRIPT "${CMAKE_CURRENT_LIST_DIR}/../Concat.cmake")
+include(GbaFix)
+include(Mktemp)
+include(Bincat)
 
 function(install_rom target)
     if(NOT TARGET ${target})
@@ -59,15 +60,37 @@ function(install_rom target)
         set(ARGS_DESTINATION ".")
     endif()
 
+    # Add gbafix checking command
     add_custom_command(TARGET ${target} PRE_BUILD
-        COMMAND "${CMAKE_COMMAND}"
-        ARGS -D VERIFY=ON
-            -D ROM_TITLE=$<TARGET_PROPERTY:${target},ROM_TITLE>
-            -D ROM_ID=$<TARGET_PROPERTY:${target},ROM_ID>
-            -D ROM_MAKER=$<TARGET_PROPERTY:${target},ROM_MAKER>
-            -D ROM_VERSION=$<TARGET_PROPERTY:${target},ROM_VERSION>
-            -P "${GBAFIX_SCRIPT}"
+        COMMAND "${CMAKE_COMMAND}" -P "${GBAFIX_SCRIPT}" -- $<TARGET_FILE_NAME:${target}> DRY_RUN
+            TITLE $<TARGET_PROPERTY:${target},ROM_TITLE>
+            ID $<TARGET_PROPERTY:${target},ROM_ID>
+            MAKER $<TARGET_PROPERTY:${target},ROM_MAKER>
+            VERSION $<TARGET_PROPERTY:${target},ROM_VERSION>
     )
+
+    set(INSTALL_DESTINATION "${CMAKE_INSTALL_PREFIX}/${ARGS_DESTINATION}")
+
+    # Install the .elf
+    install(TARGETS ${target} DESTINATION "${ARGS_DESTINATION}")
+
+    # objcopy and gbafix
+    install(CODE "
+        execute_process(
+            COMMAND \"${CMAKE_OBJCOPY}\" -O binary \"$<TARGET_FILE_NAME:${target}>\" \"$<TARGET_FILE_BASE_NAME:${target}>.bin\"
+            COMMAND \"${CMAKE_COMMAND}\" -P \"${GBAFIX_SCRIPT}\" -- \"$<TARGET_FILE_BASE_NAME:${target}>.bin\"
+                TITLE \"$<TARGET_PROPERTY:${target},ROM_TITLE>\"
+                ID \"$<TARGET_PROPERTY:${target},ROM_ID>\"
+                MAKER \"$<TARGET_PROPERTY:${target},ROM_MAKER>\"
+                VERSION \"$<TARGET_PROPERTY:${target},ROM_VERSION>\"
+                \"$<TARGET_FILE_BASE_NAME:${target}>.gba\"
+            WORKING_DIRECTORY \"${INSTALL_DESTINATION}\"
+        )
+    ")
+
+    if(NOT ARGS_CONCAT)
+        return()
+    endif()
 
     cmake_parse_arguments(CONCAT_ARGS "" "ALIGN" "" ${ARGS_CONCAT})
 
@@ -75,6 +98,7 @@ function(install_rom target)
         set(CONCAT_ARGS_ALIGN 1)
     endif()
 
+    # List files to be appended
     foreach(concat ${CONCAT_ARGS_UNPARSED_ARGUMENTS})
         if(NOT TARGET ${concat})
             get_filename_component(concat "${concat}" ABSOLUTE)
@@ -85,29 +109,25 @@ function(install_rom target)
         endif()
     endforeach()
 
-    set(INSTALL_DESTINATION "${CMAKE_INSTALL_PREFIX}/${ARGS_DESTINATION}")
-    install(TARGETS ${target} DESTINATION "${ARGS_DESTINATION}")
+    # Append files
     install(CODE "
         execute_process(
-            COMMAND \"${CMAKE_OBJCOPY}\" -O binary \"$<TARGET_FILE_NAME:${target}>\" \"$<TARGET_FILE_BASE_NAME:${target}>.bin\"
+            COMMAND \"${CMAKE_COMMAND}\" -P \"${MKTEMP_SCRIPT}\"
+            OUTPUT_VARIABLE tmpfile OUTPUT_STRIP_TRAILING_WHITESPACE
             WORKING_DIRECTORY \"${INSTALL_DESTINATION}\"
         )
 
-        set(CMAKE_OBJCOPY \"${CMAKE_OBJCOPY}\")
-        include(\"${GBAFIX_SCRIPT}\")
-        gbafix(\"${INSTALL_DESTINATION}/$<TARGET_FILE_BASE_NAME:${target}>.bin\"
-            TITLE \"$<TARGET_PROPERTY:${target},ROM_TITLE>\"
-            ID \"$<TARGET_PROPERTY:${target},ROM_ID>\"
-            MAKER \"$<TARGET_PROPERTY:${target},ROM_MAKER>\"
-            VERSION \"$<TARGET_PROPERTY:${target},ROM_VERSION>\"
-            OUTPUT \"${INSTALL_DESTINATION}/$<TARGET_FILE_BASE_NAME:${target}>.gba\"
+        execute_process(
+            COMMAND \"${CMAKE_COMMAND}\" -P \"${BINCAT_SCRIPT}\" --
+                \"$<TARGET_FILE_BASE_NAME:${target}>.gba\"
+                \"\${tmpfile}\"
+                ${CONCAT_ARGS_ALIGN}
+                ${appendFiles}
+            WORKING_DIRECTORY \"${INSTALL_DESTINATION}\"
         )
 
-        set(appendFiles ${appendFiles})
-        if(appendFiles)
-            include(\"${CONCAT_SCRIPT}\")
-            binconcat(${CONCAT_ARGS_ALIGN} \"${INSTALL_DESTINATION}/$<TARGET_FILE_BASE_NAME:${target}>.gba\" \${appendFiles})
-        endif()
+        file(REMOVE \"${INSTALL_DESTINATION}/$<TARGET_FILE_BASE_NAME:${target}>.gba\")
+        file(RENAME \"${INSTALL_DESTINATION}/\${tmpfile}\" \"${INSTALL_DESTINATION}/$<TARGET_FILE_BASE_NAME:${target}>.gba\")
     ")
 endfunction()
 
