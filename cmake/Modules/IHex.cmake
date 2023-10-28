@@ -21,7 +21,9 @@ unset(CMAKE_SCRIPT_MODE_FILE) # Enable nested include()
 
 # Collect arguments past -- into CMAKE_ARGN
 foreach(ii RANGE ${CMAKE_ARGC})
-    if("${CMAKE_ARGV${ii}}" STREQUAL --)
+    if(${ii} EQUAL ${CMAKE_ARGC})
+        break()
+    elseif("${CMAKE_ARGV${ii}}" STREQUAL --)
         set(start ${ii})
     elseif(DEFINED start)
         list(APPEND CMAKE_ARGN "${CMAKE_ARGV${ii}}")
