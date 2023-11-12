@@ -45,6 +45,11 @@ foreach(suffix "" _ASM _C _CXX)
     set(CMAKE_EXECUTABLE_SUFFIX${suffix} .elf CACHE INTERNAL "")
 endforeach()
 
+# Setup default install prefix
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    set(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}" CACHE PATH "Installation prefix path for the project install step" FORCE)
+endif()
+
 include(GbaFix)
 include(Mktemp)
 include(Bincat)
