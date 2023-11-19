@@ -25,6 +25,8 @@ static int stub(void) {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wattribute-alias"
 
+int _open(const char *file, int flags, int mode) __attribute__((alias("stub")));
+
 int _close(int file) __attribute__((alias("stub")));
 
 int _fstat(int file, struct stat *st) __attribute__((alias("stub")));
