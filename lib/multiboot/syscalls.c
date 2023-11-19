@@ -43,5 +43,7 @@ int _read(int file, char *ptr, int len) __attribute__((alias("stub")));
 
 int _write(int file, char *ptr, int len) __attribute__((alias("stub")));
 
+int _getpid(void) __attribute__((alias("stub")));
+
 #pragma GCC diagnostic pop
 #pragma clang diagnostic pop
