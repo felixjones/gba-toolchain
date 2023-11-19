@@ -67,6 +67,27 @@ if(CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
     endif()
 endif()
 
+# Fixup MSYS search paths
+if(CMAKE_HOST_SYSTEM_NAME STREQUAL "MSYS")
+    if(DEFINED "ENV{GNUARM}")
+        execute_process(COMMAND cygpath -u "$ENV{GNUARM}" OUTPUT_VARIABLE GNUARM OUTPUT_STRIP_TRAILING_WHITESPACE)
+        set(ENV{GNUARM} "${GNUARM}")
+        unset(GNUARM)
+    endif()
+
+    if(DEFINED "ENV{DEVKITPRO}")
+        execute_process(COMMAND cygpath -u "$ENV{DEVKITPRO}" OUTPUT_VARIABLE DEVKITPRO OUTPUT_STRIP_TRAILING_WHITESPACE)
+        set(ENV{DEVKITPRO} "${DEVKITPRO}")
+        unset(DEVKITPRO)
+    endif()
+
+    if(DEFINED "ENV{DEVKITARM}")
+        execute_process(COMMAND cygpath -u "$ENV{DEVKITARM}" OUTPUT_VARIABLE DEVKITARM OUTPUT_STRIP_TRAILING_WHITESPACE)
+        set(ENV{DEVKITARM} "${DEVKITARM}")
+        unset(DEVKITARM)
+    endif()
+endif()
+
 if(GNUARM)
     list(SORT GNUARM COMPARE NATURAL ORDER DESCENDING)
     list(POP_FRONT GNUARM GNUARM_LATEST)
