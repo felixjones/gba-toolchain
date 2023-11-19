@@ -176,7 +176,7 @@ function(add_butano_asset_subdirectory name)
     if(NOT CMAKE_BIN2S_PROGRAM)
         add_custom_command(
             OUTPUT "${binaryDir}/_bn_audio_soundbank.s"
-            COMMAND "${CMAKE_COMMAND}" -D "-DINPUTS=_bn_audio_soundbank.bin" "-DOUTPUT=_bn_audio_soundbank.s" -P "${ASSET_SCRIPT}"
+            COMMAND "${CMAKE_COMMAND}" -P "${BIN2S_SCRIPT}" -- "_bn_audio_soundbank.bin" > "_bn_audio_soundbank.s"
             DEPENDS "${binaryDir}/_bn_audio_soundbank.bin"
             VERBATIM
             WORKING_DIRECTORY "${binaryDir}"
