@@ -84,11 +84,11 @@ function(install_rom target)
         execute_process(
             COMMAND \"${CMAKE_OBJCOPY}\" -O binary \"$<TARGET_FILE_NAME:${target}>\" \"$<TARGET_FILE_BASE_NAME:${target}>.bin\"
             COMMAND \"${CMAKE_COMMAND}\" -P \"${GBAFIX_SCRIPT}\" -- \"$<TARGET_FILE_BASE_NAME:${target}>.bin\"
+                \"$<TARGET_FILE_BASE_NAME:${target}>.gba\"
                 TITLE \"$<TARGET_PROPERTY:${target},ROM_TITLE>\"
                 ID \"$<TARGET_PROPERTY:${target},ROM_ID>\"
                 MAKER \"$<TARGET_PROPERTY:${target},ROM_MAKER>\"
                 VERSION \"$<TARGET_PROPERTY:${target},ROM_VERSION>\"
-                \"$<TARGET_FILE_BASE_NAME:${target}>.gba\"
             WORKING_DIRECTORY \"${INSTALL_DESTINATION}\"
         )
     ")
