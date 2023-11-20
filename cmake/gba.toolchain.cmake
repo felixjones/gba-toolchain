@@ -107,7 +107,7 @@ set(COMPILER_SEARCH_PATHS "$ENV{GNUARM}" "$ENV{DEVKITARM}" "$ENV{DEVKITPRO}/devk
 
 # Set CMAKE_MAKE_PROGRAM for Unix Makefiles
 if(CMAKE_GENERATOR STREQUAL "Unix Makefiles" AND NOT CMAKE_MAKE_PROGRAM)
-    find_program(CMAKE_MAKE_PROGRAM NAMES make mingw32-make gmake REQUIRED)
+    find_program(CMAKE_MAKE_PROGRAM NAMES make mingw32-make gmake)
 
     # DEVKITPRO sometimes has make
     if(NOT CMAKE_MAKE_PROGRAM)
