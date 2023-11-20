@@ -69,6 +69,11 @@ endif()
 
 # Fixup MSYS search paths
 if(CMAKE_HOST_SYSTEM_NAME STREQUAL "MSYS")
+    # Disallow msys2 CMake
+    if(CMAKE_COMMAND MATCHES "msys2")
+        message(FATAL_ERROR "${CMAKE_COMMAND} is known to cause problems. Please use an alternative CMake executable.")
+    endif()
+
     if(DEFINED "ENV{GNUARM}")
         execute_process(COMMAND cygpath -u "$ENV{GNUARM}" OUTPUT_VARIABLE GNUARM OUTPUT_STRIP_TRAILING_WHITESPACE)
         set(ENV{GNUARM} "${GNUARM}")
@@ -103,6 +108,11 @@ set(COMPILER_SEARCH_PATHS "$ENV{GNUARM}" "$ENV{DEVKITARM}" "$ENV{DEVKITPRO}/devk
 # Set CMAKE_MAKE_PROGRAM for Unix Makefiles
 if(CMAKE_GENERATOR STREQUAL "Unix Makefiles" AND NOT CMAKE_MAKE_PROGRAM)
     find_program(CMAKE_MAKE_PROGRAM NAMES make mingw32-make gmake REQUIRED)
+
+    # DEVKITPRO sometimes has make
+    if(NOT CMAKE_MAKE_PROGRAM)
+        find_program(CMAKE_MAKE_PROGRAM NAMES make PATHS "$ENV{DEVKITPRO}/msys2/usr" PATH_SUFFIXES bin REQUIRED)
+    endif()
 endif()
 
 # TODO: Set up linker to allow executable test compile
