@@ -143,20 +143,17 @@ function(add_asset_library target)
     set(assetsEval $<TARGET_GENEX_EVAL:${target},$<TARGET_PROPERTY:${target},ASSETS>>)
 
     if(CMAKE_BIN2S_PROGRAM)
-        add_custom_command(
-            OUTPUT ${target}.s
-            COMMAND "${CMAKE_BIN2S_PROGRAM}" "${assetsEval}" > "${CMAKE_BINARY_DIR}/${target}.s"
-            DEPENDS ${assetsEval}
-            WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-        )
+        set(bin2sCommand "${CMAKE_BIN2S_PROGRAM}")
     else()
-        add_custom_command(
-            OUTPUT ${target}.s
-            COMMAND "${CMAKE_COMMAND}" -P "${BIN2S_SCRIPT}" -- "${assetsEval}" > "${CMAKE_BINARY_DIR}/${target}.s"
-            DEPENDS ${assetsEval}
-            WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-        )
+        set(bin2sCommand "${CMAKE_COMMAND}" -P "${BIN2S_SCRIPT}" --)
     endif()
+
+    add_custom_command(
+        OUTPUT ${target}.s
+        COMMAND ${bin2sCommand} "${assetsEval}" > "${CMAKE_BINARY_DIR}/${target}.s"
+        DEPENDS ${assetsEval}
+        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    )
 
     add_library(${target} OBJECT ${target}.s)
 

@@ -23,8 +23,7 @@ if(NOT libgbt_player)
         add_library(gbt-player STATIC "gba/gbt_player/gbt_player.c")
 
         target_compile_options(gbt-player PRIVATE
-            $<$<COMPILE_LANGUAGE:C>:
-                -mthumb
+            $<$<COMPILE_LANGUAGE:C>:-mthumb -O2
                 -fomit-frame-pointer
                 -ffunction-sections
                 -fdata-sections
@@ -160,13 +159,19 @@ function(add_gbt_maxmod_assets target)
         endif()
     endforeach()
 
+    if(CMAKE_BIN2S_PROGRAM)
+        set(bin2sCommand "${CMAKE_BIN2S_PROGRAM}")
+    else()
+        set(bin2sCommand "${CMAKE_COMMAND}" -P "${BIN2S_SCRIPT}" --)
+    endif()
+
     add_custom_command(
         OUTPUT "${target}.s" "soundbank/${target}.h"
         BYPRODUCTS "${target}.bin"
         DEPENDS ${dma}
         COMMAND "${CMAKE_COMMAND}" -E make_directory "soundbank"
         COMMAND "${CMAKE_MMUTIL_PROGRAM}" -o${target}.bin -hsoundbank/${target}.h ${dma}
-        COMMAND "${CMAKE_COMMAND}" -P "${BIN2S_SCRIPT}" -- "${target}.bin" > "${target}.s"
+        COMMAND ${bin2sCommand}  "${target}.bin" > "${target}.s"
         WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
     )
 

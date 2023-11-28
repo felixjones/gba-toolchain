@@ -10,8 +10,10 @@ if(NOT CMAKE_SCRIPT_MODE_FILE)
     set(BIN2S_SCRIPT "${CMAKE_CURRENT_LIST_FILE}")
     function(bin2s output)
         execute_process(
-            COMMAND "${CMAKE_COMMAND}" -P "${BIN2S_SCRIPT}" -- "${output}" "${ARGN}"
+            COMMAND "${CMAKE_COMMAND}" -P "${BIN2S_SCRIPT}" -- "${ARGN}"
+            OUTPUT_VARIABLE outputVariable OUTPUT_STRIP_TRAILING_WHITESPACE
         )
+        set("${output}" "${outputVariable}" PARENT_SCOPE)
     endfunction()
     return()
 endif()

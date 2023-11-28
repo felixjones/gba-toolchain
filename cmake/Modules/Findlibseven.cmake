@@ -21,13 +21,13 @@ if(NOT libseven)
         # Download
         DOWNLOAD_DIR "${SOURCE_DIR}/download"
         GIT_REPOSITORY "https://github.com/LunarLambda/sdk-seven.git"
-        GIT_TAG "v0.20.1"
+        GIT_TAG "v0.27.0"
         # Configure
         SOURCE_DIR "${SOURCE_DIR}/source"
         SOURCE_SUBDIR "libseven"
         CMAKE_ARGS --toolchain "${CMAKE_TOOLCHAIN_FILE}"
             -DCMAKE_INSTALL_PREFIX:PATH='${SOURCE_DIR}'
-            -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+            -DCMAKE_BUILD_TYPE:STRING=Release
         # Build
         BINARY_DIR "${SOURCE_DIR}/build"
         BUILD_COMMAND "${CMAKE_COMMAND}" --build .

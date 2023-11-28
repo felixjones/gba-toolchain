@@ -44,7 +44,7 @@ if(NOT libgbfs OR NOT CMAKE_GBFS_PROGRAM OR NOT CMAKE_BIN2S_PROGRAM)
             add_library(gbfs STATIC "libgbfs.c")
 
             target_compile_options(gbfs PRIVATE
-                $<$<COMPILE_LANGUAGE:C>: -mthumb
+                $<$<COMPILE_LANGUAGE:C>:-mthumb -O2
                     -fomit-frame-pointer
                     -ffunction-sections
                     -fdata-sections

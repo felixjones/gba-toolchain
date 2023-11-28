@@ -99,7 +99,7 @@ For more information on CMake `find_package` see: [cmake-commands find_package](
 | agbabi        | Findagbabi.cmake        | Library functions optimized for the GBA ([more info](https://github.com/felixjones/agbabi))                                    |                                                                  |
 | posprintf     | Findposprintf.cmake     | Partial implementation of `sprintf` optimized for the GBA ([more info](http://www.danposluns.com/gbadev/posprintf/index.html)) |                                                                  |
 | grit          | Findgrit.cmake          | Bitmap and Tile graphics converter ([more info](https://www.coranac.com/man/grit/html/grit.htm))                               | `add_grit_bitmap`<br />`add_grit_sprite`<br />`add_grit_tilemap` |
-| butano        | Findbutano.cmake        | Butano engine ([more info](https://github.com/GValiente/butano))                                                               | `add_butano_asset_subdirectory`                                  |
+| butano        | Findbutano.cmake        | Butano engine ([more info](https://github.com/GValiente/butano))                                                               | `add_butano_assets`                                              |
 | gbt-player    | Findgbt-player.cmake    | Game Boy music player library and converter kit ([more info](https://github.com/AntonioND/gbt-player))                         | `add_gbt_assets`<br />`add_gbt_maxmod_assets`                    |                                                      |
 
 **Important**: Some modules may have external dependencies that may require tools to be compiled with a host compiler.
