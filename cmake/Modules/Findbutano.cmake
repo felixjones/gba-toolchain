@@ -142,7 +142,7 @@ function(add_butano_assets target)
 
     # Add audio outputs
     if(ARGS_AUDIO)
-        set(byproducts"${binaryDir}/_bn_audio_files_info.txt" "${binaryDir}/_bn_audio_soundbank.bin")
+        set(byproducts "${binaryDir}/_bn_audio_files_info.txt" "${binaryDir}/_bn_audio_soundbank.bin")
         set(outputs "${binaryDir}/_bn_audio_soundbank.s")
         set(headers
             "${binaryDir}/bn_music_items.h" "${binaryDir}/bn_music_items_info.h"
