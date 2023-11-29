@@ -40,7 +40,7 @@ if(NOT BUTANO_DIR)
         # Download
         DOWNLOAD_DIR "${SOURCE_DIR}/download"
         GIT_REPOSITORY "https://github.com/GValiente/butano.git"
-        GIT_TAG "16.4.0"
+        GIT_TAG "master"
     )
 
     FetchContent_Populate(butano)
