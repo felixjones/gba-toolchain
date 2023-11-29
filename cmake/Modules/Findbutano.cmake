@@ -28,6 +28,7 @@ include(Bin2s)
 find_path(BUTANO_DIR NAMES butano/butano.mak PATHS "$ENV{DEVKITPRO}/butano" "${CMAKE_SYSTEM_LIBRARY_PATH}/butano" "${BUTANO_DIR}" PATH_SUFFIXES source NO_CACHE)
 
 if(NOT BUTANO_DIR)
+    unset(BUTANO_DIR CACHE)
     set(SOURCE_DIR "${CMAKE_SYSTEM_LIBRARY_PATH}/butano")
 
     file(MAKE_DIRECTORY "${SOURCE_DIR}/temp")
@@ -39,11 +40,14 @@ if(NOT BUTANO_DIR)
         # Download
         DOWNLOAD_DIR "${SOURCE_DIR}/download"
         GIT_REPOSITORY "https://github.com/GValiente/butano.git"
-        GIT_TAG "master"
+        GIT_TAG "16.4.0"
     )
 
     FetchContent_Populate(butano)
-    set(BUTANO_DIR "${butano_SOURCE_DIR}" CACHE PATH "Path to Butano directory")
+    if(NOT butano_SOURCE_DIR)
+        message(FATAL_ERROR "Failed to fetch butano")
+    endif()
+    set(BUTANO_DIR "${butano_SOURCE_DIR}" CACHE PATH "Path to Butano directory" FORCE)
 endif()
 
 if(NOT EXISTS "${BUTANO_DIR}/CMakeLists.txt")
@@ -197,6 +201,10 @@ function(add_butano_assets target)
         endif()
         #TODO: Support JSON file generation
     endforeach()
+
+    if(NOT outputs AND NOT headers)
+        message(FATAL_ERROR "add_butano_assets called with empty assets")
+    endif()
 
     # Butano asset tool
     add_custom_command(

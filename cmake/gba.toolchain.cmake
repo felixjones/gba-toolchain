@@ -18,7 +18,11 @@ set(CMAKE_SYSTEM_PROCESSOR armv4t CACHE INTERNAL "")
 
 if(CMAKE_HOST_SYSTEM_NAME MATCHES "Windows")
     if(CMAKE_GENERATOR MATCHES "Visual Studio")
-        message(FATAL_ERROR "Toolchain is not compatible with Visual Studio (Use -G Ninja or -G Unix Makefiles)")
+        message(FATAL_ERROR "Toolchain is not compatible with Visual Studio (Use -G \"Ninja\" or -G \"Unix Makefiles\")")
+    endif()
+
+    if(CMAKE_GENERATOR STREQUAL "NMake Makefiles")
+        message(FATAL_ERROR "Toolchain is not compatible with NMake (Use -G \"Ninja\" or -G \"Unix Makefiles\")")
     endif()
 
     # Fixup devkitPro default environment paths for Windows
@@ -104,6 +108,12 @@ if(GNUARM_LATEST)
 endif()
 
 set(COMPILER_SEARCH_PATHS "$ENV{GNUARM}" "$ENV{DEVKITARM}" "$ENV{DEVKITPRO}/devkitARM")
+
+# Set library prefixes and suffixes
+if(NOT CMAKE_FIND_LIBRARY_PREFIXES OR NOT CMAKE_FIND_LIBRARY_SUFFIXES)
+    set(CMAKE_FIND_LIBRARY_PREFIXES "lib" CACHE INTERNAL "")
+    set(CMAKE_FIND_LIBRARY_SUFFIXES ".so" ".a" CACHE INTERNAL "")
+endif()
 
 # Set CMAKE_MAKE_PROGRAM for Unix Makefiles
 if(CMAKE_GENERATOR STREQUAL "Unix Makefiles" AND NOT CMAKE_MAKE_PROGRAM)
