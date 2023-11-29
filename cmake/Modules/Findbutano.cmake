@@ -183,6 +183,7 @@ function(add_butano_assets target)
     endif()
 
     # Butano asset tool
+    find_file(butano_assets_tool NAMES "butano_assets_tool.py" PATHS "${BUTANO_DIR}/butano/tools")
     add_custom_command(
         OUTPUT ${outputs} ${headers}
         BYPRODUCTS "${byproducts}"
