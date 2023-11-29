@@ -63,14 +63,13 @@ if(NOT EXISTS "${BUTANO_DIR}/CMakeLists.txt")
         file(GLOB src "butano/src/*.cpp")
         file(GLOB hw_src "butano/hw/src/*.cpp")
         file(GLOB hw_asm "butano/hw/src/*.s")
-        file(GLOB common "common/src/*.cpp")
 
         # 3rd party code
         file(GLOB_RECURSE cpp_3rd_party "butano/hw/3rd_party/*.cpp")
         file(GLOB_RECURSE c_3rd_party "butano/hw/3rd_party/*.c")
         file(GLOB_RECURSE asm_3rd_party "butano/hw/3rd_party/*.s")
 
-        add_library(butano OBJECT ${src} ${hw_src} ${hw_asm} ${common}
+        add_library(butano OBJECT ${src} ${hw_src} ${hw_asm}
             ${cpp_3rd_party}
             ${c_3rd_party}
             ${asm_3rd_party}
@@ -78,7 +77,6 @@ if(NOT EXISTS "${BUTANO_DIR}/CMakeLists.txt")
 
         target_include_directories(butano PUBLIC
             "butano/include"
-            "common/include"
             "butano/hw/3rd_party/libtonc/include"
         )
         target_include_directories(butano PRIVATE
@@ -90,17 +88,13 @@ if(NOT EXISTS "${BUTANO_DIR}/CMakeLists.txt")
         set(ARCH -mthumb -mthumb-interwork)
         set(CWARNINGS -Wall -Wextra -Wpedantic -Wshadow -Wundef -Wunused-parameter -Wmisleading-indentation -Wduplicated-cond
                 -Wduplicated-branches -Wlogical-op -Wnull-dereference -Wswitch-default -Wstack-usage=16384)
-        set(CFLAGS ${CWARNINGS} -mcpu=arm7tdmi -mtune=arm7tdmi -ffast-math -ffunction-sections -fdata-sections ${ARCH})
+        set(CFLAGS ${CWARNINGS} -gdwarf-4 -O2 -mcpu=arm7tdmi -mtune=arm7tdmi -ffast-math -ffunction-sections -fdata-sections ${ARCH})
         set(CPPWARNINGS -Wuseless-cast -Wnon-virtual-dtor -Woverloaded-virtual)
 
         target_compile_options(butano PRIVATE
             $<$<COMPILE_LANGUAGE:ASM>:${ARCH} -x assembler-with-cpp>
             $<$<COMPILE_LANGUAGE:C>:${CFLAGS}>
             $<$<COMPILE_LANGUAGE:CXX>:${CFLAGS} ${CPPWARNINGS} -fno-rtti -fno-exceptions -fno-threadsafe-statics -fuse-cxa-atexit>
-            $<$<CONFIG:Release>:-O2>
-            $<$<CONFIG:Debug>:-O0 -g>
-            $<$<CONFIG:MinSizeRel>:-Os>
-            $<$<CONFIG:RelWithDebInfo>:-Og -g>
         )
 
         target_compile_definitions(butano PUBLIC
@@ -135,24 +129,6 @@ if(CMAKE_BIN2S_PROGRAM)
 else()
     set(bin2sCommand "${CMAKE_COMMAND}" -P "${BIN2S_SCRIPT}" --)
 endif()
-
-# Generate Butano common assets
-find_file(butano_assets_tool NAMES "butano_assets_tool.py" PATHS "${BUTANO_DIR}/butano/tools" NO_CACHE)
-execute_process(
-    COMMAND "${CMAKE_COMMAND}" -E make_directory "${CMAKE_BINARY_DIR}/butano_common"
-    COMMAND "${Python_EXECUTABLE}" "${butano_assets_tool}"
-        --grit="${CMAKE_GRIT_PROGRAM}"
-        --mmutil="${CMAKE_MMUTIL_PROGRAM}"
-        --audio=common/audio
-        --dmg_audio=common/dmg_audio
-        --graphics=common/graphics
-        --build=${CMAKE_BINARY_DIR}/butano_common
-    WORKING_DIRECTORY "${BUTANO_DIR}"
-)
-file(GLOB butanoCommon "${CMAKE_BINARY_DIR}/butano_common/*.s")
-target_sources(butano PRIVATE ${butanoCommon})
-target_include_directories(butano PRIVATE "${CMAKE_BINARY_DIR}/butano_common")
-unset(butanoCommon)
 
 function(add_butano_assets target)
     set(multiValueArgs
