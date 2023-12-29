@@ -153,6 +153,7 @@ function(add_asset_library target)
         COMMAND ${bin2sCommand} "${assetsEval}" > "${CMAKE_BINARY_DIR}/${target}.s"
         DEPENDS ${assetsEval}
         WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+        COMMAND_EXPAND_LISTS
     )
 
     add_library(${target} OBJECT ${target}.s)
