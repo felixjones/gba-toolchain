@@ -168,7 +168,7 @@ function(add_superfamiconv_graphics target)
         add_custom_command(
             OUTPUT ${mapOutputs}
             DEPENDS ${ARGS_UNPARSED_ARGUMENTS} ${tilesOutputs} ${paletteOutputs}
-            COMMAND "${CMAKE_COMMAND}" -DTILES=ON
+            COMMAND "${CMAKE_COMMAND}" -DMAP=ON
                 "-DPROGRAM=${CMAKE_SUPERFAMICONV_PROGRAM}"
                 "-DPREFIX=${CMAKE_BINARY_DIR}/"
                 -DSUFFIX=.map
