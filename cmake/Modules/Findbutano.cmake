@@ -105,15 +105,28 @@ if(NOT EXISTS "${BUTANO_DIR}/CMakeLists.txt")
             BN_IWRAM_END=__fini_array_end
         )
 
+        execute_process(COMMAND "${CMAKE_C_COMPILER}" --version OUTPUT_VARIABLE GNU_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
+        if(GNU_VERSION MATCHES "devkitARM")
+            target_compile_definitions(butano PUBLIC
+                BN_ROM_START=__text_start
+                BN_ROM_END=__rom_end__
+            )
+        else()
+            target_compile_definitions(butano PUBLIC
+                BN_ROM_START=__start
+                BN_ROM_END=__rom_end
+            )
+        endif()
+
         # Set IWRAM compile options
         get_target_property(iwramSources butano SOURCES)
         list(FILTER iwramSources INCLUDE REGEX ".+\\.bn_iwram\\..+")
-        set_source_files_properties(${iwramSources} PROPERTIES COMPILE_FLAGS "-fno-lto -marm -mlong-calls -O2")
+        set_source_files_properties(${iwramSources} PROPERTIES COMPILE_FLAGS "-fno-lto -marm -mlong-calls")
 
         # Set EWRAM compile options
         get_target_property(ewramSources butano SOURCES)
         list(FILTER ewramSources INCLUDE REGEX ".+\\.bn_ewram\\..+")
-        set_source_files_properties(${ewramSources} PROPERTIES COMPILE_FLAGS "-fno-lto -O2")
+        set_source_files_properties(${ewramSources} PROPERTIES COMPILE_FLAGS "-fno-lto")
 
         # Set no-flto compile options
         get_target_property(nofltoSources butano SOURCES)
