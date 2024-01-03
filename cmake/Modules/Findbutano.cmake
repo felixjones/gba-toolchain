@@ -103,20 +103,9 @@ if(NOT EXISTS "${BUTANO_DIR}/CMakeLists.txt")
             BN_IWRAM_START=__iwram_start__
             BN_IWRAM_TOP=__iwram_top
             BN_IWRAM_END=__fini_array_end
+            BN_ROM_START=__start
+            BN_ROM_END=__rom_end
         )
-
-        execute_process(COMMAND "${CMAKE_C_COMPILER}" --version OUTPUT_VARIABLE GNU_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
-        if(GNU_VERSION MATCHES "devkitARM")
-            target_compile_definitions(butano PUBLIC
-                BN_ROM_START=__text_start
-                BN_ROM_END=__rom_end__
-            )
-        else()
-            target_compile_definitions(butano PUBLIC
-                BN_ROM_START=__start
-                BN_ROM_END=__rom_end
-            )
-        endif()
 
         # Set IWRAM compile options
         get_target_property(iwramSources butano SOURCES)
