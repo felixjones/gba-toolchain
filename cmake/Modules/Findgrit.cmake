@@ -130,8 +130,8 @@ if(NOT CMAKE_GRIT_PROGRAM)
 endif()
 
 function(add_grit_tilemap target type)
-    file(RELATIVE_PATH inpath "${CMAKE_BINARY_DIR}" "${CMAKE_SOURCE_DIR}")
-    set(outpath "${CMAKE_BINARY_DIR}")
+    file(RELATIVE_PATH inpath "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_SOURCE_DIR}")
+    set(outpath "${CMAKE_CURRENT_BINARY_DIR}")
 
     set(oneValueArgs
         SHARED_PREFIX # File to use for shared output (default is target name when sharing is used)
@@ -301,14 +301,14 @@ function(add_grit_tilemap target type)
         COMMAND "${CMAKE_GRIT_PROGRAM}" ${input} ${opts}
         DEPENDS ${input}
         VERBATIM
-        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
+        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
     )
 
     # Setup the target
 
     if(type STREQUAL C OR type STREQUAL ASM)
         add_library(${target} OBJECT ${output})
-        target_include_directories(${target} INTERFACE "${CMAKE_BINARY_DIR}")
+        target_include_directories(${target} INTERFACE "${CMAKE_CURRENT_BINARY_DIR}")
     else()
         add_custom_target(${target} DEPENDS ${output})
         set_target_properties(${target} PROPERTIES OBJECTS "${output}")
@@ -321,8 +321,8 @@ function(add_grit_sprite target type)
 endfunction()
 
 function(add_grit_bitmap target type)
-    file(RELATIVE_PATH inpath "${CMAKE_BINARY_DIR}" "${CMAKE_SOURCE_DIR}")
-    set(outpath "${CMAKE_BINARY_DIR}")
+    file(RELATIVE_PATH inpath "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_SOURCE_DIR}")
+    set(outpath "${CMAKE_CURRENT_BINARY_DIR}")
 
     set(oneValueArgs
         SHARED_PREFIX # File to use for shared output (default is target name when sharing is used)
@@ -468,14 +468,14 @@ function(add_grit_bitmap target type)
         COMMAND "${CMAKE_GRIT_PROGRAM}" ${input} ${opts}
         DEPENDS ${input}
         VERBATIM
-        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
+        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
     )
 
     # Setup the target
 
     if(type STREQUAL C OR type STREQUAL ASM)
         add_library(${target} OBJECT ${output})
-        target_include_directories(${target} INTERFACE "${CMAKE_BINARY_DIR}")
+        target_include_directories(${target} INTERFACE "${CMAKE_CURRENT_BINARY_DIR}")
     else()
         add_custom_target(${target} DEPENDS ${output})
         set_target_properties(${target} PROPERTIES OBJECTS "${output}")
