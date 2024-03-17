@@ -140,7 +140,7 @@ function(add_butano_assets target)
     )
     cmake_parse_arguments(ARGS "" "" "${multiValueArgs}" ${ARGN})
 
-    set(binaryDir "${CMAKE_BINARY_DIR}/butano_${target}_assets")
+    set(binaryDir "${CMAKE_CURRENT_BINARY_DIR}/butano_${target}_assets")
 
     # Add audio outputs
     if(ARGS_AUDIO)
@@ -198,7 +198,7 @@ function(add_butano_assets target)
             --graphics="${ARGS_GRAPHICS}"
             --build="${binaryDir}"
         COMMAND ${bin2sCommand} "${binaryDir}/_bn_audio_soundbank.bin" > "${binaryDir}/_bn_audio_soundbank.s"
-        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
     )
 
     add_library(${target} OBJECT ${outputs})

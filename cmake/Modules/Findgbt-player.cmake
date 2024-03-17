@@ -107,17 +107,17 @@ function(add_gbt_assets target)
                 COMMAND "${CMAKE_COMMAND}" -E env "${Python_EXECUTABLE}" "${s3m2gbt}"
                     --input "${input}"
                     --name "${target}_${name}"
-                    --output "${CMAKE_BINARY_DIR}/${output}"
+                    --output "${CMAKE_CURRENT_BINARY_DIR}/${output}"
                     --instruments
-                WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+                WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
             )
         elseif(ext STREQUAL ".mod")
             add_custom_command(
                 OUTPUT "${output}"
                 COMMAND "${CMAKE_COMMAND}" -E env "${Python_EXECUTABLE}" "${mod2gbt}"
-                    "${CMAKE_SOURCE_DIR}/${input}" "${target}_${name}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/${input}" "${target}_${name}"
                 COMMAND "${CMAKE_COMMAND}" -E rename "${target}_${output}" "${output}"
-                WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
+                WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
             )
         else()
             message(FATAL_ERROR "${input} must be .s3m or .mod format")
@@ -143,14 +143,14 @@ function(add_gbt_maxmod_assets target)
                 BYPRODUCTS "${name}_psg.s3m"
                 COMMAND "${CMAKE_COMMAND}" -E env "${Python_EXECUTABLE}" "${s3msplit}"
                     --input "${input}"
-                    --psg "${CMAKE_BINARY_DIR}/${name}_psg.s3m"
-                    --dma "${CMAKE_BINARY_DIR}/${name}_dma.s3m"
+                    --psg "${CMAKE_CURRENT_BINARY_DIR}/${name}_psg.s3m"
+                    --dma "${CMAKE_CURRENT_BINARY_DIR}/${name}_dma.s3m"
                 COMMAND "${CMAKE_COMMAND}" -E env "${Python_EXECUTABLE}" "${s3m2gbt}"
-                    --input "${CMAKE_BINARY_DIR}/${name}_psg.s3m"
+                    --input "${CMAKE_CURRENT_BINARY_DIR}/${name}_psg.s3m"
                     --name "${target}_${name}"
-                    --output "${CMAKE_BINARY_DIR}/${output}"
+                    --output "${CMAKE_CURRENT_BINARY_DIR}/${output}"
                     --instruments
-                WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+                WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
             )
             list(APPEND outputs ${output})
             list(APPEND dma "${name}_dma.s3m")
@@ -172,9 +172,9 @@ function(add_gbt_maxmod_assets target)
         COMMAND "${CMAKE_COMMAND}" -E make_directory "soundbank"
         COMMAND "${CMAKE_MMUTIL_PROGRAM}" -o${target}.bin -hsoundbank/${target}.h ${dma}
         COMMAND ${bin2sCommand}  "${target}.bin" > "${target}.s"
-        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
+        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
     )
 
     add_library(${target} OBJECT ${outputs} "${target}.s")
-    target_include_directories(${target} INTERFACE ${CMAKE_BINARY_DIR})
+    target_include_directories(${target} INTERFACE ${CMAKE_CURRENT_BINARY_DIR})
 endfunction()
