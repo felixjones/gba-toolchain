@@ -150,9 +150,9 @@ function(add_asset_library target)
 
     add_custom_command(
         OUTPUT ${target}.s
-        COMMAND ${bin2sCommand} "${assetsEval}" > "${CMAKE_BINARY_DIR}/${target}.s"
+        COMMAND ${bin2sCommand} "${assetsEval}" > "${CMAKE_CURRENT_BINARY_DIR}/${target}.s"
         DEPENDS ${assetsEval}
-        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
         COMMAND_EXPAND_LISTS
     )
 

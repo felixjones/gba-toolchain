@@ -130,7 +130,7 @@ if(NOT CMAKE_GRIT_PROGRAM)
 endif()
 
 function(add_grit_tilemap target type)
-    file(RELATIVE_PATH inpath "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_SOURCE_DIR}")
+    file(RELATIVE_PATH inpath "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
     set(outpath "${CMAKE_CURRENT_BINARY_DIR}")
 
     set(oneValueArgs
@@ -321,7 +321,7 @@ function(add_grit_sprite target type)
 endfunction()
 
 function(add_grit_bitmap target type)
-    file(RELATIVE_PATH inpath "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_SOURCE_DIR}")
+    file(RELATIVE_PATH inpath "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
     set(outpath "${CMAKE_CURRENT_BINARY_DIR}")
 
     set(oneValueArgs

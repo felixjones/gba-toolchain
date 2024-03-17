@@ -123,11 +123,11 @@ function(add_superfamiconv_graphics target)
             DEPENDS ${ARGS_UNPARSED_ARGUMENTS}
             COMMAND "${CMAKE_COMMAND}" -DPALETTE=ON
                 "-DPROGRAM=${CMAKE_SUPERFAMICONV_PROGRAM}"
-                "-DPREFIX=${CMAKE_BINARY_DIR}/"
+                "-DPREFIX=${CMAKE_CURRENT_BINARY_DIR}/"
                 -DSUFFIX=.palette
                 "-DINPUTS=${ARGS_UNPARSED_ARGUMENTS}"
                 -P "${SUPERFAMICONV_SCRIPT}"
-            WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+            WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
             VERBATIM
         )
     endif()
@@ -146,13 +146,13 @@ function(add_superfamiconv_graphics target)
             COMMAND "${CMAKE_COMMAND}" -DTILES=ON
                 "-DPROGRAM=${CMAKE_SUPERFAMICONV_PROGRAM}"
                 "-DPARAMS=$<IF:$<BOOL:${ARGS_SPRITE_MODE}>,--no-discard,${ARGS_TILES}>"
-                "-DPREFIX=${CMAKE_BINARY_DIR}/"
+                "-DPREFIX=${CMAKE_CURRENT_BINARY_DIR}/"
                 -DSUFFIX=.tiles
-                "-DPREFIX_PALETTE=${CMAKE_BINARY_DIR}/"
+                "-DPREFIX_PALETTE=${CMAKE_CURRENT_BINARY_DIR}/"
                 -DSUFFIX_PALETTE=.palette
                 "-DINPUTS=${ARGS_UNPARSED_ARGUMENTS}"
                 -P "${SUPERFAMICONV_SCRIPT}"
-            WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+            WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
             VERBATIM
         )
     endif()
@@ -170,15 +170,15 @@ function(add_superfamiconv_graphics target)
             DEPENDS ${ARGS_UNPARSED_ARGUMENTS} ${tilesOutputs} ${paletteOutputs}
             COMMAND "${CMAKE_COMMAND}" -DMAP=ON
                 "-DPROGRAM=${CMAKE_SUPERFAMICONV_PROGRAM}"
-                "-DPREFIX=${CMAKE_BINARY_DIR}/"
+                "-DPREFIX=${CMAKE_CURRENT_BINARY_DIR}/"
                 -DSUFFIX=.map
-                "-DPREFIX_PALETTE=${CMAKE_BINARY_DIR}/"
+                "-DPREFIX_PALETTE=${CMAKE_CURRENT_BINARY_DIR}/"
                 -DSUFFIX_PALETTE=.palette
-                "-DPREFIX_TILES=${CMAKE_BINARY_DIR}/"
+                "-DPREFIX_TILES=${CMAKE_CURRENT_BINARY_DIR}/"
                 -DSUFFIX_TILES=.tiles
                 "-DINPUTS=${ARGS_UNPARSED_ARGUMENTS}"
                 -P "${SUPERFAMICONV_SCRIPT}"
-            WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+            WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
             VERBATIM
         )
     endif()
@@ -187,7 +187,7 @@ function(add_superfamiconv_graphics target)
 
     set(binaryOutput)
     foreach(output ${outputs})
-        list(APPEND binaryOutput "${CMAKE_BINARY_DIR}/${output}")
+        list(APPEND binaryOutput "${CMAKE_CURRENT_BINARY_DIR}/${output}")
     endforeach()
 
     set_target_properties(${target} PROPERTIES

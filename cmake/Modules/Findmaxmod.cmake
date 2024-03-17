@@ -190,19 +190,19 @@ function(add_maxmod_soundbank target)
 
     add_custom_command(
         OUTPUT ${target}.bin soundbank/${target}.h
-        COMMAND "${CMAKE_COMMAND}" -E make_directory "${CMAKE_BINARY_DIR}/soundbank"
-        COMMAND "${CMAKE_MMUTIL_PROGRAM}" -o${CMAKE_BINARY_DIR}/${target}.bin -h${CMAKE_BINARY_DIR}/soundbank/${target}.h ${ASSETS}
+        COMMAND "${CMAKE_COMMAND}" -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/soundbank"
+        COMMAND "${CMAKE_MMUTIL_PROGRAM}" -o${CMAKE_CURRENT_BINARY_DIR}/${target}.bin -h${CMAKE_CURRENT_BINARY_DIR}/soundbank/${target}.h ${ASSETS}
         DEPENDS ${ASSETS}
-        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
         VERBATIM
         COMMAND_EXPAND_LISTS
     )
 
     add_library(${target} INTERFACE)
-    target_include_directories(${target} INTERFACE ${CMAKE_BINARY_DIR})
+    target_include_directories(${target} INTERFACE ${CMAKE_CURRENT_BINARY_DIR})
 
     set_target_properties(${target} PROPERTIES
         ASSETS "${ARGN}"
-        BIN_FILE "${CMAKE_BINARY_DIR}/${target}.bin"
+        BIN_FILE "${CMAKE_CURRENT_BINARY_DIR}/${target}.bin"
     )
 endfunction()
