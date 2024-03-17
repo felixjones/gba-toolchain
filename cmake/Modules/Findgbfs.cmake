@@ -173,8 +173,8 @@ function(add_gbfs_archive target)
 
     add_custom_command(
         OUTPUT ${target}.gbfs ${target}.s
-        COMMAND "${CMAKE_GBFS_PROGRAM}" "${CMAKE_BINARY_DIR}/${target}.gbfs" ${ASSETS}
-        COMMAND "${CMAKE_BIN2S_PROGRAM}" "${CMAKE_BINARY_DIR}/${target}.gbfs" > "${CMAKE_BINARY_DIR}/${target}.s"
+        COMMAND "${CMAKE_GBFS_PROGRAM}" "${CMAKE_CURRENT_BINARY_DIR}/${target}.gbfs" ${ASSETS}
+        COMMAND "${CMAKE_BIN2S_PROGRAM}" "${CMAKE_CURRENT_BINARY_DIR}/${target}.gbfs" > "${CMAKE_CURRENT_BINARY_DIR}/${target}.s"
         DEPENDS ${ASSETS}
         VERBATIM
         COMMAND_EXPAND_LISTS
@@ -183,11 +183,11 @@ function(add_gbfs_archive target)
 
     add_library(${target} OBJECT ${target}.s)
 
-    install(FILES "${CMAKE_BINARY_DIR}/${target}.gbfs" DESTINATION .)
+    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${target}.gbfs" DESTINATION .)
 
     set_target_properties(${target} PROPERTIES
         ASSETS "${ARGN}"
-        GBFS_FILE "${CMAKE_BINARY_DIR}/${target}.gbfs"
+        GBFS_FILE "${CMAKE_CURRENT_BINARY_DIR}/${target}.gbfs"
     )
 endfunction()
 
