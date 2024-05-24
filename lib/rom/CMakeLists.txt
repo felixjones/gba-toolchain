@@ -1,29 +1,25 @@
 #===============================================================================
 #
-# Copyright (C) 2021-2023 gba-toolchain contributors
+# Copyright (C) 2021-2024 gba-toolchain contributors
 # For conditions of distribution and use, see copyright notice in LICENSE.md
 #
 #===============================================================================
 
-enable_language(ASM)
+cmake_minimum_required(VERSION 3.25.1)
+project(librom ASM)
+
+if(TARGET librom)
+    return()
+endif()
 
 add_library(librom STATIC
-    crt0.s
-    rom.header.s
+        crt0.s
+        rom.header.s
 )
 set_target_properties(librom PROPERTIES PREFIX "")
 
-target_link_options(librom
-    PRIVATE
-        -Wl,--gc-sections
-    INTERFACE
-        -T "${CMAKE_CURRENT_LIST_DIR}/rom.ld"
-        $<$<BOOL:${CMAKE_NANO}>:-specs=nano.specs>
+target_link_options(librom INTERFACE
+        -T "${CMAKE_CURRENT_SOURCE_DIR}/rom.ld"
+        $<$<BOOL:${NEWLIB_NANO}>:-specs=nano.specs>
         -specs=nosys.specs
 )
-
-execute_process(COMMAND "${CMAKE_C_COMPILER}" --version OUTPUT_VARIABLE GNU_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
-if(NOT GNU_VERSION MATCHES "devkitARM")
-    enable_language(C)
-    target_sources(librom PRIVATE syscalls.c)
-endif()

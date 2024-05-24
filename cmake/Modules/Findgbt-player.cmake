@@ -1,180 +1,199 @@
 #===============================================================================
 #
-# Copyright (C) 2021-2023 gba-toolchain contributors
+# Finds Gbt-Player and provides the `add_s3msplit_command` and `add_gbt_library` functions
+#   If Gbt-Player is not available, it will be downloaded and compiled.
+#   `add_s3msplit_command` splits s3m files into dedicated PSG and DMA s3m files.
+#   `add_gbt_library` compiles s3m files into an object library to be linked.
+#
+# Files split with `add_s3msplit_command` will be marked GENERATED.
+# The files are split relative to `CMAKE_CURRENT_BINARY_DIR`.
+#
+# Multiple Gbt-Player libraries may be linked together to produce a single soundbank.
+#
+# Gbt-Player libraries have the following properties:
+#   `GBT_SOURCES` list of source paths relative to `CMAKE_CURRENT_SOURCE_DIR`.
+#
+# When passing sources directly to `add_gbt_library` the GENERATED flag will be checked
+# this allows Gbt-Player libraries to be built with generated files (such as from `add_s3msplit_command`)
+#
+# Gbt-Player libraries also provide an INTERFACE link to libgbtplayer for convenience.
+#
+# Example splitting s3m file for both MaxMod and Gbt-Player:
+#   ```cmake
+#   add_s3msplit_command(template_combined.s3m
+#        PSG music/template_combined_psg.s3m
+#        DMA maxmod/template_combined_dma.s3m
+#   )
+#   add_maxmod_library(soundbank
+#        maxmod/template_combined_dma.s3m
+#   )
+#   add_gbt_library(gbt
+#        music/template_combined_psg.s3m
+#   )
+#   target_link_libraries(my_target PRIVATE soundbank gbt)
+#   ```
+#
+# Split S3M command:
+#   `add_s3msplit_command(<input-s3m> <PSG output-psg> <DMA output-dma>)`
+#
+# Add Gbt-Player library command:
+#   `add_gbt_library(<target> <file-path>...)`
+#
+# Copyright (C) 2021-2024 gba-toolchain contributors
 # For conditions of distribution and use, see copyright notice in LICENSE.md
 #
 #===============================================================================
 
-enable_language(ASM C)
-
-include(FetchContent)
-
-find_library(libgbt_player gbt_player PATHS "${CMAKE_SYSTEM_LIBRARY_PATH}/gbt_player" "${GBT_PLAYER_DIR}" PATH_SUFFIXES lib)
-
-if(NOT libgbt_player)
-    set(SOURCE_DIR "${CMAKE_SYSTEM_LIBRARY_PATH}/gbt_player")
-
-    file(MAKE_DIRECTORY "${SOURCE_DIR}/include")
-    file(MAKE_DIRECTORY "${SOURCE_DIR}/temp")
-    file(WRITE "${SOURCE_DIR}/temp/CMakeLists.txt" [=[
-        cmake_minimum_required(VERSION 3.18)
-        project(gbt_player C)
-
-        add_library(gbt-player STATIC "gba/gbt_player/gbt_player.c")
-
-        target_compile_options(gbt-player PRIVATE
-            $<$<COMPILE_LANGUAGE:C>:-mthumb -O2
-                -fomit-frame-pointer
-                -ffunction-sections
-                -fdata-sections
-                -Wall
-                -Wextra
-                -Wpedantic
-                -Wconversion
-                -Wno-sign-conversion
-                -Wno-stringop-truncation
-            >
-        )
-
-        if(CMAKE_PROJECT_NAME STREQUAL gbt_player)
-            install(TARGETS gbt-player
-                LIBRARY DESTINATION lib
-            )
-            install(FILES "gba/gbt_player/gbt_hardware.h" "gba/gbt_player/gbt_player.h"
-                DESTINATION include
-            )
-        else()
-            file(INSTALL "gba/gbt_player/gbt_hardware.h" "gba/gbt_player/gbt_player.h" DESTINATION "${SOURCE_DIR}/build/include")
-            target_include_directories(gbt-player INTERFACE "${SOURCE_DIR}/build/include")
-        endif()
-    ]=])
-
-    ExternalProject_Add(gbt_player_proj
-        PREFIX "${SOURCE_DIR}"
-        TMP_DIR "${SOURCE_DIR}/temp"
-        STAMP_DIR "${SOURCE_DIR}/stamp"
-        # Download
-        DOWNLOAD_DIR "${SOURCE_DIR}/download"
-        GIT_REPOSITORY "https://github.com/AntonioND/gbt-player.git"
-        GIT_TAG "master"
-        # Update
-        UPDATE_COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-            "${SOURCE_DIR}/temp/CMakeLists.txt"
-            "${SOURCE_DIR}/source/CMakeLists.txt"
-        # Configure
-        SOURCE_DIR "${SOURCE_DIR}/source"
-        CMAKE_ARGS --toolchain "${CMAKE_TOOLCHAIN_FILE}"
-            -DCMAKE_INSTALL_PREFIX:PATH='${SOURCE_DIR}'
-        # Build
-        BINARY_DIR "${SOURCE_DIR}/build"
-        BUILD_COMMAND "${CMAKE_COMMAND}" --build .
-        BUILD_BYPRODUCTS "${SOURCE_DIR}/build/libgbt-player.a"
-        # Install
-        INSTALL_DIR "${SOURCE_DIR}"
-    )
-
-    add_library(gbt-player STATIC IMPORTED)
-    add_dependencies(gbt-player gbt_player_proj)
-    set_property(TARGET gbt-player PROPERTY IMPORTED_LOCATION "${SOURCE_DIR}/build/libgbt-player.a")
-    target_include_directories(gbt-player INTERFACE "${SOURCE_DIR}/include")
-else()
-    add_library(gbt-player STATIC IMPORTED)
-    set_property(TARGET gbt-player PROPERTY IMPORTED_LOCATION "${libgbt_player}")
-
-    get_filename_component(INCLUDE_PATH "${libgbt_player}" DIRECTORY)
-    get_filename_component(INCLUDE_PATH "${INCLUDE_PATH}" DIRECTORY)
-    target_include_directories(gbt-player INTERFACE "${INCLUDE_PATH}/include")
-endif()
-
-unset(libgbt_player CACHE)
-
-# gbt-player tools
 if(NOT Python_EXECUTABLE)
     find_package(Python COMPONENTS Interpreter REQUIRED)
 endif()
 
-find_file(s3m2gbt NAMES "gba/s3m2gbt/s3m2gbt.py" PATHS "${CMAKE_SYSTEM_LIBRARY_PATH}/gbt_player" "${GBT_PLAYER_DIR}" PATH_SUFFIXES source NO_CACHE)
-find_file(mod2gbt NAMES "gba/mod2gbt/mod2gbt.py" PATHS "${CMAKE_SYSTEM_LIBRARY_PATH}/gbt_player" "${GBT_PLAYER_DIR}" PATH_SUFFIXES source NO_CACHE)
-function(add_gbt_assets target)
-    foreach(input ${ARGN})
-        get_filename_component(name ${input} NAME_WE)
-        get_filename_component(ext ${input} LAST_EXT)
-        set(output "${name}.c")
+function(add_s3msplit_command input)
+    set(oneValueArgs PSG DMA)
+    cmake_parse_arguments(ARGS "" "${oneValueArgs}" "" ${ARGN})
 
-        if(ext STREQUAL ".s3m")
-            add_custom_command(
-                OUTPUT "${output}"
-                COMMAND "${CMAKE_COMMAND}" -E env "${Python_EXECUTABLE}" "${s3m2gbt}"
-                    --input "${input}"
-                    --name "${target}_${name}"
-                    --output "${CMAKE_CURRENT_BINARY_DIR}/${output}"
-                    --instruments
-                WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-            )
-        elseif(ext STREQUAL ".mod")
-            add_custom_command(
-                OUTPUT "${output}"
-                COMMAND "${CMAKE_COMMAND}" -E env "${Python_EXECUTABLE}" "${mod2gbt}"
-                    "${CMAKE_CURRENT_SOURCE_DIR}/${input}" "${target}_${name}"
-                COMMAND "${CMAKE_COMMAND}" -E rename "${target}_${output}" "${output}"
-                WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-            )
-        else()
-            message(FATAL_ERROR "${input} must be .s3m or .mod format")
-        endif()
-        list(APPEND outputs ${output})
-    endforeach()
-
-    add_library(${target} OBJECT ${outputs})
-endfunction()
-
-find_file(s3msplit NAMES "gba/s3msplit/s3msplit.py" PATHS "${CMAKE_SYSTEM_LIBRARY_PATH}/gbt_player" "${GBT_PLAYER_DIR}" PATH_SUFFIXES source NO_CACHE)
-function(add_gbt_maxmod_assets target)
-    find_package(maxmod REQUIRED)
-
-    foreach(input ${ARGN})
-        get_filename_component(name ${input} NAME_WE)
-        get_filename_component(ext ${input} LAST_EXT)
-        set(output "${name}.c")
-
-        if(ext STREQUAL ".s3m")
-            add_custom_command(
-                OUTPUT "${output}" "${name}_dma.s3m"
-                BYPRODUCTS "${name}_psg.s3m"
-                COMMAND "${CMAKE_COMMAND}" -E env "${Python_EXECUTABLE}" "${s3msplit}"
-                    --input "${input}"
-                    --psg "${CMAKE_CURRENT_BINARY_DIR}/${name}_psg.s3m"
-                    --dma "${CMAKE_CURRENT_BINARY_DIR}/${name}_dma.s3m"
-                COMMAND "${CMAKE_COMMAND}" -E env "${Python_EXECUTABLE}" "${s3m2gbt}"
-                    --input "${CMAKE_CURRENT_BINARY_DIR}/${name}_psg.s3m"
-                    --name "${target}_${name}"
-                    --output "${CMAKE_CURRENT_BINARY_DIR}/${output}"
-                    --instruments
-                WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-            )
-            list(APPEND outputs ${output})
-            list(APPEND dma "${name}_dma.s3m")
-        else()
-            message(FATAL_ERROR "${input} must be .s3m format")
-        endif()
-    endforeach()
-
-    if(CMAKE_BIN2S_PROGRAM)
-        set(bin2sCommand "${CMAKE_BIN2S_PROGRAM}")
-    else()
-        set(bin2sCommand "${CMAKE_COMMAND}" -P "${BIN2S_SCRIPT}" --)
-    endif()
-
-    add_custom_command(
-        OUTPUT "${target}.s" "soundbank/${target}.h"
-        BYPRODUCTS "${target}.bin"
-        DEPENDS ${dma}
-        COMMAND "${CMAKE_COMMAND}" -E make_directory "soundbank"
-        COMMAND "${CMAKE_MMUTIL_PROGRAM}" -o${target}.bin -hsoundbank/${target}.h ${dma}
-        COMMAND ${bin2sCommand}  "${target}.bin" > "${target}.s"
-        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+    get_filename_component(psgPath "${ARGS_PSG}" DIRECTORY)
+    get_filename_component(dmaPath "${ARGS_DMA}" DIRECTORY)
+    add_custom_command(OUTPUT "${ARGS_PSG}" "${ARGS_DMA}"
+            DEPENDS "${input}"
+            # Make output dirs
+            COMMAND "${CMAKE_COMMAND}" -E make_directory "${psgPath}"
+            COMMAND "${CMAKE_COMMAND}" -E make_directory "${dmaPath}"
+            # Run s3msplit.py
+            COMMAND "${Python_EXECUTABLE}" "${S3MSPLIT_PATH}"
+                --input "${CMAKE_CURRENT_SOURCE_DIR}/${input}"
+                --psg "${ARGS_PSG}"
+                --dma "${ARGS_DMA}"
+                > $<IF:$<BOOL:${CMAKE_HOST_WIN32}>,NUL,/dev/null> # Silence stdout
     )
 
-    add_library(${target} OBJECT ${outputs} "${target}.s")
-    target_include_directories(${target} INTERFACE ${CMAKE_CURRENT_BINARY_DIR})
+    set_source_files_properties("${ARGS_PSG}" "${ARGS_DMA}" PROPERTIES GENERATED TRUE)
 endfunction()
+
+function(add_gbt_library target)
+    set(gbtTargetDir "_gbt/${target}.dir")
+    file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${gbtTargetDir}")
+    set(sourcesEval $<TARGET_PROPERTY:${target},INTERFACE_SOURCES>)
+
+    if(NOT C IN_LIST ENABLED_LANGUAGES)
+        enable_language(C)
+    endif()
+
+    add_custom_command(OUTPUT "${gbtTargetDir}/${target}.o"
+            DEPENDS $<PATH:ABSOLUTE_PATH,NORMALIZE,${sourcesEval},${CMAKE_CURRENT_SOURCE_DIR}>
+            # Run s3m2gbt_multi.py
+            COMMAND "${Python_EXECUTABLE}" "${S3M2GBT_MULTI_PATH}"
+                --input $<PATH:ABSOLUTE_PATH,NORMALIZE,${sourcesEval},${CMAKE_CURRENT_SOURCE_DIR}>
+                --name $<PATH:REMOVE_EXTENSION,$<PATH:GET_FILENAME,${sourcesEval}>>
+                --output "${target}.c"
+                > $<IF:$<BOOL:${CMAKE_HOST_WIN32}>,NUL,/dev/null> # Silence stdout
+            # Create object file
+            COMMAND "${CMAKE_C_COMPILER}" -c "${target}.c"
+            # Remove byproducts
+            COMMAND "${CMAKE_COMMAND}" -E rm -f "${target}.c"
+            WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${gbtTargetDir}"
+            COMMAND_EXPAND_LISTS
+    )
+
+    unset(sources)
+    foreach(arg ${ARGN})
+        if(IS_ABSOLUTE "${arg}" AND EXISTS "${arg}")
+            list(APPEND sources "${arg}")
+            continue()
+        endif()
+
+        if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${arg}")
+            list(APPEND sources "${arg}")
+            continue()
+        endif()
+
+        get_source_file_property(isGenerated "${arg}" GENERATED)
+        if(isGenerated)
+            if(IS_ABSOLUTE "${arg}")
+                list(APPEND sources "${arg}")
+                continue()
+            endif()
+
+            list(APPEND sources "${CMAKE_CURRENT_BINARY_DIR}/${arg}")
+            continue()
+        endif()
+
+        message(FATAL_ERROR "Cannot find source file: ${arg}")
+    endforeach()
+
+    add_library(${target} OBJECT IMPORTED)
+    set_target_properties(${target} PROPERTIES
+            IMPORTED_OBJECTS "${CMAKE_CURRENT_BINARY_DIR}/${gbtTargetDir}/${target}.o"
+            GBT_SOURCES "${sources}"
+    )
+    target_sources(${target}
+            INTERFACE "$<PATH:ABSOLUTE_PATH,NORMALIZE,$<TARGET_PROPERTY:${target},GBT_SOURCES>,${CMAKE_CURRENT_SOURCE_DIR}>"
+    )
+    target_link_libraries(${target} INTERFACE gbtplayer)
+endfunction()
+
+include(FetchContent)
+include(Mktemp)
+
+mktemp(gbt_playerCMakeLists TMPDIR)
+file(WRITE "${gbt_playerCMakeLists}" [=[
+cmake_minimum_required(VERSION 3.25.1)
+project(gbt-player VERSION 4.4.1 LANGUAGES C)
+
+add_library(gbtplayer STATIC gba/gbt_player/gbt_player.c)
+target_include_directories(gbtplayer SYSTEM INTERFACE gba)
+]=])
+
+mktemp(gbt_playerMultiS3M2GBT TMPDIR)
+file(WRITE "${gbt_playerMultiS3M2GBT}" [=[
+if __name__ == '__main__':
+
+    import argparse
+    import sys
+    import s3m2gbt
+    import os
+
+    parser = argparse.ArgumentParser(description='Convert multiple S3M files into GBT format binary file.')
+    parser.add_argument('--input', nargs='+', default=None, required=True,
+                        help='input files')
+    parser.add_argument('--name', nargs='+', default=None, required=True,
+                        help='output song names for each file')
+    parser.add_argument('--output', default=None, required=True,
+                        help='output C file for all songs')
+
+    args = parser.parse_args()
+
+    with open(args.output, "w") as outfile:
+        for file_input, file_name in zip(args.input, args.name):
+            try:
+                s3m2gbt.convert_file(file_input, file_name, None, False)
+                with open(file_name + '.c', 'r') as infile:
+                    outfile.write(infile.read())
+                os.remove(file_name + '.c')
+            except s3m2gbt.RowConversionError as e:
+                print('ERROR: ' + str(e))
+                sys.exit(1)
+            except s3m2gbt.S3MFormatError as e:
+                print('ERROR: Invalid S3M file: ' + str(e))
+                sys.exit(1)
+
+    sys.exit(0)
+]=])
+
+FetchContent_Declare(gbt_player
+        GIT_REPOSITORY "https://github.com/AntonioND/gbt-player.git"
+        GIT_TAG "master"
+        PATCH_COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${gbt_playerCMakeLists}" "CMakeLists.txt"
+            && "${CMAKE_COMMAND}" -E copy_if_different "${gbt_playerMultiS3M2GBT}" "gba/s3m2gbt/s3m2gbt_multi.py"
+)
+FetchContent_MakeAvailable(gbt_player)
+file(REMOVE "${gbt_playerCMakeLists}")
+file(REMOVE "${gbt_playerMultiS3M2GBT}")
+
+if(NOT S3MSPLIT_PATH)
+    find_file(S3MSPLIT_PATH s3msplit.py PATHS "${gbt_player_SOURCE_DIR}/gba/s3msplit")
+endif()
+
+if(NOT S3M2GBT_MULTI_PATH)
+    find_file(S3M2GBT_MULTI_PATH s3m2gbt_multi.py PATHS "${gbt_player_SOURCE_DIR}/gba/s3m2gbt")
+endif()

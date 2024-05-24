@@ -1,206 +1,430 @@
 #===============================================================================
 #
-# Copyright (C) 2021-2023 gba-toolchain contributors
+# Fetches Butano and provides the `add_butano_library` function
+#   Also provides the `butano-common` global Butano library target.
+#   `add_butano_library` compiles graphics, audio, and DMG audio into an object library to be linked.
+#
+# Multiple Butano libraries may be linked together, however a target cannot directly link with multiple Butano libraries:
+#   ```cmake
+#   add_butano_library(library-A GRAPHICS image.bmp)
+#   add_butano_library(library-B AUDIO sound.wav)
+#   # target_link_libraries(my_target PRIVATE library-A library-B)  # Do not do this
+#   target_link_libraries(library-A INTERFACE library-B)  # Instead, link the libraries together
+#   target_link_libraries(my_target PRIVATE library-A)  # And then link with a single Butano library
+#   ```
+#
+# If butano-common is desired, it may be linked to another Butano library:
+#   ```cmake
+#   add_butano_library(library-A GRAPHICS image.bmp)
+#   target_link_libraries(library-A INTERFACE butano-common)  # Link with butano-common
+#   target_link_libraries(my_target PRIVATE library-A)
+#   ```
+#
+# Butano libraries also provide an INTERFACE link to butano-runtime for convenience.
+#
+# Butano libraries have the following properties:
+#   `BUTANO_SOURCES` list of source paths relative to `CMAKE_CURRENT_SOURCE_DIR`.
+#
+# Example:
+#   ```cmake
+#   file(GLOB_RECURSE graphics CONFIGURE_DEPENDS graphics/*.bmp)
+#   file(GLOB_RECURSE audio CONFIGURE_DEPENDS audio/*.wav audio/*.it)
+#   file(GLOB_RECURSE dmg_audio CONFIGURE_DEPENDS dmg_audio/*.vgm dmg_audio/*.s3m)
+#   add_butano_library(my_butano_assets
+#        GRAPHICS ${graphics}
+#        AUDIO ${audio}
+#        DMG_AUDIO ${dmg_audio}
+#   )
+#   target_link_libraries(my_target PRIVATE my_butano_assets)
+#   ```
+#
+# Add Butano library command:
+#   `add_butano_library(<target> [GRAPHICS <file-path>...] [AUDIO <file-path>...] [DMG_AUDIO <file-path>...])`
+#
+# Copyright (C) 2021-2024 gba-toolchain contributors
 # For conditions of distribution and use, see copyright notice in LICENSE.md
 #
 #===============================================================================
 
-enable_language(ASM C CXX)
-
-include(FetchContent)
-
-# Butano dependencies
 if(NOT Python_EXECUTABLE)
     find_package(Python COMPONENTS Interpreter REQUIRED)
 endif()
 
-if(NOT CMAKE_GRIT_PROGRAM)
-    find_package(grit REQUIRED)
+include(Depfile)
+include(Bin2o)
+find_package(grit REQUIRED)
+find_package(maxmod REQUIRED)
+
+function(add_butano_library target)
+    set(bnTargetDir "_butano/${target}.dir")
+    file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${bnTargetDir}")
+    set(sourcesEval $<TARGET_PROPERTY:${target},INTERFACE_SOURCES>)
+
+    set(assetScript "${CMAKE_CURRENT_BINARY_DIR}/${bnTargetDir}/bn_assets.cmake")
+    file(WRITE "${assetScript}" [=[
+include(${DEPFILE_PATH} OPTIONAL RESULT_VARIABLE found)
+if(NOT found)
+    message(FATAL_ERROR "Could not include Depfile.cmake (tried ${DEPFILE_PATH})")
+endif()
+include(${BIN2O_PATH} OPTIONAL RESULT_VARIABLE found)
+if(NOT found)
+    message(FATAL_ERROR "Could not include Bin2o.cmake (tried ${BIN2O_PATH})")
 endif()
 
-if(NOT CMAKE_MMUTIL_PROGRAM)
-    find_package(maxmod REQUIRED)
-endif()
-
-include(Bin2s)
-
-# Find butano
-find_path(BUTANO_DIR NAMES butano/butano.mak PATHS "$ENV{DEVKITPRO}/butano" "${CMAKE_SYSTEM_LIBRARY_PATH}/butano" "${BUTANO_DIR}" PATH_SUFFIXES source NO_CACHE)
-
-if(NOT BUTANO_DIR)
-    unset(BUTANO_DIR CACHE)
-    set(SOURCE_DIR "${CMAKE_SYSTEM_LIBRARY_PATH}/butano")
-
-    file(MAKE_DIRECTORY "${SOURCE_DIR}/temp")
-    FetchContent_Declare(butano DOWNLOAD_EXTRACT_TIMESTAMP ON
-        PREFIX "${SOURCE_DIR}"
-        TMP_DIR "${SOURCE_DIR}/temp"
-        STAMP_DIR "${SOURCE_DIR}/stamp"
-        SOURCE_DIR "${SOURCE_DIR}/source"
-        # Download
-        DOWNLOAD_DIR "${SOURCE_DIR}/download"
-        GIT_REPOSITORY "https://github.com/GValiente/butano.git"
-        GIT_TAG "master"
-    )
-
-    FetchContent_Populate(butano)
-    if(NOT butano_SOURCE_DIR)
-        message(FATAL_ERROR "Failed to fetch butano")
+foreach(ii RANGE ${CMAKE_ARGC})
+    if(${ii} EQUAL ${CMAKE_ARGC})
+        break()
+    elseif("${CMAKE_ARGV${ii}}" STREQUAL --)
+        set(start ${ii})
+    elseif(DEFINED start)
+        list(APPEND SCRIPT_ARGN "${CMAKE_ARGV${ii}}")
     endif()
-    set(BUTANO_DIR "${butano_SOURCE_DIR}" CACHE PATH "Path to Butano directory" FORCE)
-endif()
+endforeach()
+unset(start)
 
-if(NOT EXISTS "${BUTANO_DIR}/CMakeLists.txt")
-    file(WRITE "${BUTANO_DIR}/CMakeLists.txt" [=[
-        cmake_minimum_required(VERSION 3.18)
-        project(butano ASM C CXX)
+list(GET SCRIPT_ARGN 0 target)
+list(GET SCRIPT_ARGN 1 argsFile)
+file(READ "${argsFile}" arguments)
+string(REPLACE " " ";" arguments ${arguments})
 
-        if(NOT CMAKE_SYSTEM_NAME STREQUAL AdvancedGameBoy)
-            message(FATAL_ERROR "Butano is a library for AdvancedGameBoy")
-        endif()
-
-        # Butano is as an OBJECT library
-        file(GLOB src "butano/src/*.cpp")
-        file(GLOB hw_src "butano/hw/src/*.cpp")
-        file(GLOB hw_asm "butano/hw/src/*.s")
-
-        # 3rd party code
-        file(GLOB_RECURSE cpp_3rd_party "butano/hw/3rd_party/*.cpp")
-        file(GLOB_RECURSE c_3rd_party "butano/hw/3rd_party/*.c")
-        file(GLOB_RECURSE asm_3rd_party "butano/hw/3rd_party/*.s")
-
-        add_library(butano OBJECT ${src} ${hw_src} ${hw_asm}
-            ${cpp_3rd_party}
-            ${c_3rd_party}
-            ${asm_3rd_party}
-        )
-
-        target_include_directories(butano PUBLIC
-            "butano/include"
-            "butano/hw/3rd_party/libtonc/include"
-        )
-        target_include_directories(butano PRIVATE
-            "butano/hw/3rd_party/libugba/include"
-            "butano/hw/3rd_party/maxmod/include"
-        )
-        target_compile_features(butano PUBLIC cxx_std_20)
-
-        set(ARCH -mthumb -mthumb-interwork)
-        set(CWARNINGS -Wall -Wextra -Wpedantic -Wshadow -Wundef -Wunused-parameter -Wmisleading-indentation -Wduplicated-cond
-                -Wduplicated-branches -Wlogical-op -Wnull-dereference -Wswitch-default -Wstack-usage=16384)
-        set(CFLAGS ${CWARNINGS} -gdwarf-4 -O2 -mcpu=arm7tdmi -mtune=arm7tdmi -ffast-math -ffunction-sections -fdata-sections ${ARCH})
-        set(CPPWARNINGS -Wuseless-cast -Wnon-virtual-dtor -Woverloaded-virtual)
-
-        target_compile_options(butano PRIVATE
-            $<$<COMPILE_LANGUAGE:ASM>:${ARCH} -x assembler-with-cpp>
-            $<$<COMPILE_LANGUAGE:C>:${CFLAGS}>
-            $<$<COMPILE_LANGUAGE:CXX>:${CFLAGS} ${CPPWARNINGS} -fno-rtti -fno-exceptions -fno-threadsafe-statics -fuse-cxa-atexit>
-        )
-
-        target_compile_definitions(butano PUBLIC
-            BN_TOOLCHAIN_TAG="gba-toolchain"
-            BN_EWRAM_BSS_SECTION=".sbss"
-            BN_IWRAM_START=__iwram_start__
-            BN_IWRAM_TOP=__iwram_top
-            BN_IWRAM_END=__fini_array_end
-            BN_ROM_START=__start
-            BN_ROM_END=__rom_end
-        )
-
-        # Set IWRAM compile options
-        get_target_property(iwramSources butano SOURCES)
-        list(FILTER iwramSources INCLUDE REGEX ".+\\.bn_iwram\\..+")
-        set_source_files_properties(${iwramSources} PROPERTIES COMPILE_FLAGS "-fno-lto -marm -mlong-calls")
-
-        # Set EWRAM compile options
-        get_target_property(ewramSources butano SOURCES)
-        list(FILTER ewramSources INCLUDE REGEX ".+\\.bn_ewram\\..+")
-        set_source_files_properties(${ewramSources} PROPERTIES COMPILE_FLAGS "-fno-lto")
-
-        # Set no-flto compile options
-        get_target_property(nofltoSources butano SOURCES)
-        list(FILTER nofltoSources INCLUDE REGEX ".+\\.bn_noflto\\..+")
-        set_source_files_properties(${nofltoSources} PROPERTIES COMPILE_FLAGS "-fno-lto")
-    ]=])
-endif()
-
-add_subdirectory("${BUTANO_DIR}" "${CMAKE_BINARY_DIR}/lib/butano" EXCLUDE_FROM_ALL)
-
-if(CMAKE_BIN2S_PROGRAM)
-    set(bin2sCommand "${CMAKE_BIN2S_PROGRAM}")
-else()
-    set(bin2sCommand "${CMAKE_COMMAND}" -P "${BIN2S_SCRIPT}" --)
-endif()
-
-function(add_butano_assets target)
-    set(multiValueArgs
-        AUDIO
-        DMG_AUDIO
-        GRAPHICS
-    )
-    cmake_parse_arguments(ARGS "" "" "${multiValueArgs}" ${ARGN})
-
-    set(binaryDir "${CMAKE_CURRENT_BINARY_DIR}/butano_${target}_assets")
-
-    # Add audio outputs
-    if(ARGS_AUDIO)
-        set(byproducts "${binaryDir}/_bn_audio_files_info.txt" "${binaryDir}/_bn_audio_soundbank.bin")
-        set(outputs "${binaryDir}/_bn_audio_soundbank.s")
-        set(headers
-            "${binaryDir}/bn_music_items.h" "${binaryDir}/bn_music_items_info.h"
-            "${binaryDir}/bn_sound_items.h" "${binaryDir}/bn_sound_items_info.h"
-        )
+foreach(arg ${arguments})
+    if(arg MATCHES "/GRAPHICS$")
+        set(mode GRAPHICS)
+        continue()
+    endif()
+    if(arg MATCHES "/AUDIO$")
+        set(mode AUDIO)
+        continue()
+    endif()
+    if(arg MATCHES "/DMG_AUDIO$")
+        set(mode DMG_AUDIO)
+        continue()
+    endif()
+    if(arg MATCHES "/END$")
+        unset(mode)
+        continue()
     endif()
 
-    # Add dmg_audio outputs
-    foreach(dmgAudio ${ARGS_DMG_AUDIO})
-        get_filename_component(extension "${dmgAudio}" EXT)
-        if(extension STREQUAL ".json")
-            continue()
-        endif()
+    if(NOT mode)
+        continue()
+    endif()
 
-        get_filename_component(name "${dmgAudio}" NAME_WE)
-        if(name)
-            list(APPEND outputs "${binaryDir}/${name}_bn_dmg.c")
+    list(APPEND bn${mode} ${arg})
+endforeach()
+
+function(find_common_parent_dir result_var)
+    list(POP_FRONT ARGN commonPath)
+    if(NOT IS_DIRECTORY commonPath)
+        get_filename_component(commonPath "${commonPath}" DIRECTORY)
+    endif()
+    string(REPLACE "/" ";" commonParts "${commonPath}")
+    list(LENGTH commonParts commonPartsLen)
+
+    foreach(path ${ARGN})
+        if(NOT IS_DIRECTORY path)
+            get_filename_component(path "${path}" DIRECTORY)
         endif()
+        string(REPLACE "/" ";" pathParts "${path}")
+        list(LENGTH pathParts pathPartsLen)
+
+        if(${commonPartsLen} VERSION_LESS ${pathPartsLen})
+            set(minLen ${commonPartsLen})
+        else()
+            set(minLen ${pathPartsLen})
+        endif()
+        math(EXPR minLen "${minLen} - 1")
+
+        unset(newCommonParts)
+        foreach(i RANGE ${minLen})
+            list(GET commonParts ${i} component1)
+            list(GET pathParts ${i} component2)
+            if(NOT "${component1}" STREQUAL "${component2}")
+                break()
+            endif()
+            list(APPEND newCommonParts ${component1})
+        endforeach()
+
+        set(commonParts ${newCommonParts})
+        list(LENGTH newCommonParts commonPartsLen)
     endforeach()
 
-    # Add graphics outputs
-    foreach(graphics ${ARGS_GRAPHICS})
-        get_filename_component(extension "${graphics}" EXT)
-        if(extension STREQUAL ".json")
-            continue()
-        endif()
-
-        get_filename_component(name "${graphics}" NAME_WE)
-        if(name)
-            list(APPEND outputs "${binaryDir}/${name}_bn_gfx.s")
-            list(APPEND byproducts "${binaryDir}/_bn_${name}_graphics_file_info.txt")
-        endif()
-        #TODO: Support JSON file generation
-    endforeach()
-
-    if(NOT outputs AND NOT headers)
-        message(FATAL_ERROR "add_butano_assets called with empty assets")
-    endif()
-
-    # Butano asset tool
-    find_file(butano_assets_tool NAMES "butano_assets_tool.py" PATHS "${BUTANO_DIR}/butano/tools")
-    add_custom_command(
-        OUTPUT ${outputs} ${headers}
-        BYPRODUCTS "${byproducts}"
-        COMMAND "${CMAKE_COMMAND}" -E make_directory "${binaryDir}"
-        COMMAND "${Python_EXECUTABLE}" "${butano_assets_tool}"
-            --grit="${CMAKE_GRIT_PROGRAM}"
-            --mmutil="${CMAKE_MMUTIL_PROGRAM}"
-            --audio="${ARGS_AUDIO}"
-            --dmg_audio="${ARGS_DMG_AUDIO}"
-            --graphics="${ARGS_GRAPHICS}"
-            --build="${binaryDir}"
-        COMMAND ${bin2sCommand} "${binaryDir}/_bn_audio_soundbank.bin" > "${binaryDir}/_bn_audio_soundbank.s"
-        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-    )
-
-    add_library(${target} OBJECT ${outputs})
-    target_include_directories(${target} INTERFACE "${binaryDir}")
+    string(JOIN "/" commonPath ${commonParts})
+    set(${result_var} "${commonPath}" PARENT_SCOPE)
 endfunction()
+
+find_common_parent_dir(workingDirectory ${bnAUDIO} ${bnDMG_AUDIO} ${bnGRAPHICS})
+
+foreach(input ${bnGRAPHICS})
+    get_filename_component(name "${input}" NAME_WE)
+    get_filename_component(directory "${input}" DIRECTORY)
+    if(EXISTS "${directory}/${name}.json")
+        list(APPEND input "${directory}/${name}.json")
+    endif()
+    list(APPEND depGraphics
+        TARGETS "${name}_bn_gfx.o"
+        DEPENDENCIES ${input}
+    )
+    list(APPEND graphicsUnity "${name}_bn_gfx.s")
+endforeach()
+
+if(NOT bnAUDIO)
+    set(bnAUDIO _bn_dummy_audio_file.txt)
+endif()
+
+set(depAudio
+    TARGETS _bn_audio_soundbank.o bn_music_items_info.h bn_sound_items_info.h
+    DEPENDENCIES ${bnAUDIO}
+)
+
+foreach(input ${bnDMG_AUDIO})
+    get_filename_component(name "${input}" NAME_WE)
+    get_filename_component(directory "${input}" DIRECTORY)
+    if(EXISTS "${directory}/${name}.json")
+        list(APPEND input "${directory}/${name}.json")
+    endif()
+    list(APPEND depAudioDmg
+        TARGETS "${name}_bn_dmg.o"
+        DEPENDENCIES ${input}
+    )
+    list(APPEND dmgUnity "${name}_bn_dmg.c")
+endforeach()
+
+depfile(${target}.d
+    ${depGraphics}
+    ${depAudio}
+    ${depAudioDmg}
+)
+
+foreach(input ${bnAUDIO})
+    if(NOT IS_ABSOLUTE "${input}")
+        continue()
+    endif()
+    file(RELATIVE_PATH input "${workingDirectory}" "${input}")
+    list(APPEND audioInputs "${input}")
+endforeach()
+
+foreach(input ${bnDMG_AUDIO})
+    if(NOT IS_ABSOLUTE "${input}")
+        continue()
+    endif()
+    file(RELATIVE_PATH input "${workingDirectory}" "${input}")
+    list(APPEND dmgAudioInputs "${input}")
+endforeach()
+
+foreach(input ${bnGRAPHICS})
+    if(NOT IS_ABSOLUTE "${input}")
+        continue()
+    endif()
+    file(RELATIVE_PATH input "${workingDirectory}" "${input}")
+    list(APPEND graphicsInputs "${input}")
+endforeach()
+
+string(JOIN " " audioInputs ${audioInputs})
+string(JOIN " " dmgAudioInputs ${dmgAudioInputs})
+string(JOIN " " graphicsInputs ${graphicsInputs})
+
+# Run Butano assets tool
+execute_process(
+    COMMAND "${Python_EXECUTABLE}" "${BUTANO_ASSETS_TOOL_PATH}"
+        --grit ${GRIT_PATH}
+        --mmutil ${MMUTIL_PATH}
+        --audio "${audioInputs}"
+        --dmg_audio "${dmgAudioInputs}"
+        --graphics "${graphicsInputs}"
+        --build ${CMAKE_CURRENT_LIST_DIR}
+    WORKING_DIRECTORY "${workingDirectory}"
+    RESULT_VARIABLE result
+)
+
+if(result)
+    return()
+endif()
+
+# Create soundbank object file
+bin2o(_bn_audio_soundbank.o _bn_audio_soundbank.bin)
+
+# Create graphics unity source
+foreach(path ${graphicsUnity})
+    if(EXISTS "${path}")
+        list(APPEND graphicsSources "${path}")
+    endif()
+endforeach()
+if(graphicsSources)
+    execute_process(
+        COMMAND "${CMAKE_COMMAND}" -E cat ${graphicsSources}
+        OUTPUT_FILE "_bn_graphics.unity.s"
+    )
+else()
+    file(TOUCH "_bn_graphics.unity.s")
+endif()
+
+# Create DMG Audio unity source
+foreach(path ${dmgUnity})
+    if(EXISTS "${path}")
+        list(APPEND dmgSources "${path}")
+    endif()
+endforeach()
+if(dmgSources)
+    execute_process(
+        COMMAND "${CMAKE_COMMAND}" -E cat ${dmgSources}
+        OUTPUT_FILE "_bn_dmg_audio.unity.c"
+    )
+else()
+    file(TOUCH "_bn_dmg_audio.unity.c")
+endif()
+]=])
+
+    add_custom_command(OUTPUT "${bnTargetDir}/_bn_audio_soundbank.o" "${bnTargetDir}/_bn_graphics.unity.o" "${bnTargetDir}/_bn_dmg_audio.unity.o"
+            DEPFILE "${bnTargetDir}/${target}.d"
+            BYPRODUCTS "${bnTargetDir}/_bn_audio_soundbank.bin" "${bnTargetDir}/_bn_audio_files_info.txt" "${bnTargetDir}/_bn_graphics.unity.s" "${bnTargetDir}/_bn_dmg_audio.unity.c"
+            # Write inputs to file
+            COMMAND "${CMAKE_COMMAND}" -E rm -f args.txt
+            COMMAND "${CMAKE_COMMAND}" -E echo_append "$<PATH:ABSOLUTE_PATH,NORMALIZE,${sourcesEval},${CMAKE_CURRENT_SOURCE_DIR}>" > args.txt
+            # Run script
+            COMMAND "${CMAKE_COMMAND}"
+                -D DEPFILE_PATH=${DEPFILE_PATH}
+                -D BIN2O_PATH=${BIN2O_PATH}
+                -D GRIT_PATH=${GRIT_PATH}
+                -D MMUTIL_PATH=${MMUTIL_PATH}
+                -D BUTANO_ASSETS_TOOL_PATH=${BUTANO_ASSETS_TOOL_PATH}
+                -D Python_EXECUTABLE=${Python_EXECUTABLE}
+                -D CMAKE_LINKER="${CMAKE_LINKER}"
+                -D CMAKE_OBJCOPY="${CMAKE_OBJCOPY}"
+                -P "${assetScript}" -- ${target} args.txt
+                > $<IF:$<BOOL:${CMAKE_HOST_WIN32}>,NUL,/dev/null> # Silence stdout
+            # Delete inputs file
+            COMMAND "${CMAKE_COMMAND}" -E rm -f args.txt
+            # Compile _bn_graphics.unity.o
+            COMMAND "${CMAKE_ASM_COMPILER}" "-c" "-o" "_bn_graphics.unity.o" "_bn_graphics.unity.s"
+            # Compile _bn_dmg_audio.unity.o
+            COMMAND "${CMAKE_C_COMPILER}" "-c" "-o" "_bn_dmg_audio.unity.o" "_bn_dmg_audio.unity.c"
+            WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${bnTargetDir}"
+            COMMAND_EXPAND_LISTS
+    )
+
+    foreach(arg ${ARGN})
+        if(arg STREQUAL GRAPHICS OR arg STREQUAL AUDIO OR arg STREQUAL DMG_AUDIO)
+            set(mode ${arg})
+            continue()
+        endif()
+
+        if(NOT mode)
+            message(FATAL_ERROR "Source ${arg} must be preceded by valid mode [GRAPHICS|AUDIO|DMG_AUDIO]")
+        endif()
+
+        list(APPEND bn${mode} ${arg})
+    endforeach()
+
+    file(TOUCH
+            "${CMAKE_CURRENT_BINARY_DIR}/${bnTargetDir}/GRAPHICS"
+            "${CMAKE_CURRENT_BINARY_DIR}/${bnTargetDir}/AUDIO"
+            "${CMAKE_CURRENT_BINARY_DIR}/${bnTargetDir}/DMG_AUDIO"
+            "${CMAKE_CURRENT_BINARY_DIR}/${bnTargetDir}/END"
+    )
+
+    add_library(${target} OBJECT IMPORTED)
+    set_target_properties(${target} PROPERTIES
+            IMPORTED_OBJECTS "${CMAKE_CURRENT_BINARY_DIR}/${bnTargetDir}/_bn_audio_soundbank.o;${CMAKE_CURRENT_BINARY_DIR}/${bnTargetDir}/_bn_graphics.unity.o;${CMAKE_CURRENT_BINARY_DIR}/${bnTargetDir}/_bn_dmg_audio.unity.o"
+            BUTANO_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/${bnTargetDir}/GRAPHICS;${bnGRAPHICS};${CMAKE_CURRENT_BINARY_DIR}/${bnTargetDir}/AUDIO;${bnAUDIO};${CMAKE_CURRENT_BINARY_DIR}/${bnTargetDir}/DMG_AUDIO;${bnDMG_AUDIO};${CMAKE_CURRENT_BINARY_DIR}/${bnTargetDir}/END"
+    )
+    target_sources(${target} INTERFACE
+            "$<PATH:ABSOLUTE_PATH,NORMALIZE,$<TARGET_PROPERTY:${target},BUTANO_SOURCES>,${CMAKE_CURRENT_SOURCE_DIR}>"
+            $<TARGET_OBJECTS:butano-runtime>
+    )
+    target_include_directories(${target} INTERFACE
+            "${CMAKE_CURRENT_BINARY_DIR}/${bnTargetDir}"
+            $<TARGET_PROPERTY:butano-runtime,INTERFACE_INCLUDE_DIRECTORIES>
+    )
+    target_compile_features(${target} INTERFACE cxx_std_20)
+endfunction()
+
+include(FetchContent)
+include(Mktemp)
+
+mktemp(butanoCMakeLists TMPDIR)
+file(WRITE "${butanoCMakeLists}" [=[
+cmake_minimum_required(VERSION 3.25.1)
+project(butano LANGUAGES ASM C CXX VERSION 17.6.0)
+
+# Butano sources
+file(GLOB src CONFIGURE_DEPENDS "butano/src/*.cpp")
+file(GLOB hw_src CONFIGURE_DEPENDS "butano/hw/src/*.cpp")
+file(GLOB hw_asm CONFIGURE_DEPENDS "butano/hw/src/*.s")
+
+# 3rd party code
+file(GLOB_RECURSE cpp_3rd_party CONFIGURE_DEPENDS "butano/hw/3rd_party/*.cpp")
+file(GLOB_RECURSE c_3rd_party CONFIGURE_DEPENDS "butano/hw/3rd_party/*.c")
+file(GLOB_RECURSE asm_3rd_party CONFIGURE_DEPENDS "butano/hw/3rd_party/*.s")
+
+add_library(butano-runtime OBJECT ${src} ${hw_src} ${hw_asm}
+    ${cpp_3rd_party}
+    ${c_3rd_party}
+    ${asm_3rd_party}
+)
+
+target_include_directories(butano-runtime
+    PUBLIC
+        butano/include
+        butano/hw/3rd_party/libtonc/include
+    PRIVATE
+        butano/hw/3rd_party/libugba/include
+        butano/hw/3rd_party/maxmod/include
+)
+
+target_compile_features(butano-runtime PRIVATE cxx_std_20)
+
+set(ARCH -mthumb -mthumb-interwork)
+set(CWARNINGS -Wall -Wextra -Wpedantic -Wshadow -Wundef -Wunused-parameter -Wmisleading-indentation -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wnull-dereference -Wswitch-default -Wstack-usage=16384)
+set(CFLAGS ${CWARNINGS} -gdwarf-4 -O2 -mcpu=arm7tdmi -mtune=arm7tdmi -ffast-math -ffunction-sections -fdata-sections ${ARCH})
+set(CPPWARNINGS -Wuseless-cast -Wnon-virtual-dtor -Woverloaded-virtual)
+
+target_compile_options(butano-runtime PRIVATE
+    $<$<COMPILE_LANGUAGE:ASM>:${ARCH} -x assembler-with-cpp>
+    $<$<COMPILE_LANGUAGE:C>:${CFLAGS}>
+    $<$<COMPILE_LANGUAGE:CXX>:${CFLAGS} ${CPPWARNINGS} -fno-rtti -fno-exceptions -fno-threadsafe-statics -fuse-cxa-atexit>
+)
+
+target_compile_definitions(butano-runtime PUBLIC
+    BN_TOOLCHAIN_TAG="gba-toolchain"
+    BN_EWRAM_BSS_SECTION=".sbss"
+    BN_IWRAM_START=__iwram_start__
+    BN_IWRAM_TOP=__iwram_top
+    BN_IWRAM_END=__fini_array_end
+    BN_ROM_START=__start
+    BN_ROM_END=__rom_end
+)
+
+# Set IWRAM compile options
+get_target_property(iwramSources butano-runtime SOURCES)
+list(FILTER iwramSources INCLUDE REGEX ".+\\.bn_iwram\\..+")
+set_source_files_properties(${iwramSources} PROPERTIES COMPILE_FLAGS "-fno-lto -marm -mlong-calls")
+
+# Set EWRAM compile options
+get_target_property(ewramSources butano-runtime SOURCES)
+list(FILTER ewramSources INCLUDE REGEX ".+\\.bn_ewram\\..+")
+set_source_files_properties(${ewramSources} PROPERTIES COMPILE_FLAGS "-fno-lto")
+
+# Set no-flto compile options
+get_target_property(nofltoSources butano-runtime SOURCES)
+list(FILTER nofltoSources INCLUDE REGEX ".+\\.bn_noflto\\..+")
+set_source_files_properties(${nofltoSources} PROPERTIES COMPILE_FLAGS "-fno-lto")
+]=])
+
+FetchContent_Declare(butano
+        GIT_REPOSITORY "https://github.com/GValiente/butano.git"
+        GIT_TAG "17.6.0"
+        PATCH_COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${butanoCMakeLists}" "CMakeLists.txt"
+)
+FetchContent_MakeAvailable(butano)
+file(REMOVE "${butanoCMakeLists}")
+
+find_file(BUTANO_ASSETS_TOOL_PATH NAMES "butano_assets_tool.py" PATHS "${butano_SOURCE_DIR}/butano/tools")
+
+# Add the Butano common library
+if(NOT TARGET butano-common)
+    file(GLOB graphics CONFIGURE_DEPENDS "${butano_SOURCE_DIR}/common/graphics/*.bmp")
+    add_butano_library(butano-common GRAPHICS ${graphics})
+    file(GLOB sources CONFIGURE_DEPENDS "${butano_SOURCE_DIR}/common/src/*.cpp")
+    target_sources(butano-common INTERFACE ${sources})
+    target_include_directories(butano-common INTERFACE "${butano_SOURCE_DIR}/common/include")
+endif()

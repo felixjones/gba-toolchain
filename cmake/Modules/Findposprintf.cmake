@@ -1,68 +1,37 @@
 #===============================================================================
 #
-# Copyright (C) 2021-2023 gba-toolchain contributors
+# Partial implementation of sprintf optimised for GBA
+#   Documentation: https://www.danposluns.com/gbadev/posprintf/instructions.html
+#
+# Copyright (C) 2021-2024 gba-toolchain contributors
 # For conditions of distribution and use, see copyright notice in LICENSE.md
 #
 #===============================================================================
 
-include(ExternalProject)
-
-find_library(libposprintf posprintf PATHS "${CMAKE_SYSTEM_LIBRARY_PATH}/posprintf" "${POSPRINTF_DIR}" PATH_SUFFIXES lib)
-
-if(NOT libposprintf)
-    set(SOURCE_DIR "${CMAKE_SYSTEM_LIBRARY_PATH}/posprintf")
-
-    file(MAKE_DIRECTORY "${SOURCE_DIR}/include")
-    file(MAKE_DIRECTORY "${SOURCE_DIR}/temp")
-    file(WRITE "${SOURCE_DIR}/temp/CMakeLists.txt" [=[
-        cmake_minimum_required(VERSION 3.18)
-        project(posprintf ASM)
-
-        add_library(posprintf STATIC "posprintf/posprintf.S")
-
-        install(TARGETS posprintf
-            LIBRARY DESTINATION lib
-        )
-        install(FILES "posprintf/posprintf.h"
-            DESTINATION include
-        )
-    ]=])
-
-    ExternalProject_Add(posprintf_proj DOWNLOAD_EXTRACT_TIMESTAMP ON
-        PREFIX "${SOURCE_DIR}"
-        TMP_DIR "${SOURCE_DIR}/temp"
-        STAMP_DIR "${SOURCE_DIR}/stamp"
-        # Download
-        DOWNLOAD_DIR "${SOURCE_DIR}/download"
-        URL "http://www.danposluns.com/gbadev/posprintf/posprintf.zip"
-        URL_MD5 "f2cfce6b93764c59d84faa6c57ab1fbe"
-        # Update
-        UPDATE_COMMAND "${CMAKE_COMMAND}" -E copy
-            "${SOURCE_DIR}/temp/CMakeLists.txt"
-            "${SOURCE_DIR}/source/CMakeLists.txt"
-        # Configure
-        SOURCE_DIR "${SOURCE_DIR}/source"
-        CMAKE_ARGS --toolchain "${CMAKE_TOOLCHAIN_FILE}"
-            -DCMAKE_INSTALL_PREFIX:PATH='${SOURCE_DIR}'
-        # Build
-        BINARY_DIR "${SOURCE_DIR}/build"
-        BUILD_COMMAND "${CMAKE_COMMAND}" --build .
-        BUILD_BYPRODUCTS "${SOURCE_DIR}/build/libposprintf.a"
-        # Install
-        INSTALL_DIR "${SOURCE_DIR}"
-    )
-
-    add_library(posprintf STATIC IMPORTED)
-    add_dependencies(posprintf posprintf_proj)
-    set_property(TARGET posprintf PROPERTY IMPORTED_LOCATION "${SOURCE_DIR}/build/libposprintf.a")
-    target_include_directories(posprintf INTERFACE "${SOURCE_DIR}/include")
-else()
-    add_library(posprintf STATIC IMPORTED)
-    set_property(TARGET posprintf PROPERTY IMPORTED_LOCATION "${libposprintf}")
-
-    get_filename_component(INCLUDE_PATH "${libposprintf}" DIRECTORY)
-    get_filename_component(INCLUDE_PATH "${INCLUDE_PATH}" DIRECTORY)
-    target_include_directories(posprintf INTERFACE "${INCLUDE_PATH}/include")
+if(TARGET posprintf)
+    return()
 endif()
 
-unset(libposprintf CACHE)
+include(FetchContent)
+include(Mktemp)
+
+mktemp(posprintfCMakeLists TMPDIR)
+file(WRITE "${posprintfCMakeLists}" [=[
+cmake_minimum_required(VERSION 3.25.1)
+project(posprintf ASM)
+
+add_library(posprintf STATIC
+    posprintf/posprintf.S
+)
+target_include_directories(posprintf
+    INTERFACE posprintf
+)
+]=])
+
+FetchContent_Declare(posprintf
+        URL "https://www.danposluns.com/gbadev/posprintf/posprintf.zip"
+        PATCH_COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${posprintfCMakeLists}" "CMakeLists.txt"
+)
+FetchContent_MakeAvailable(posprintf)
+
+file(REMOVE "${posprintfCMakeLists}")

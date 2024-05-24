@@ -1,0 +1,56 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 25,
+    "patch": 1
+  },
+  "configurePresets": [
+    {
+      "name": "gba-toolchain",
+      "toolchainFile": "../cmake/gba.toolchain.cmake",
+      "binaryDir": "${sourceDir}/cmake-build-agb",
+      "generator": "MinGW Makefiles",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": {
+          "type": "STRING",
+          "value": "Debug"
+        }
+      },
+      "vendor": {
+        "jetbrains.com/clion": {
+          "toolchain": "MinGW"
+        }
+      }
+    },
+    {
+      "name": "rpi",
+      "toolchainFile": "../cmake/gba.toolchain.cmake",
+      "binaryDir": "${sourceDir}/cmake-build-rpi",
+      "generator": "Unix Makefiles",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": {
+          "type": "STRING",
+          "value": "Debug"
+        },
+        "CMAKE_EXE_LINKER_FLAGS": {
+          "type": "STRING",
+          "value": "-fuse-ld=mold"
+        },
+        "CMAKE_C_COMPILER_LAUNCHER": {
+          "type": "PATH",
+          "value": "ccache"
+        },
+        "CMAKE_CXX_COMPILER_LAUNCHER": {
+          "type": "PATH",
+          "value": "ccache"
+        }
+      },
+      "vendor": {
+        "jetbrains.com/clion": {
+          "toolchain": "Raspberry Pi"
+        }
+      }
+    }
+  ]
+}

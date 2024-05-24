@@ -1,20 +1,23 @@
 #===============================================================================
 #
-# Copyright (C) 2021-2023 gba-toolchain contributors
+# Copyright (C) 2021-2024 gba-toolchain contributors
 # For conditions of distribution and use, see copyright notice in LICENSE.md
 #
 #===============================================================================
 
+if(TARGET gba-hpp)
+    return()
+endif()
+
 include(FetchContent)
 
-if(EXISTS "${CMAKE_SYSTEM_LIBRARY_PATH}/gba-hpp/CMakeLists.txt" OR EXISTS "${CMAKE_BINARY_DIR}/lib/gba-hpp/CMakeLists.txt")
-    add_subdirectory("${CMAKE_SYSTEM_LIBRARY_PATH}/gba-hpp" "${CMAKE_BINARY_DIR}/lib/gba-hpp" EXCLUDE_FROM_ALL)
-else()
-    FetchContent_Declare(gba-hpp DOWNLOAD_EXTRACT_TIMESTAMP ON
-        SOURCE_DIR "${CMAKE_SYSTEM_LIBRARY_PATH}/gba-hpp"
+FetchContent_Declare(gba-hpp
         GIT_REPOSITORY "https://github.com/felixjones/gba-hpp.git"
         GIT_TAG "main"
-    )
+)
 
-    FetchContent_MakeAvailable(gba-hpp)
+FetchContent_GetProperties(gba-hpp)
+if(NOT gba-hpp_POPULATED)
+    FetchContent_Populate(gba-hpp)
+    add_subdirectory(${gba-hpp_SOURCE_DIR} ${gba-hpp_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()

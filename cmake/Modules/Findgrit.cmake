@@ -1,651 +1,478 @@
 #===============================================================================
 #
-# Provides the CMake functions for adding a grit assets target:
-#   `add_grit_tilemap`, `add_grit_sprite`, and `add_grit_bitmap`
+# Finds grit and provides the `add_grit_library` function
+#   If grit is not available, it will be downloaded and compiled.
+#   `add_grit_library` compiles source images into an object library to be linked.
 #
-# Copyright (C) 2021-2023 gba-toolchain contributors
+# grit libraries have the following properties:
+#   `GRIT_FLAGS` raw string flags sent to grit.
+#   `GRIT_FLAGS_FILE` path to a .grit additional flags file.
+#   `GRIT_TILESET_FILE` path to a tileset file.
+#   `GRIT_SOURCES` list of source paths relative to `CMAKE_CURRENT_SOURCE_DIR`.
+#
+# grit libraries will generate a header file for convenience.
+#
+# Example:
+#   ```cmake
+#   add_grit_library(my_sprite
+#       GRAPHICS_BIT_DEPTH 4
+#       path/to/sprite.png
+#   )
+#   target_link_libraries(my_target PRIVATE my_sprite)
+#   ```
+#
+# Add grit library command:
+#   ```cmake
+#   add_grit_library(<target> [PALETTE_SHARED] [GRAPHICS_SHARED] [FLAGS <flags-string>] [FLAGS_FILE <flags-path>] [TILESET_FILE <tileset-path>]
+#       [PALETTE|NO_PALETTE]
+#       [PALETTE_COMPRESSION <OFF|LZ77|HUFF|RLE|FAKE>]
+#       [PALETTE_RANGE_START <integer>]
+#       [PALETTE_RANGE_END <integer>]
+#       [PALETTE_COUNT <integer>]
+#       [PALETTE_TRANSPARENT_INDEX <integer>]
+#       [GRAPHICS|NO_GRAPHICS]
+#       [GRAPHICS_COMPRESSION <OFF|LZ77|HUFF|RLE|FAKE>]
+#       [GRAPHICS_PIXEL_OFFSET <integer>]
+#       [GRAPHICS_FORMAT <BITMAP|TILE>]
+#       [GRAPHICS_BIT_DEPTH <integer>]
+#       [GRAPHICS_TRANSPARENT_COLOR <hex-code>]
+#       [AREA_LEFT <integer>]
+#       [AREA_RIGHT <integer>]
+#       [AREA_WIDTH <integer>]
+#       [AREA_TOP <integer>]
+#       [AREA_BOTTOM <integer>]
+#       [AREA_HEIGHT <integer>]
+#       [MAP|NO_MAP]
+#       [MAP_COMPRESSION <OFF|LZ77|HUFF|RLE|FAKE>]
+#       [<MAP_TILE_REDUCTION <TILES|PALETTES|FLIPPED>...>|MAP_NO_TILE_REDUCTION]
+#       [MAP_LAYOUT <REGULAR_FLAT|REGULAR_SBB|AFFINE>]
+#       [METATILE_HEIGHT <integer>]
+#       [METATILE_WIDTH <integer>]
+#       [METATILE_REDUCTION]
+#       <file-path>...
+#   )
+#   ```
+#
+# `PALETTE_SHARED` write palettes to shared file. Requires multiple inputs.
+# `GRAPHICS_SHARED` write graphics to shared file. Requires multiple inputs.
+# `FLAGS` raw flags passed to grit.
+# `FLAGS_FILE` .grit flags file with additional flags.
+# `TILESET_FILE` tileset file.
+# `PALETTE`, `NO_PALETTE` include/exclude palette generation.
+# `PALETTE_COMPRESSION` palette compression format.
+#   `OFF` no compression.
+#   `LZ77` LZ77 compression.
+#   `HUFF` Huffman compression.
+#   `RLE` run-length-encoding compression.
+#   `FAKE` no compression, but use compression compatible header.
+# `PALETTE_RANGE_START` index of first palette entry.
+# `PALETTE_RANGE_END` index of last palette entry.
+# `PALETTE_COUNT` number of palette entries. Cannot be used with `PALETTE_RANGE_END`.
+# `PALETTE_TRANSPARENT_INDEX` palette entry to use as transparency.
+# `GRAPHICS`, `NO_GRAPHICS` include/exclude tile graphics generation.
+# `GRAPHICS_COMPRESSION` tile graphics compression format.
+#   `OFF` no compression.
+#   `LZ77` LZ77 compression.
+#   `HUFF` Huffman compression.
+#   `RLE` run-length-encoding compression.
+#   `FAKE` no compression, but use compression compatible header.
+# `GRAPHICS_PIXEL_OFFSET` number of pixels to offset the source image.
+# `GRAPHICS_FORMAT` type of output image.
+#   `BITMAP` direct bitmap image output.
+#   `TILE` tile-map sprite or background output.
+# `GRAPHICS_BIT_DEPTH` bit depth (1, 2, 4, 8, 16).
+# `GRAPHICS_TRANSPARENT_COLOR` hex color to use as transparency.
+# `AREA_LEFT` source image left margin.
+# `AREA_RIGHT` source image right margin.
+# `AREA_WIDTH` source image width. Cannot be used with `AREA_RIGHT`.
+# `AREA_TOP` source image top margin.
+# `AREA_BOTTOM` source image bottom margin.
+# `AREA_HEIGHT` source image height. Cannot be used with `AREA_BOTTOM`.
+# `MAP`, `NO_MAP` include/exclude screen map generation.
+# `MAP_COMPRESSION` tile map compression format.
+#   `OFF` no compression.
+#   `LZ77` LZ77 compression.
+#   `HUFF` Huffman compression.
+#   `RLE` run-length-encoding compression.
+#   `FAKE` no compression, but use compression compatible header.
+# `MAP_TILE_REDUCTION`, `MAP_NO_TILE_REDUCTION` screen entry tile reduction.
+#   `TILES` reduce common tile graphics.
+#   `PALETTES` reduce shared palettes.
+#   `FLIPPED` reduce flipped tiles.
+# `MAP_LAYOUT` screen map layout.
+#   `REGULAR_FLAT` regular flat map.
+#   `REGULAR_SBB` regular screen base block map.
+#   `AFFINE` affine tile-map (mode 1, 2).
+# `METATILE_HEIGHT` combine N vertical screen entries into meta tiles.
+# `METATILE_WIDTH` combine N horizontal screen entries into meta tiles.
+# `METATILE_REDUCTION` reduce meta tiles (can only reduce by palettes).
+#
+# Copyright (C) 2021-2024 gba-toolchain contributors
 # For conditions of distribution and use, see copyright notice in LICENSE.md
 #
 #===============================================================================
 
-enable_language(ASM C)
+include(Bin2o)
+include(Depfile)
+include(FileRename)
+
+#TODO: add_grit_command
+
+function(add_grit_library target)
+    set(gritTargetDir "_grit/${target}.dir")
+    file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${gritTargetDir}")
+    set(sourcesEval $<TARGET_PROPERTY:${target},INTERFACE_SOURCES>)
+    set(flagsFileEval $<TARGET_PROPERTY:${target},GRIT_FLAGS_FILE>)
+    set(tilesetFileEval $<TARGET_PROPERTY:${target},GRIT_TILESET_FILE>)
+
+    __grit_palette_args()
+    __grit_graphics_args()
+    __grit_map_args()
+    __grit_meta_args()
+
+    set(options ${paletteOptions} ${graphicsOptions} ${mapOptions} ${metaOptions}
+            PALETTE_SHARED
+            GRAPHICS_SHARED
+    )
+    set(oneValueArgs ${paletteOneValueArgs} ${graphicsOneValueArgs} ${mapOneValueArgs} ${metaOneValueArgs}
+            FLAGS
+            FLAGS_FILE
+            TILESET_FILE
+    )
+    set(multiValueArgs ${mapMultiValueArgs})
+    cmake_parse_arguments(ARGS "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+    if(ARGS_PALETTE_SHARED)
+        list(APPEND sharedFlags -pS)
+    endif()
+    if(ARGS_GRAPHICS_SHARED)
+        list(APPEND sharedFlags -gS)
+    endif()
+    if(sharedFlags)
+        list(APPEND sharedFlags -O${target})
+    endif()
+
+    add_custom_command(OUTPUT "${gritTargetDir}/${target}.o" "${gritTargetDir}/${target}.h"
+            DEPFILE "${gritTargetDir}/${target}.d"
+            # Create depfile
+            COMMAND "${CMAKE_COMMAND}" -P "${DEPFILE_PATH}" -- "${target}.d"
+                TARGETS "${gritTargetDir}/${target}.o" "${gritTargetDir}/${target}.h"
+                DEPENDENCIES
+                    $<$<BOOL:${flagsFileEval}>:$<PATH:ABSOLUTE_PATH,NORMALIZE,${flagsFileEval},${CMAKE_CURRENT_SOURCE_DIR}>>
+                    $<$<BOOL:${tilesetFileEval}>:$<PATH:ABSOLUTE_PATH,NORMALIZE,${tilesetFileEval},${CMAKE_CURRENT_SOURCE_DIR}>>
+                    $<PATH:ABSOLUTE_PATH,NORMALIZE,${sourcesEval},${CMAKE_CURRENT_SOURCE_DIR}>
+            # Run grit
+            COMMAND "${GRIT_PATH}" $<PATH:ABSOLUTE_PATH,NORMALIZE,${sourcesEval},${CMAKE_CURRENT_SOURCE_DIR}> -fh! -ftb
+                $<TARGET_PROPERTY:${target},GRIT_FLAGS>
+                $<$<BOOL:${flagsFileEval}>:-ff$<PATH:ABSOLUTE_PATH,NORMALIZE,${flagsFileEval},${CMAKE_CURRENT_SOURCE_DIR}>>
+                $<$<BOOL:${tilesetFileEval}>:-fx$<PATH:ABSOLUTE_PATH,NORMALIZE,${tilesetFileEval},${CMAKE_CURRENT_SOURCE_DIR}>>
+                "$<$<BOOL:${sharedFlags}>:${sharedFlags}>"
+            # Rename byproducts
+            COMMAND "${CMAKE_COMMAND}" -P "${FILE_RENAME_PATH}" -- "[.]img[.]bin$$" "Tiles.bin" ERROR_QUIET $<PATH:REPLACE_EXTENSION,$<PATH:GET_FILENAME,${sourcesEval}>,img.bin>
+            COMMAND "${CMAKE_COMMAND}" -P "${FILE_RENAME_PATH}" -- "[.]map[.]bin$$" "Map.bin" ERROR_QUIET $<PATH:REPLACE_EXTENSION,$<PATH:GET_FILENAME,${sourcesEval}>,map.bin>
+            COMMAND "${CMAKE_COMMAND}" -P "${FILE_RENAME_PATH}" -- "[.]pal[.]bin$$" "Pal.bin" ERROR_QUIET $<PATH:REPLACE_EXTENSION,$<PATH:GET_FILENAME,${sourcesEval}>,pal.bin>
+            # Rename shared output (if any)
+            COMMAND "${CMAKE_COMMAND}" -P "${FILE_RENAME_PATH}" -- "[.]img[.]bin$$" "Tiles.bin" ERROR_QUIET "${target}.img.bin"
+            COMMAND "${CMAKE_COMMAND}" -P "${FILE_RENAME_PATH}" -- "[.]pal[.]bin$$" "Pal.bin" ERROR_QUIET "${target}.pal.bin"
+            # Create object file
+            COMMAND "${CMAKE_COMMAND}" -D "CMAKE_LINKER=\"${CMAKE_LINKER}\"" -D "CMAKE_OBJCOPY=\"${CMAKE_OBJCOPY}\""
+                -P "${BIN2O_PATH}" -- "${target}.o" HEADER "${target}.h" SUFFIX_END End SUFFIX_SIZE Len NAME_WE ERROR_QUIET
+                    $<JOIN:$<PATH:REMOVE_EXTENSION,$<PATH:GET_FILENAME,${sourcesEval}>>,Tiles.bin$<SEMICOLON>>Tiles.bin
+                    $<JOIN:$<PATH:REMOVE_EXTENSION,$<PATH:GET_FILENAME,${sourcesEval}>>,Map.bin$<SEMICOLON>>Map.bin
+                    $<JOIN:$<PATH:REMOVE_EXTENSION,$<PATH:GET_FILENAME,${sourcesEval}>>,Pal.bin$<SEMICOLON>>Pal.bin
+                    $<$<BOOL:${ARGS_PALETTE_SHARED}>:"${target}Pal.bin">
+                    $<$<BOOL:${ARGS_GRAPHICS_SHARED}>:"${target}Tiles.bin">
+            # Remove byproducts
+            COMMAND "${CMAKE_COMMAND}" -E rm -f
+                $<JOIN:$<PATH:REMOVE_EXTENSION,$<PATH:GET_FILENAME,${sourcesEval}>>,Tiles.bin$<SEMICOLON>>Tiles.bin
+                $<JOIN:$<PATH:REMOVE_EXTENSION,$<PATH:GET_FILENAME,${sourcesEval}>>,Map.bin$<SEMICOLON>>Map.bin
+                $<JOIN:$<PATH:REMOVE_EXTENSION,$<PATH:GET_FILENAME,${sourcesEval}>>,Pal.bin$<SEMICOLON>>Pal.bin
+                $<$<BOOL:${ARGS_PALETTE_SHARED}>:"${target}Pal.bin">
+                $<$<BOOL:${ARGS_GRAPHICS_SHARED}>:"${target}Tiles.bin">
+            WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${gritTargetDir}"
+            COMMAND_EXPAND_LISTS
+    )
+
+    if(ARGS_FLAGS)
+        separate_arguments(gritFlags NATIVE_COMMAND "${ARGS_FLAGS}")
+    endif()
+
+    foreach(option ${paletteOptions} ${paletteOneValueArgs} ${graphicsOptions} ${graphicsOneValueArgs} ${mapOptions} ${mapOneValueArgs} ${mapMultiValueArgs} ${metaOptions} ${metaOneValueArgs})
+        if(NOT ARGS_${option})
+            continue()
+        endif()
+
+        if(${option}_KEYS)  # Keyword arg
+            unset(gritMultiArgs)
+            foreach(arg ${ARGS_${option}})
+                if(NOT ${arg} IN_LIST ${option}_KEYS)
+                    message(WARNING "Unknown key \"${arg}\" for \"${option}\"")
+                    continue()
+                endif()
+
+                string(APPEND gritMultiArgs ${${option}_VALUE_${arg}})
+            endforeach()
+
+            list(APPEND gritFlags "${${option}}${gritMultiArgs}")
+        elseif(${option}_ARG)  # One value arg
+            list(APPEND gritFlags "${${option}}${ARGS_${option}}")
+        else()  # Flag
+            list(APPEND gritFlags "${${option}}")
+        endif()
+    endforeach()
+
+    add_library(${target} OBJECT IMPORTED)
+    set_target_properties(${target} PROPERTIES
+            IMPORTED_OBJECTS "${CMAKE_CURRENT_BINARY_DIR}/${gritTargetDir}/${target}.o"
+            GRIT_FLAGS "${gritFlags}"
+            GRIT_FLAGS_FILE "${ARGS_FLAGS_FILE}"
+            GRIT_TILESET_FILE "${ARGS_TILESET_FILE}"
+            GRIT_SOURCES "${ARGS_UNPARSED_ARGUMENTS}"
+    )
+    target_sources(${target}
+            INTERFACE "$<PATH:ABSOLUTE_PATH,NORMALIZE,$<TARGET_PROPERTY:${target},GRIT_SOURCES>,${CMAKE_CURRENT_SOURCE_DIR}>"
+    )
+    target_include_directories(${target} INTERFACE "${CMAKE_CURRENT_BINARY_DIR}/${gritTargetDir}")
+endfunction()
+
+macro(__grit_palette_args)
+    set(PALETTE "-p")
+    set(NO_PALETTE "-p!")
+    set(PALETTE_COMPRESSION "-pz")
+        set(PALETTE_COMPRESSION_KEYS OFF LZ77 HUFF RLE FAKE)
+            set(PALETTE_COMPRESSION_VALUE_OFF "!")
+            set(PALETTE_COMPRESSION_VALUE_LZ77 "l")
+            set(PALETTE_COMPRESSION_VALUE_HUFF "h")
+            set(PALETTE_COMPRESSION_VALUE_RLE "r")
+            set(PALETTE_COMPRESSION_VALUE_FAKE "0")
+    set(PALETTE_RANGE_START "-ps")
+        set(PALETTE_RANGE_START_ARG ON)
+    set(PALETTE_RANGE_END "-pe")
+        set(PALETTE_RANGE_END_ARG ON)
+    set(PALETTE_COUNT "-pn")
+        set(PALETTE_COUNT_ARG ON)
+    set(PALETTE_TRANSPARENT_INDEX "-pT")
+        set(PALETTE_TRANSPARENT_INDEX_ARG ON)
+
+    set(paletteOptions
+            PALETTE
+            NO_PALETTE
+    )
+    set(paletteOneValueArgs
+            PALETTE_COMPRESSION
+            PALETTE_RANGE_START
+            PALETTE_RANGE_END
+            PALETTE_COUNT
+            PALETTE_TRANSPARENT_INDEX
+    )
+endmacro()
+
+macro(__grit_graphics_args)
+    set(GRAPHICS "-g")
+    set(NO_GRAPHICS "-g!")
+    set(GRAPHICS_COMPRESSION "-gz")
+        set(GRAPHICS_COMPRESSION_KEYS OFF LZ77 HUFF RLE FAKE)
+            set(GRAPHICS_COMPRESSION_VALUE_OFF "!")
+            set(GRAPHICS_COMPRESSION_VALUE_LZ77 "l")
+            set(GRAPHICS_COMPRESSION_VALUE_HUFF "h")
+            set(GRAPHICS_COMPRESSION_VALUE_RLE "r")
+            set(GRAPHICS_COMPRESSION_VALUE_FAKE "0")
+    set(GRAPHICS_PIXEL_OFFSET "-ga")
+        set(GRAPHICS_PIXEL_OFFSET_ARG ON)
+    set(GRAPHICS_FORMAT "-g")
+        set(GRAPHICS_FORMAT_KEYS BITMAP TILE)
+            set(GRAPHICS_FORMAT_VALUE_BITMAP "b")
+            set(GRAPHICS_FORMAT_VALUE_TILE "t")
+    set(GRAPHICS_BIT_DEPTH "-gB")
+        set(GRAPHICS_BIT_DEPTH_ARG ON)
+    set(GRAPHICS_TRANSPARENT_COLOR "-gT")
+        set(GRAPHICS_TRANSPARENT_COLOR_ARG ON)
+
+    set(AREA_LEFT "-al")
+        set(AREA_LEFT_ARG ON)
+    set(AREA_RIGHT "-ar")
+        set(AREA_RIGHT_ARG ON)
+    set(AREA_WIDTH "-aw")
+        set(AREA_WIDTH_ARG ON)
+    set(AREA_TOP "-at")
+        set(AREA_TOP_ARG ON)
+    set(AREA_BOTTOM "-ab")
+        set(AREA_BOTTOM_ARG ON)
+    set(AREA_HEIGHT "-ah")
+        set(AREA_HEIGHT_ARG ON)
+
+    set(graphicsOptions
+            GRAPHICS
+            NO_GRAPHICS
+    )
+    set(graphicsOneValueArgs
+            GRAPHICS_COMPRESSION
+            GRAPHICS_PIXEL_OFFSET
+            GRAPHICS_FORMAT
+            GRAPHICS_BIT_DEPTH
+            GRAPHICS_TRANSPARENT_COLOR
+            AREA_LEFT
+            AREA_RIGHT
+            AREA_WIDTH
+            AREA_TOP
+            AREA_BOTTOM
+            AREA_HEIGHT
+    )
+endmacro()
+
+macro(__grit_map_args)
+    set(MAP "-m")
+    set(NO_MAP "-m!")
+    set(MAP_COMPRESSION "-mz")
+        set(MAP_COMPRESSION_KEYS OFF LZ77 HUFF RLE FAKE)
+            set(MAP_COMPRESSION_VALUE_OFF "!")
+            set(MAP_COMPRESSION_VALUE_LZ77 "l")
+            set(MAP_COMPRESSION_VALUE_HUFF "h")
+            set(MAP_COMPRESSION_VALUE_RLE "r")
+            set(MAP_COMPRESSION_VALUE_FAKE "0")
+    set(MAP_TILE_REDUCTION "-mR")
+        set(MAP_TILE_REDUCTION_KEYS TILES PALETTES FLIPPED)
+            set(MAP_TILE_REDUCTION_VALUE_TILES "t")
+            set(MAP_TILE_REDUCTION_VALUE_PALETTES "p")
+            set(MAP_TILE_REDUCTION_VALUE_FLIPPED "f")
+    set(MAP_NO_TILE_REDUCTION "-mR!")
+        set(MAP_NO_TILE_REDUCTION_ARG ON)
+    set(MAP_LAYOUT "-mL")
+        set(MAP_LAYOUT_KEYS REGULAR_FLAT REGULAR_SBB AFFINE)
+            set(MAP_LAYOUT_VALUE_REGULAR_FLAT "f")
+            set(MAP_LAYOUT_VALUE_REGULAR_SBB "s")
+            set(MAP_LAYOUT_VALUE_AFFINE "a")
+
+    set(mapOptions
+            MAP
+            NO_MAP
+            MAP_NO_TILE_REDUCTION
+    )
+    set(mapOneValueArgs
+            MAP_COMPRESSION
+            MAP_LAYOUT
+    )
+    set(mapMultiValueArgs MAP_TILE_REDUCTION)
+endmacro()
+
+macro(__grit_meta_args)
+    set(METATILE_HEIGHT "-Mh")
+        set(METATILE_HEIGHT_ARG ON)
+    set(METATILE_WIDTH "-Mw")
+        set(METATILE_WIDTH_ARG ON)
+    set(METATILE_REDUCTION "-MRp")
+
+    set(metaOptions
+            METATILE_REDUCTION
+    )
+    set(metaOneValueArgs
+            METATILE_HEIGHT
+            METATILE_WIDTH
+    )
+endmacro()
+
+find_program(GRIT_PATH grit grit.exe
+        PATHS ${devkitARM} "${GRIT_DIR}" $ENV{HOME}
+        PATH_SUFFIXES "bin" "tools/bin"
+)
+
+if(GRIT_PATH)
+    return()
+endif()
+
+include(FetchContent)
+include(Mktemp)
+include(ProcessorCount)
+
+mktemp(gritCMakeLists TMPDIR)
+file(WRITE "${gritCMakeLists}" [=[
+cmake_minimum_required(VERSION 3.25.1)
+project(grit VERSION 0.9.2 LANGUAGES CXX)
 
 include(FetchContent)
 
-find_program(CMAKE_GRIT_PROGRAM grit grit.exe PATHS "$ENV{DEVKITPRO}/tools" "${CMAKE_SYSTEM_LIBRARY_PATH}/grit" "${GRIT_DIR}" PATH_SUFFIXES bin)
+add_library(cldib STATIC
+        cldib/cldib_adjust.cpp
+        cldib/cldib_conv.cpp
+        cldib/cldib_core.cpp
+        cldib/cldib_tmap.cpp
+        cldib/cldib_tools.cpp
+        cldib/cldib_wu.cpp
+)
 
-if(NOT CMAKE_GRIT_PROGRAM)
-    set(SOURCE_DIR "${CMAKE_SYSTEM_LIBRARY_PATH}/grit")
+find_library(FreeImage_LIB_PATH NAMES freeimage)
+find_path(FreeImage_INCLUDE_PATH FreeImage.h)
 
-    file(MAKE_DIRECTORY "${SOURCE_DIR}/temp")
-    file(WRITE "${SOURCE_DIR}/temp/CMakeLists.txt" [=[
-        cmake_minimum_required(VERSION 3.18)
-        project(grit VERSION 0.9.2 LANGUAGES CXX)
+if(FreeImage_LIB_PATH AND FreeImage_INCLUDE_PATH)
+    target_link_libraries(cldib PUBLIC "${FreeImage_LIB_PATH}")
+    target_include_directories(cldib PUBLIC cldib "${FreeImage_INCLUDE_PATH}")
+else()
+    FetchContent_Declare(FreeImage
+            GIT_REPOSITORY "https://github.com/danoli3/FreeImage.git"
+            GIT_TAG "master"
+            INSTALL_COMMAND ""
+    )
+    FetchContent_MakeAvailable(FreeImage)
 
-        if(TOOLCHAIN_MODULE_PATH)
-            list(APPEND CMAKE_MODULE_PATH ${TOOLCHAIN_MODULE_PATH})
-        endif()
-        find_package(FreeImage REQUIRED)
+    target_link_libraries(cldib PUBLIC FreeImage)
+    target_include_directories(cldib PUBLIC cldib "${FreeImage_SOURCE_DIR}/Source")
+endif()
 
-        add_library(cldib STATIC
-            cldib/cldib_adjust.cpp
-            cldib/cldib_conv.cpp
-            cldib/cldib_core.cpp
-            cldib/cldib_tmap.cpp
-            cldib/cldib_tools.cpp
-            cldib/cldib_wu.cpp
-        )
-        target_include_directories(cldib PUBLIC cldib)
+add_library(libgrit STATIC
+        libgrit/cprs.cpp
+        libgrit/cprs_huff.cpp
+        libgrit/cprs_lz.cpp
+        libgrit/cprs_rle.cpp
+        libgrit/grit_core.cpp
+        libgrit/grit_misc.cpp
+        libgrit/grit_prep.cpp
+        libgrit/grit_shared.cpp
+        libgrit/grit_xp.cpp
+        libgrit/logger.cpp
+        libgrit/pathfun.cpp
+)
+set_target_properties(libgrit PROPERTIES PREFIX "")
+target_include_directories(libgrit PUBLIC libgrit .)
+target_link_libraries(libgrit PUBLIC cldib)
+target_compile_definitions(libgrit PUBLIC PACKAGE_VERSION="${CMAKE_PROJECT_VERSION}")
 
-        add_library(libgrit STATIC
-            libgrit/cprs.cpp
-            libgrit/cprs_huff.cpp
-            libgrit/cprs_lz.cpp
-            libgrit/cprs_rle.cpp
-            libgrit/grit_core.cpp
-            libgrit/grit_misc.cpp
-            libgrit/grit_prep.cpp
-            libgrit/grit_shared.cpp
-            libgrit/grit_xp.cpp
-            libgrit/logger.cpp
-            libgrit/pathfun.cpp
-        )
-        set_target_properties(libgrit PROPERTIES PREFIX "")
-        target_include_directories(libgrit PUBLIC libgrit .)
-        target_link_libraries(libgrit PUBLIC cldib)
-        target_compile_definitions(libgrit PUBLIC PACKAGE_VERSION="${CMAKE_PROJECT_VERSION}")
+add_executable(grit
+        srcgrit/cli.cpp
+        srcgrit/grit_main.cpp
+        extlib/fi.cpp
+)
+target_include_directories(grit PRIVATE extlib)
+target_link_libraries(grit PRIVATE libgrit $<$<NOT:$<BOOL:MSVC>>:m>)
+install(TARGETS grit DESTINATION bin)
+]=])
 
-        add_executable(grit
-            srcgrit/cli.cpp
-            srcgrit/grit_main.cpp
-            extlib/fi.cpp
-        )
-        target_include_directories(grit PRIVATE extlib)
-        target_link_libraries(grit PRIVATE
-            libgrit
-            freeimage::FreeImage
-            $<$<NOT:$<BOOL:MSVC>>:m>
-        )
-
-        install(TARGETS grit DESTINATION bin)
-    ]=])
-
-    FetchContent_Declare(grit_proj DOWNLOAD_EXTRACT_TIMESTAMP ON
-        PREFIX "${SOURCE_DIR}"
-        TMP_DIR "${SOURCE_DIR}/temp"
-        STAMP_DIR "${SOURCE_DIR}/stamp"
-        SOURCE_DIR "${SOURCE_DIR}/source"
-        # Download
-        DOWNLOAD_DIR "${SOURCE_DIR}/download"
+FetchContent_Declare(grit
         GIT_REPOSITORY "https://github.com/devkitPro/grit.git"
         GIT_TAG "master"
-        # Update
-        UPDATE_COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-            "${SOURCE_DIR}/temp/CMakeLists.txt"
-            "${SOURCE_DIR}/source/CMakeLists.txt"
-    )
+)
 
-    FetchContent_Populate(grit_proj)
+FetchContent_GetProperties(grit)
+if(NOT grit_POPULATED)
+    FetchContent_Populate(grit)
+    execute_process(COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${gritCMakeLists}" "${grit_SOURCE_DIR}/CMakeLists.txt")
+    file(REMOVE "${gritCMakeLists}")
 
-    # Configure
-    execute_process(
-        COMMAND "${CMAKE_COMMAND}" -S . -B "${SOURCE_DIR}/build"
-            "-DTOOLCHAIN_MODULE_PATH=${CMAKE_MODULE_PATH}"
-            "-DTOOLCHAIN_LIBRARY_PATH=${CMAKE_SYSTEM_LIBRARY_PATH}"
-        WORKING_DIRECTORY "${SOURCE_DIR}/source"
-        RESULT_VARIABLE cmakeResult
-    )
-
-    if(cmakeResult EQUAL "1")
-        message(WARNING "Failed to configure grit")
-    else()
-        # Build
-        execute_process(
-            COMMAND "${CMAKE_COMMAND}" --build . --config Release
-            WORKING_DIRECTORY "${SOURCE_DIR}/build"
-            RESULT_VARIABLE cmakeResult
-        )
-
-        if(cmakeResult EQUAL "1")
-            message(WARNING "Failed to build grit")
-        else()
-            # Install
-            execute_process(
-                COMMAND ${CMAKE_COMMAND} --install . --prefix "${SOURCE_DIR}" --config Release
-                WORKING_DIRECTORY "${SOURCE_DIR}/build"
-                RESULT_VARIABLE cmakeResult
-            )
-
-            if(cmakeResult EQUAL "1")
-                message(WARNING "Failed to install grit")
-            else()
-                find_program(CMAKE_GRIT_PROGRAM grit PATHS "${SOURCE_DIR}/bin")
-            endif()
-        endif()
+    if(CMAKE_C_COMPILER_LAUNCHER)
+        list(APPEND cmakeFlags -D CMAKE_C_COMPILER_LAUNCHER=${CMAKE_C_COMPILER_LAUNCHER})
     endif()
+    if(CMAKE_CXX_COMPILER_LAUNCHER)
+        list(APPEND cmakeFlags -D CMAKE_CXX_COMPILER_LAUNCHER=${CMAKE_CXX_COMPILER_LAUNCHER})
+    endif()
+    ProcessorCount(nproc)
+    math(EXPR nproc "${nproc} - 1")
+
+    execute_process(COMMAND "${CMAKE_COMMAND}" -S "${grit_SOURCE_DIR}" -B "${grit_BINARY_DIR}" -G "${CMAKE_GENERATOR}" ${cmakeFlags})  # Configure
+    execute_process(COMMAND "${CMAKE_COMMAND}" --build "${grit_BINARY_DIR}" --parallel ${nproc})  # Build
+    if(CMAKE_HOST_SYSTEM_NAME STREQUAL Linux)
+        execute_process(COMMAND "${CMAKE_COMMAND}" --install "${grit_BINARY_DIR}" --prefix $ENV{HOME})  # Install
+    endif()
+
+    find_program(GRIT_PATH grit grit.exe PATHS "${grit_BINARY_DIR}")
+else()
+    file(REMOVE "${gritCMakeLists}")
 endif()
-
-if(NOT CMAKE_GRIT_PROGRAM)
-    message(WARNING "grit not found: Please set `-DCMAKE_GRIT_PROGRAM:FILEPATH=<path/to/bin/grit>`")
-endif()
-
-function(add_grit_tilemap target type)
-    file(RELATIVE_PATH inpath "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
-    set(outpath "${CMAKE_CURRENT_BINARY_DIR}")
-
-    set(oneValueArgs
-        SHARED_PREFIX # File to use for shared output (default is target name when sharing is used)
-        LOG_LEVEL # 1, 2, or 3 (default is 1)
-        DATA_TYPE # Default data type (individual options can override this) u8, u16, or u32
-        OPTIONS_FILE # File to read in additional options
-    )
-    set(multiValueArgs
-        GRAPHICS
-        PALETTE
-        MAP
-        --
-    )
-    cmake_parse_arguments(ARGS "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-    grit_parse_arguments_graphics(ARGS_GFX optGfx ${ARGS_GRAPHICS})
-    grit_parse_arguments_palette(ARGS_PAL optPal ${ARGS_PALETTE})
-    grit_parse_arguments_map(ARGS_MAP optMap ${ARGS_MAP})
-
-    list(APPEND ARGS_UNPARSED_ARGUMENTS ${ARGS_GFX_UNPARSED_ARGUMENTS})
-    list(APPEND ARGS_UNPARSED_ARGUMENTS ${ARGS_PAL_UNPARSED_ARGUMENTS})
-    list(APPEND ARGS_UNPARSED_ARGUMENTS ${ARGS_MAP_UNPARSED_ARGUMENTS})
-    list(APPEND ARGS_UNPARSED_ARGUMENTS ${ARGS_--})
-    set(ARGN ${ARGS_UNPARSED_ARGUMENTS})
-
-    # Tilemap options
-
-    set(opts "-gt") # Tilemap mode
-
-    if(NOT ARGS_GFX_BIT_DEPTH)
-        list(APPEND opts "-gB4") # Default to 4bpp tile graphics
-    endif()
-    if(NOT ARGS_MAP_LAYOUT)
-        list(APPEND opts "-mLs") # Default to SBB layout
-    endif()
-    if(NOT ARGS_MAP_OPTIMIZE)
-        if(ARGS_GFX_BIT_DEPTH EQUAL 8)
-            if(ARGS_MAP_LAYOUT STREQUAL AFFINE)
-                list(APPEND opts "-mRa") # Optimise for affine
-            else()
-                list(APPEND opts "-mR8") # Optimise for 8bpp
-            endif()
-        elseif(NOT ARGS_GFX_BIT_DEPTH OR ARGS_GFX_BIT_DEPTH EQUAL 4)
-            list(APPEND opts "-mR4") # Optimise for 4bpp
-        endif()
-    endif()
-
-    if(type STREQUAL C)
-        set(suffix ".c")
-        list(APPEND opts "-ftc")
-    elseif(type STREQUAL ASM)
-        set(suffix ".s")
-        list(APPEND opts "-fts")
-    elseif(type STREQUAL BIN OR type STREQUAL BINARY)
-        set(palsuffix ".pal.bin")
-        set(imgsuffix ".img.bin")
-        set(mapsuffix ".map.bin")
-        list(APPEND opts "-ftb" "-fh!")
-    elseif(type STREQUAL GBFS)
-        set(suffix ".gbfs")
-        list(APPEND opts "-ftg" "-fh!")
-    else()
-        message(FATAL_ERROR "Unknown grit output type '${type}'")
-    endif()
-
-    # Common file options
-
-    if(ARGS_SHARED_PREFIX)
-        list(APPEND opts "-O${ARGS_SHARED_PREFIX}")
-    elseif(ARGS_GFX_SHARED OR ARGS_PAL_SHARED)
-        list(APPEND opts "-O${target}")
-    endif()
-
-    if(ARGS_LOG_LEVEL EQUAL 1)
-        list(APPEND opts "-W1")
-    elseif(ARGS_LOG_LEVEL EQUAL 2)
-        list(APPEND opts "-W2")
-    elseif(ARGS_LOG_LEVEL EQUAL 3)
-        list(APPEND opts "-W3")
-    elseif(ARGS_LOG_LEVEL)
-        message(WARNING "Invalid grit log level '${ARGS_LOG_LEVEL}'. Must be '1', '2', or '3'.")
-    endif()
-
-    if(ARGS_DATA_TYPE MATCHES "^[uU]8$")
-        list(APPEND opts "-U8")
-    elseif(ARGS_DATA_TYPE MATCHES "^[uU]16$")
-        list(APPEND opts "-U16")
-    elseif(ARGS_DATA_TYPE MATCHES "^[uU]32$")
-        list(APPEND opts "-U32")
-    elseif(ARGS_DATA_TYPE)
-        message(WARNING "Invalid grit data type '${ARGS_DATA_TYPE}'. Must be 'u8', 'u16', or 'u32'.")
-    endif()
-
-    if(ARGS_COMPRESSION STREQUAL OFF OR ARGS_COMPRESSION STREQUAL NONE)
-        list(APPEND opts "-Z!")
-    elseif(ARGS_COMPRESSION STREQUAL LZ77)
-        list(APPEND opts "-Zl")
-    elseif(ARGS_COMPRESSION STREQUAL HUFF OR ARGS_COMPRESSION STREQUAL HUFFMAN)
-        list(APPEND opts "-Zh")
-    elseif(ARGS_COMPRESSION STREQUAL RLE OR ARGS_COMPRESSION STREQUAL RUN_LENGTH_ENCODING)
-        list(APPEND opts "-Zr")
-    elseif(ARGS_COMPRESSION)
-        message(WARNING "Invalid grit compression type '${ARGS_COMPRESSION}'. Must be 'OFF', 'LZ77', 'HUFF', or 'RLE'.")
-    endif()
-
-    list(APPEND opts ${optGfx} ${optPal} ${optMap})
-
-    if(ARGS_OPTIONS_FILE)
-        if(IS_ABSOLUTE ${ARGS_OPTIONS_FILE})
-            list(APPEND opts "-ff${ARGS_OPTIONS_FILE}")
-        else()
-            list(APPEND opts "-ff${inpath}/${ARGS_OPTIONS_FILE}")
-        endif()
-    endif()
-
-    # Setup the output files
-
-    if(suffix)
-        macro(append_output prefix operation)
-            list(APPEND output "${outpath}/${prefix}${suffix}")
-            if(type STREQUAL C OR type STREQUAL ASM)
-                list(APPEND output "${outpath}/${prefix}.h") # TODO : Header exclude support?
-            endif()
-        endmacro()
-    else()
-        macro(append_output prefix operation)
-            if(NOT ARGS_MAP_EXCLUDE AND ${operation} ARGS_MAP_SHARED)
-                list(APPEND output "${outpath}/${prefix}${mapsuffix}")
-            endif()
-            if(NOT ARGS_PAL_EXCLUDE AND ${operation} ARGS_PAL_SHARED)
-                list(APPEND output "${outpath}/${prefix}${palsuffix}")
-            endif()
-            if(NOT ARGS_GFX_EXCLUDE AND ${operation} ARGS_GFX_SHARED)
-                list(APPEND output "${outpath}/${prefix}${imgsuffix}")
-            endif()
-        endmacro()
-    endif()
-
-    if(ARGS_SHARED_PREFIX)
-        append_output(${ARGS_SHARED_PREFIX} "")
-    elseif(ARGS_GFX_SHARED OR ARGS_PAL_SHARED OR ARGS_MAP_SHARED)
-        append_output(${target} "")
-    endif()
-
-    foreach(arg ${ARGN})
-        if(arg MATCHES "[$][<]TARGET_[A-Z_]+[:].+[>]")
-            message(WARNING "Tried to set genex '${arg}' as an output for '${target}'")
-            continue()
-        endif()
-        if(arg MATCHES "[$][<][A-Z_]+[:].+[>]")
-            list(APPEND input "${arg}") # Copy any valid generator expression
-        else()
-            if(IS_ABSOLUTE ${arg})
-                list(APPEND input "${arg}")
-            else()
-                list(APPEND input "${inpath}/${arg}")
-            endif()
-            # Parse the file and expected output types to produce output names
-            get_filename_component(arg "${arg}" NAME_WE)
-            append_output(${arg} NOT)
-        endif()
-    endforeach()
-
-    # Setup the grit command
-
-    add_custom_command(
-        OUTPUT ${output}
-        COMMAND "${CMAKE_GRIT_PROGRAM}" ${input} ${opts}
-        DEPENDS ${input}
-        VERBATIM
-        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-    )
-
-    # Setup the target
-
-    if(type STREQUAL C OR type STREQUAL ASM)
-        add_library(${target} OBJECT ${output})
-        target_include_directories(${target} INTERFACE "${CMAKE_CURRENT_BINARY_DIR}")
-    else()
-        add_custom_target(${target} DEPENDS ${output})
-        set_target_properties(${target} PROPERTIES OBJECTS "${output}")
-    endif()
-endfunction()
-
-function(add_grit_sprite target type)
-    set(args MAP EXCLUDE ${ARGN})
-    add_grit_tilemap(${target} ${type} ${args})
-endfunction()
-
-function(add_grit_bitmap target type)
-    file(RELATIVE_PATH inpath "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
-    set(outpath "${CMAKE_CURRENT_BINARY_DIR}")
-
-    set(oneValueArgs
-        SHARED_PREFIX # File to use for shared output (default is target name when sharing is used)
-        LOG_LEVEL # 1, 2, or 3 (default is 1)
-        DATA_TYPE # Default data type (individual options can override this) u8, u16, or u32
-        COMPRESSION # Default compression type (individual options can override this)
-        OPTIONS_FILE # File to read in additional options
-    )
-    set(multiValueArgs
-        GRAPHICS
-        PALETTE
-        --
-    )
-    cmake_parse_arguments(ARGS "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-    grit_parse_arguments_graphics(ARGS_GFX optGfx ${ARGS_GRAPHICS})
-    grit_parse_arguments_palette(ARGS_PAL optPal ${ARGS_PALETTE})
-
-    list(APPEND ARGS_UNPARSED_ARGUMENTS ${ARGS_GFX_UNPARSED_ARGUMENTS})
-    list(APPEND ARGS_UNPARSED_ARGUMENTS ${ARGS_PAL_UNPARSED_ARGUMENTS})
-    list(APPEND ARGS_UNPARSED_ARGUMENTS ${ARGS_--})
-    set(ARGN ${ARGS_UNPARSED_ARGUMENTS})
-
-    # Bitmap options
-
-    set(opts "-gb") # Bitmap mode
-
-    if(type STREQUAL C)
-        set(suffix ".c")
-        list(APPEND opts "-ftc")
-    elseif(type STREQUAL ASM)
-        set(suffix ".s")
-        list(APPEND opts "-fts")
-    elseif(type STREQUAL BIN OR type STREQUAL BINARY)
-        set(palsuffix ".pal.bin")
-        set(imgsuffix ".img.bin")
-        list(APPEND opts "-ftb" "-fh!")
-    elseif(type STREQUAL GBFS)
-        set(suffix ".gbfs")
-        list(APPEND opts "-ftg" "-fh!")
-    else()
-        message(FATAL_ERROR "Unknown grit output type '${type}'")
-    endif()
-
-    # Common file options
-
-    if(ARGS_SHARED_PREFIX)
-        list(APPEND opts "-O${ARGS_SHARED_PREFIX}")
-    elseif(ARGS_GFX_SHARED OR ARGS_PAL_SHARED)
-        list(APPEND opts "-O${target}")
-    endif()
-
-    if(ARGS_LOG_LEVEL EQUAL 1)
-        list(APPEND opts "-W1")
-    elseif(ARGS_LOG_LEVEL EQUAL 2)
-        list(APPEND opts "-W2")
-    elseif(ARGS_LOG_LEVEL EQUAL 3)
-        list(APPEND opts "-W3")
-    elseif(ARGS_LOG_LEVEL)
-        message(WARNING "Invalid grit log level '${ARGS_LOG_LEVEL}'. Must be '1', '2', or '3'.")
-    endif()
-
-    if(ARGS_DATA_TYPE MATCHES "^[uU]8$")
-        list(APPEND opts "-U8")
-    elseif(ARGS_DATA_TYPE MATCHES "^[uU]16$")
-        list(APPEND opts "-U16")
-    elseif(ARGS_DATA_TYPE MATCHES "^[uU]32$")
-        list(APPEND opts "-U32")
-    elseif(ARGS_DATA_TYPE)
-        message(WARNING "Invalid grit data type '${ARGS_DATA_TYPE}'. Must be 'u8', 'u16', or 'u32'.")
-    endif()
-
-    if(ARGS_COMPRESSION STREQUAL OFF OR ARGS_COMPRESSION STREQUAL NONE)
-        list(APPEND opts "-Z!")
-    elseif(ARGS_COMPRESSION STREQUAL LZ77)
-        list(APPEND opts "-Zl")
-    elseif(ARGS_COMPRESSION STREQUAL HUFF OR ARGS_COMPRESSION STREQUAL HUFFMAN)
-        list(APPEND opts "-Zh")
-    elseif(ARGS_COMPRESSION STREQUAL RLE OR ARGS_COMPRESSION STREQUAL RUN_LENGTH_ENCODING)
-        list(APPEND opts "-Zr")
-    elseif(ARGS_COMPRESSION)
-        message(WARNING "Invalid grit compression type '${ARGS_COMPRESSION}'. Must be 'OFF', 'LZ77', 'HUFF', or 'RLE'.")
-    endif()
-
-    list(APPEND opts ${optGfx} ${optPal})
-
-    if(ARGS_OPTIONS_FILE)
-        if(IS_ABSOLUTE ARGS_OPTIONS_FILE)
-            list(APPEND opts "-ff${ARGS_OPTIONS_FILE}")
-        else()
-            list(APPEND opts "-ff${inpath}/${ARGS_OPTIONS_FILE}")
-        endif()
-    endif()
-
-    # Setup the output files
-
-    if(suffix)
-        macro(append_output prefix operation)
-            list(APPEND output "${outpath}/${prefix}${suffix}")
-            if(type STREQUAL C OR type STREQUAL ASM)
-                list(APPEND output "${outpath}/${prefix}.h") # TODO : Header exclude support?
-            endif()
-        endmacro()
-    else()
-        macro(append_output prefix operation)
-            if(NOT ARGS_PAL_EXCLUDE AND ${operation} ARGS_PAL_SHARED)
-                list(APPEND output "${outpath}/${prefix}${palsuffix}")
-            endif()
-            if(NOT ARGS_GFX_EXCLUDE AND ${operation} ARGS_GFX_SHARED)
-                list(APPEND output "${outpath}/${prefix}${imgsuffix}")
-            endif()
-        endmacro()
-    endif()
-
-    if(ARGS_SHARED_PREFIX)
-        append_output(${ARGS_SHARED_PREFIX} "")
-    elseif(ARGS_GFX_SHARED OR ARGS_PAL_SHARED)
-        append_output(${target} "")
-    endif()
-
-    foreach(arg ${ARGN})
-        if(arg MATCHES "[$][<]TARGET_[A-Z_]+[:].+[>]")
-            message(WARNING "Tried to set genex '${arg}' as an output for '${target}'")
-            continue()
-        endif()
-        if(arg MATCHES "[$][<][A-Z_]+[:].+[>]")
-            list(APPEND input "${arg}") # Copy any valid generator expression
-        else()
-            if(IS_ABSOLUTE ${arg})
-                list(APPEND input "${arg}")
-            else()
-                list(APPEND input "${inpath}/${arg}")
-            endif()
-            # Parse the file and expected output types to produce output names
-            get_filename_component(arg "${arg}" NAME_WE)
-            append_output(${arg} NOT)
-        endif()
-    endforeach()
-
-    # Setup the grit command
-
-    add_custom_command(
-        OUTPUT ${output}
-        COMMAND "${CMAKE_GRIT_PROGRAM}" ${input} ${opts}
-        DEPENDS ${input}
-        VERBATIM
-        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-    )
-
-    # Setup the target
-
-    if(type STREQUAL C OR type STREQUAL ASM)
-        add_library(${target} OBJECT ${output})
-        target_include_directories(${target} INTERFACE "${CMAKE_CURRENT_BINARY_DIR}")
-    else()
-        add_custom_target(${target} DEPENDS ${output})
-        set_target_properties(${target} PROPERTIES OBJECTS "${output}")
-    endif()
-endfunction()
-
-macro(grit_copy_arguments dest source arguments)
-    foreach(arg ${arguments})
-        set(${dest}_${arg} ${${source}_${arg}} PARENT_SCOPE)
-    endforeach()
-endmacro()
-
-macro(grit_copy_parsed_arguments dest source options oneValueArgs multiValueArgs)
-    grit_copy_arguments(${dest} ${source} "${options}")
-    grit_copy_arguments(${dest} ${source} "${oneValueArgs}")
-    grit_copy_arguments(${dest} ${source} "${multiValueArgs}")
-    set(${dest}_UNPARSED_ARGUMENTS ${${source}_UNPARSED_ARGUMENTS} PARENT_SCOPE)
-endmacro()
-
-function(grit_parse_arguments_common prefix x outOptions outArgs)
-    set(options
-        EXCLUDE # Don't generate this type (overrides everything else)
-        SHARED # Should this use the shared file (see SHARED_PREFIX)
-    )
-    set(oneValueArgs
-        DATA_TYPE # u8, u16, or u32
-        COMPRESSION
-    )
-    cmake_parse_arguments(ARGS "${options}" "${oneValueArgs}" "" ${ARGN})
-
-    if(ARGS_EXCLUDE)
-        list(APPEND opts "-${x}!")
-    endif()
-    if(ARGS_SHARED)
-        list(APPEND opts "-${x}S")
-    endif()
-    if(ARGS_DATA_TYPE MATCHES "^[uU]8$")
-        list(APPEND opts "-${x}u8")
-    elseif(ARGS_DATA_TYPE MATCHES "^[uU]16$")
-        list(APPEND opts "-${x}u16")
-    elseif(ARGS_DATA_TYPE MATCHES "^[uU]32$")
-        list(APPEND opts "-${x}u32")
-    elseif(ARGS_DATA_TYPE)
-        message(WARNING "Invalid grit data type '${ARGS_DATA_TYPE}'. Must be 'u8', 'u16', or 'u32'.")
-    endif()
-    if(ARGS_COMPRESSION STREQUAL OFF OR ARGS_COMPRESSION STREQUAL NONE)
-        list(APPEND opts "-${x}z!")
-    elseif(ARGS_COMPRESSION STREQUAL LZ77)
-        list(APPEND opts "-${x}zl")
-    elseif(ARGS_COMPRESSION STREQUAL HUFF OR ARGS_COMPRESSION STREQUAL HUFFMAN)
-        list(APPEND opts "-${x}zh")
-    elseif(ARGS_COMPRESSION STREQUAL RLE OR ARGS_COMPRESSION STREQUAL RUN_LENGTH_ENCODING)
-        list(APPEND opts "-${x}zr")
-    elseif(ARGS_COMPRESSION)
-        message(WARNING "Invalid grit compression type '${ARGS_COMPRESSION}'. Must be 'OFF', 'LZ77', 'HUFF', or 'RLE'.")
-    endif()
-
-    grit_copy_parsed_arguments(${prefix} ARGS "${options}" "${oneValueArgs}" "")
-    set(${outArgs} ${options} ${oneValueArgs} PARENT_SCOPE)
-    set(${outOptions} ${opts} PARENT_SCOPE)
-endfunction()
-
-function(grit_parse_arguments_graphics prefix outOptions)
-    grit_parse_arguments_common(ARGS g opts commonArgs ${ARGN})
-    set(ARGN ${ARGS_UNPARSED_ARGUMENTS})
-
-    set(oneValueArgs
-        BIT_DEPTH
-        TRANSPARENT_COLOR
-    )
-    cmake_parse_arguments(ARGS "" "${oneValueArgs}" "" ${ARGN})
-
-    if(ARGS_BIT_DEPTH EQUAL 1 OR ARGS_BIT_DEPTH EQUAL 2 OR ARGS_BIT_DEPTH EQUAL 4 OR ARGS_BIT_DEPTH EQUAL 8 OR ARGS_BIT_DEPTH EQUAL 16)
-        list(APPEND opts "-gB${ARGS_BIT_DEPTH}")
-    elseif(ARGS_BIT_DEPTH)
-        message(FATAL_ERROR "Unknown bit depth '${ARGS_BIT_DEPTH}'")
-    endif()
-
-    if(ARGS_TRANSPARENT_COLOR)
-        list(APPEND opts "-gT${ARGS_TRANSPARENT_COLOR}")
-    endif()
-
-    grit_copy_arguments(${prefix} ARGS "${commonArgs}")
-    grit_copy_parsed_arguments(${prefix} ARGS "" "${oneValueArgs}" "")
-
-    set(${outOptions} ${opts} PARENT_SCOPE)
-endfunction()
-
-function(grit_parse_arguments_palette prefix outOptions)
-    grit_parse_arguments_common(ARGS p opts commonArgs ${ARGN})
-    set(ARGN ${ARGS_UNPARSED_ARGUMENTS})
-
-    set(oneValueArgs
-        START
-        END
-        TRANSPARENT_INDEX
-    )
-    cmake_parse_arguments(ARGS "" "${oneValueArgs}" "" ${ARGN})
-
-    if(ARGS_START)
-        list(APPEND opts "-ps${ARGS_START}")
-    endif()
-    if(ARGS_END)
-        list(APPEND opts "-pe${ARGS_END}")
-    endif()
-
-    if(ARGS_TRANSPARENT_INDEX MATCHES "[0-9]+")
-        list(APPEND opts "-pT${ARGS_TRANSPARENT_INDEX}")
-    elseif(ARGS_TRANSPARENT_INDEX)
-        message(FATAL_ERROR "Transparent index '${ARGS_TRANSPARENT_INDEX}' is not a valid number")
-    endif()
-
-    grit_copy_arguments(${prefix} ARGS "${commonArgs}")
-    grit_copy_parsed_arguments(${prefix} ARGS "" "${oneValueArgs}" "")
-
-    set(${outOptions} ${opts} PARENT_SCOPE)
-endfunction()
-
-function(grit_parse_arguments_map prefix outOptions)
-    grit_parse_arguments_common(ARGS m opts commonArgs ${ARGN})
-    set(ARGN ${ARGS_UNPARSED_ARGUMENTS})
-
-    set(oneValueArgs
-        LAYOUT
-        ENTRY_OFFSET
-    )
-    set(multiValueArgs
-        OPTIMIZE
-    )
-    cmake_parse_arguments(ARGS "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-
-    if(ARGS_LAYOUT STREQUAL FLAT)
-        list(APPEND opts "-mLf")
-    elseif(ARGS_LAYOUT STREQUAL SBB)
-        list(APPEND opts "-mLs")
-    elseif(ARGS_LAYOUT STREQUAL AFFINE)
-        list(APPEND opts "-mLa")
-    elseif(ARGS_LAYOUT)
-        message(FATAL_ERROR "Unknown map layout '${ARGS_LAYOUT}'")
-    endif()
-
-    if(ARGS_ENTRY_OFFSET MATCHES "[0-9]+")
-        list(APPEND opts "-ma${ARGS_ENTRY_OFFSET}")
-    elseif(ARGS_TRANSPARENT_INDEX)
-        message(FATAL_ERROR "Entry offset '${ARGS_ENTRY_OFFSET}' is not a valid number")
-    endif()
-
-    if(ARGS_OPTIMIZE STREQUAL NONE)
-        list(APPEND opts "-mR!")
-    elseif(ARGS_OPTIMIZE STREQUAL ALL)
-        list(APPEND opts "-mRtpf")
-    elseif(ARGS_OPTIMIZE)
-        foreach(arg ${ARGS_OPTIMIZE})
-            if(arg STREQUAL TILES)
-                string(APPEND optimize "t")
-            elseif(arg STREQUAL PALETTES)
-                string(APPEND optimize "p")
-            elseif(arg STREQUAL FLIPPED)
-                string(APPEND optimize "f")
-            elseif(arg STREQUAL NONE)
-                string(APPEND optimize "!")
-            elseif(arg)
-                message(FATAL_ERROR "Unknown map optimize level '${arg}'. Must be `TILES`, `PALETTES`, or `FLIPPED`.")
-            endif()
-        endforeach()
-        list(APPEND opts "-mR${optimize}")
-    endif()
-
-    grit_copy_arguments(${prefix} ARGS "${commonArgs}")
-    grit_copy_parsed_arguments(${prefix} ARGS "" "${oneValueArgs}" "${multiValueArgs}")
-
-    set(${outOptions} ${opts} PARENT_SCOPE)
-endfunction()

@@ -1,33 +1,29 @@
 #===============================================================================
 #
-# Copyright (C) 2021-2023 gba-toolchain contributors
+# agbabi support library for GBA
+# Includes GBA optimised aeabi implementations and support functions
+#   https://github.com/felixjones/agbabi
+#
+# Linking with agbabi will enable optimised memcpy and div
+#
+# Copyright (C) 2021-2024 gba-toolchain contributors
 # For conditions of distribution and use, see copyright notice in LICENSE.md
 #
 #===============================================================================
 
+if(TARGET agbabi)
+    return()
+endif()
+
 include(FetchContent)
 
-if(EXISTS "${CMAKE_SYSTEM_LIBRARY_PATH}/agbabi/CMakeLists.txt" OR EXISTS "${CMAKE_BINARY_DIR}/lib/agbabi/CMakeLists.txt")
-    add_subdirectory("${CMAKE_SYSTEM_LIBRARY_PATH}/agbabi" "${CMAKE_BINARY_DIR}/lib/agbabi" EXCLUDE_FROM_ALL)
-else()
-    find_library(libagbabi agbabi PATHS "${CMAKE_SYSTEM_LIBRARY_PATH}/agbabi" "${AGBABI_DIR}" PATH_SUFFIXES lib)
+FetchContent_Declare(agbabi
+        GIT_REPOSITORY "https://github.com/felixjones/agbabi.git"
+        GIT_TAG "main"
+)
 
-    if(NOT libagbabi)
-        FetchContent_Declare(agbabi DOWNLOAD_EXTRACT_TIMESTAMP ON
-            SOURCE_DIR "${CMAKE_SYSTEM_LIBRARY_PATH}/agbabi"
-            GIT_REPOSITORY "https://github.com/felixjones/agbabi.git"
-            GIT_TAG "main"
-        )
-
-        FetchContent_MakeAvailable(agbabi)
-    else()
-        add_library(agbabi STATIC IMPORTED)
-        set_property(TARGET agbabi PROPERTY IMPORTED_LOCATION "${libagbabi}")
-
-        get_filename_component(INCLUDE_PATH "${libagbabi}" DIRECTORY)
-        get_filename_component(INCLUDE_PATH "${INCLUDE_PATH}" DIRECTORY)
-        target_include_directories(agbabi INTERFACE "${INCLUDE_PATH}/include")
-
-        unset(libagbabi CACHE)
-    endif()
+FetchContent_GetProperties(agbabi)
+if(NOT agbabi_POPULATED)
+    FetchContent_Populate(agbabi)
+    add_subdirectory(${agbabi_SOURCE_DIR} ${agbabi_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()

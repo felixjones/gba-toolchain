@@ -1,6 +1,6 @@
 @===============================================================================
 @
-@ Copyright (C) 2021-2023 gba-toolchain contributors
+@ Copyright (C) 2021-2024 gba-toolchain contributors
 @ For conditions of distribution and use, see copyright notice in LICENSE.md
 @
 @===============================================================================
@@ -115,6 +115,3 @@ __array_call:
     pop     {r0}
 .Larray_bx:
     bx      r0
-
-    @ Reference a symbol from syscalls.c to keep
-    .global _getpid

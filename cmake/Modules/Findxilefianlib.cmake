@@ -1,20 +1,26 @@
 #===============================================================================
 #
-# Copyright (C) 2021-2023 gba-toolchain contributors
+# Some of my (Xilefian's) utility libraries
+#   https://github.com/felixjones/xilefianlib
+#
+# Copyright (C) 2021-2024 gba-toolchain contributors
 # For conditions of distribution and use, see copyright notice in LICENSE.md
 #
 #===============================================================================
 
+if(TARGET xilefianlib)
+    return()
+endif()
+
 include(FetchContent)
 
-if(EXISTS "${CMAKE_SYSTEM_LIBRARY_PATH}/xilefianlib/CMakeLists.txt" OR EXISTS "${CMAKE_BINARY_DIR}/lib/xilefianlib/CMakeLists.txt")
-    add_subdirectory("${CMAKE_SYSTEM_LIBRARY_PATH}/xilefianlib" "${CMAKE_BINARY_DIR}/lib/xilefianlib" EXCLUDE_FROM_ALL)
-else()
-    FetchContent_Declare(xilefianlib DOWNLOAD_EXTRACT_TIMESTAMP ON
-        SOURCE_DIR "${CMAKE_SYSTEM_LIBRARY_PATH}/xilefianlib"
+FetchContent_Declare(xilefianlib
         GIT_REPOSITORY "https://github.com/felixjones/xilefianlib.git"
         GIT_TAG "main"
-    )
+)
 
-    FetchContent_MakeAvailable(xilefianlib)
+FetchContent_GetProperties(xilefianlib)
+if(NOT xilefianlib_POPULATED)
+    FetchContent_Populate(xilefianlib)
+    add_subdirectory(${xilefianlib_SOURCE_DIR} ${xilefianlib_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()

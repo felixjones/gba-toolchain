@@ -1,90 +1,76 @@
 #===============================================================================
 #
-# Copyright (C) 2021-2023 gba-toolchain contributors
+# Copyright (C) 2021-2024 gba-toolchain contributors
 # For conditions of distribution and use, see copyright notice in LICENSE.md
 #
 #===============================================================================
 
-include(ExternalProject)
-
-find_library(libgba gba PATHS "$ENV{DEVKITPRO}/libgba" "${CMAKE_SYSTEM_LIBRARY_PATH}/libgba" "${LIBGBA_DIR}" PATH_SUFFIXES lib)
-
-if(NOT libgba)
-    set(SOURCE_DIR "${CMAKE_SYSTEM_LIBRARY_PATH}/libgba")
-
-    file(MAKE_DIRECTORY "${SOURCE_DIR}/include")
-    file(MAKE_DIRECTORY "${SOURCE_DIR}/temp")
-    file(WRITE "${SOURCE_DIR}/temp/CMakeLists.txt" [=[
-        cmake_minimum_required(VERSION 3.18)
-        project(libgba ASM C)
-
-        file(GLOB sources "src/*.c" "src/*.s" "src/BoyScout/*.c" "src/disc_io/*.c" "src/disc_io/*.s")
-        get_filename_component(console "${CMAKE_CURRENT_SOURCE_DIR}/src/console.c" ABSOLUTE)
-        list(REMOVE_ITEM sources "${console}")
-
-        add_library(gba STATIC ${sources})
-        target_include_directories(gba SYSTEM PUBLIC include)
-
-        target_compile_options(gba PRIVATE
-            $<$<COMPILE_LANGUAGE:ASM>:-x assembler-with-cpp>
-            $<$<COMPILE_LANGUAGE:C>:-mthumb -O2
-                -fno-strict-aliasing
-                -fomit-frame-pointer
-                -ffunction-sections
-                -fdata-sections
-                -Wall
-                -Wextra
-                -Wno-unused-parameter
-                -Wno-sign-compare
-                -Wno-old-style-declaration
-                -Wno-discarded-qualifiers
-                -Wno-multichar
-            >
-        )
-
-        install(TARGETS gba
-            LIBRARY DESTINATION lib
-        )
-        install(DIRECTORY include/
-            DESTINATION include
-        )
-    ]=])
-
-    ExternalProject_Add(libgba_proj
-        PREFIX "${SOURCE_DIR}"
-        TMP_DIR "${SOURCE_DIR}/temp"
-        STAMP_DIR "${SOURCE_DIR}/stamp"
-        # Download
-        DOWNLOAD_DIR "${SOURCE_DIR}/download"
-        GIT_REPOSITORY "https://github.com/devkitPro/libgba.git"
-        GIT_TAG "master"
-        # Update
-        UPDATE_COMMAND "${CMAKE_COMMAND}" -E copy
-            "${SOURCE_DIR}/temp/CMakeLists.txt"
-            "${SOURCE_DIR}/source/CMakeLists.txt"
-        # Configure
-        SOURCE_DIR "${SOURCE_DIR}/source"
-        CMAKE_ARGS --toolchain "${CMAKE_TOOLCHAIN_FILE}"
-            -DCMAKE_INSTALL_PREFIX:PATH='${SOURCE_DIR}'
-        # Build
-        BINARY_DIR "${SOURCE_DIR}/build"
-        BUILD_COMMAND "${CMAKE_COMMAND}" --build .
-        BUILD_BYPRODUCTS "${SOURCE_DIR}/build/libgba.a"
-        # Install
-        INSTALL_DIR "${SOURCE_DIR}"
-    )
-
-    add_library(libgba STATIC IMPORTED)
-    add_dependencies(libgba libgba_proj)
-    set_property(TARGET libgba PROPERTY IMPORTED_LOCATION "${SOURCE_DIR}/build/libgba.a")
-    target_include_directories(libgba INTERFACE "${SOURCE_DIR}/include")
-else()
-    add_library(libgba STATIC IMPORTED)
-    set_property(TARGET libgba PROPERTY IMPORTED_LOCATION "${libgba}")
-
-    get_filename_component(INCLUDE_PATH "${libgba}" DIRECTORY)
-    get_filename_component(INCLUDE_PATH "${INCLUDE_PATH}" DIRECTORY)
-    target_include_directories(libgba INTERFACE "${INCLUDE_PATH}/include")
+if(TARGET libgba)
+    return()
 endif()
 
-unset(libgba CACHE)
+find_library(LIBGBA_PATH gba
+        PATHS ${devkitARM} "${LIBGBA_DIR}"
+        PATH_SUFFIXES "lib" "libgba/lib"
+)
+
+if(LIBGBA_PATH)
+    add_library(libgba STATIC IMPORTED)
+    set_property(TARGET libgba PROPERTY IMPORTED_LOCATION "${LIBGBA_PATH}")
+
+    get_filename_component(gbaPath "${LIBGBA_PATH}" DIRECTORY)
+    get_filename_component(gbaPath "${gbaPath}" DIRECTORY)
+    if(EXISTS "${gbaPath}/include/gba.h")
+        target_include_directories(libgba INTERFACE "${gbaPath}/include")
+    endif()
+
+    if(NOT DEVKITPRO)
+        add_subdirectory("${CMAKE_SYSTEM_PREFIX_PATH}/lib/iosupport" "${CMAKE_CURRENT_BINARY_DIR}/lib/iosupport" EXCLUDE_FROM_ALL)
+
+        target_link_libraries(libgba INTERFACE iosupport)
+    endif()
+
+    return()
+endif()
+
+include(FetchContent)
+include(Mktemp)
+
+add_subdirectory("${CMAKE_SYSTEM_PREFIX_PATH}/lib/iosupport" "${CMAKE_CURRENT_BINARY_DIR}/lib/iosupport" EXCLUDE_FROM_ALL)
+
+mktemp(libgbaCMakeLists TMPDIR)
+file(WRITE "${libgbaCMakeLists}" [=[
+cmake_minimum_required(VERSION 3.25.1)
+project(libgba ASM C)
+
+add_subdirectory("${CMAKE_SYSTEM_PREFIX_PATH}/lib/iosupport" "${CMAKE_CURRENT_BINARY_DIR}/lib/iosupport" EXCLUDE_FROM_ALL)
+
+file(GLOB_RECURSE sources CONFIGURE_DEPENDS "src/*.s" "src/*.c")
+
+add_library(libgba STATIC ${sources})
+set_target_properties(libgba PROPERTIES PREFIX "")
+target_include_directories(libgba SYSTEM PUBLIC include)
+
+target_compile_options(libgba PRIVATE
+    $<$<COMPILE_LANGUAGE:ASM>:-x assembler-with-cpp>
+)
+
+set_source_files_properties("src/console.c" PROPERTIES COMPILE_FLAGS -Wno-incompatible-pointer-types)
+set_source_files_properties("src/xcomms.c" "src/xcomms_print.c" PROPERTIES COMPILE_FLAGS -Wno-multichar)
+set_source_files_properties("src/fade.c" PROPERTIES COMPILE_FLAGS -Wno-discarded-qualifiers)
+
+#set_source_files_properties("src/mappy_print.c" PROPERTIES COMPILE_FLAGS -marm)
+
+add_asset_library(amiga_fnt SUFFIX_SIZE _size WORKING_DIRECTORY data amiga.fnt)
+
+target_link_libraries(libgba PRIVATE iosupport amiga_fnt)
+]=])
+
+FetchContent_Declare(libgba
+        GIT_REPOSITORY "https://github.com/devkitPro/libgba.git"
+        GIT_TAG "master"
+        PATCH_COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${libgbaCMakeLists}" "CMakeLists.txt"
+)
+FetchContent_MakeAvailable(libgba)
+
+file(REMOVE "${libgbaCMakeLists}")
