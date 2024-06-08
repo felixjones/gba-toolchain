@@ -19,7 +19,7 @@ add_executable(07-sdk-seven
 )
 
 target_link_libraries(07-sdk-seven PRIVATE
-        sdk-seven::minrt_mb sdk-seven::libseven sdk-seven::libutil
+        sdk-seven::minrt sdk-seven::libseven sdk-seven::libutil
 )
 
 add_gbafix_target(07-sdk-seven-fixed 07-sdk-seven)
