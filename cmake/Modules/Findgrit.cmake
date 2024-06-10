@@ -153,14 +153,7 @@ function(add_grit_library target)
     endif()
 
     add_custom_command(OUTPUT "${gritTargetDir}/${target}.o" "${gritTargetDir}/${target}.h"
-            DEPFILE "${gritTargetDir}/${target}.d"
-            # Create depfile
-            COMMAND "${CMAKE_COMMAND}" -P "${DEPFILE_PATH}" -- "${target}.d"
-                TARGETS "${gritTargetDir}/${target}.o" "${gritTargetDir}/${target}.h"
-                DEPENDENCIES
-                    $<$<BOOL:${flagsFileEval}>:$<PATH:ABSOLUTE_PATH,NORMALIZE,${flagsFileEval},${CMAKE_CURRENT_SOURCE_DIR}>>
-                    $<$<BOOL:${tilesetFileEval}>:$<PATH:ABSOLUTE_PATH,NORMALIZE,${tilesetFileEval},${CMAKE_CURRENT_SOURCE_DIR}>>
-                    $<PATH:ABSOLUTE_PATH,NORMALIZE,${sourcesEval},${CMAKE_CURRENT_SOURCE_DIR}>
+            DEPENDS "${sourcesEval}"
             # Run grit
             COMMAND "${GRIT_PATH}" $<PATH:ABSOLUTE_PATH,NORMALIZE,${sourcesEval},${CMAKE_CURRENT_SOURCE_DIR}> -fh! -ftb
                 $<TARGET_PROPERTY:${target},GRIT_FLAGS>

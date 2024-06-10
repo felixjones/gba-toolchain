@@ -116,7 +116,8 @@ extern "C" {
             get_filename_component(inputWe "${input}" NAME_WE)
             __bin2o_get_symbol_name(symbolName "${inputWe}")
         else()
-            __bin2o_get_symbol_name(symbolName "${input}")
+            get_filename_component(inputName "${input}" NAME)
+            __bin2o_get_symbol_name(symbolName "${inputName}")
         endif()
 
         list(APPEND inputs "${input}")

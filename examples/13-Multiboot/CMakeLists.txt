@@ -35,7 +35,7 @@ add_custom_command(TARGET 13-Multiboot-client POST_BUILD
         COMMAND "${CMAKE_OBJCOPY}" -O binary "13-Multiboot-client.elf" "13-Multiboot-client.bin"
         COMMAND "${CMAKE_COMMAND}" -P "${GBAFIX_PATH}" -- "13-Multiboot-client.bin" "13-Multiboot-client.gba"
 )
-
+set_source_files_properties(13-Multiboot-client.gba PROPERTIES GENERATED TRUE)
 add_asset_library(host-assets 13-Multiboot-client.gba)
 
 target_link_libraries(13-Multiboot-host PRIVATE

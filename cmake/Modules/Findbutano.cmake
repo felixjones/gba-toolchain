@@ -52,6 +52,7 @@ endif()
 
 include(Depfile)
 include(Bin2o)
+include(CommonDir)
 find_package(grit REQUIRED)
 find_package(maxmod REQUIRED)
 
@@ -69,6 +70,10 @@ endif()
 include(${BIN2O_PATH} OPTIONAL RESULT_VARIABLE found)
 if(NOT found)
     message(FATAL_ERROR "Could not include Bin2o.cmake (tried ${BIN2O_PATH})")
+endif()
+include(${COMMON_DIR_PATH} OPTIONAL RESULT_VARIABLE found)
+if(NOT found)
+    message(FATAL_ERROR "Could not include CommonDir.cmake (tried ${COMMON_DIR_PATH})")
 endif()
 
 foreach(ii RANGE ${CMAKE_ARGC})
@@ -112,47 +117,7 @@ foreach(arg ${arguments})
     list(APPEND bn${mode} ${arg})
 endforeach()
 
-function(find_common_parent_dir result_var)
-    list(POP_FRONT ARGN commonPath)
-    if(NOT IS_DIRECTORY commonPath)
-        get_filename_component(commonPath "${commonPath}" DIRECTORY)
-    endif()
-    string(REPLACE "/" ";" commonParts "${commonPath}")
-    list(LENGTH commonParts commonPartsLen)
-
-    foreach(path ${ARGN})
-        if(NOT IS_DIRECTORY path)
-            get_filename_component(path "${path}" DIRECTORY)
-        endif()
-        string(REPLACE "/" ";" pathParts "${path}")
-        list(LENGTH pathParts pathPartsLen)
-
-        if(${commonPartsLen} VERSION_LESS ${pathPartsLen})
-            set(minLen ${commonPartsLen})
-        else()
-            set(minLen ${pathPartsLen})
-        endif()
-        math(EXPR minLen "${minLen} - 1")
-
-        unset(newCommonParts)
-        foreach(i RANGE ${minLen})
-            list(GET commonParts ${i} component1)
-            list(GET pathParts ${i} component2)
-            if(NOT "${component1}" STREQUAL "${component2}")
-                break()
-            endif()
-            list(APPEND newCommonParts ${component1})
-        endforeach()
-
-        set(commonParts ${newCommonParts})
-        list(LENGTH newCommonParts commonPartsLen)
-    endforeach()
-
-    string(JOIN "/" commonPath ${commonParts})
-    set(${result_var} "${commonPath}" PARENT_SCOPE)
-endfunction()
-
-find_common_parent_dir(workingDirectory ${bnAUDIO} ${bnDMG_AUDIO} ${bnGRAPHICS})
+common_dir(workingDirectory ${bnAUDIO} ${bnDMG_AUDIO} ${bnGRAPHICS})
 
 foreach(input ${bnGRAPHICS})
     get_filename_component(name "${input}" NAME_WE)
@@ -284,6 +249,7 @@ endif()
             COMMAND "${CMAKE_COMMAND}"
                 -D DEPFILE_PATH=${DEPFILE_PATH}
                 -D BIN2O_PATH=${BIN2O_PATH}
+                -D COMMON_DIR_PATH=${COMMON_DIR_PATH}
                 -D GRIT_PATH=${GRIT_PATH}
                 -D MMUTIL_PATH=${MMUTIL_PATH}
                 -D BUTANO_ASSETS_TOOL_PATH=${BUTANO_ASSETS_TOOL_PATH}

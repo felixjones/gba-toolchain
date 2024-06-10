@@ -147,13 +147,7 @@ endforeach()
 ]=])
 
     add_custom_command(OUTPUT "${sfcTargetDir}/${target}.o" "${sfcTargetDir}/${target}.h"
-            DEPFILE "${sfcTargetDir}/${target}.d"
-            # Create depfile
-            COMMAND "${CMAKE_COMMAND}" -P "${DEPFILE_PATH}" -- "${target}.d"
-                TARGETS "${sfcTargetDir}/${target}.o" "${sfcTargetDir}/${target}.h"
-                DEPENDENCIES
-                    $<PATH:ABSOLUTE_PATH,NORMALIZE,${sourcesEval},${CMAKE_CURRENT_SOURCE_DIR}>
-                    "${CMAKE_CURRENT_BINARY_DIR}/${sfcTargetDir}/${target}.cmake"
+            DEPENDS "${sourcesEval}"
             # Run Superfamiconv script
             COMMAND "${CMAKE_COMMAND}" -D "SUPERFAMICONV_PATH=\"${SUPERFAMICONV_PATH}\"" -P "${target}.cmake" --
                 PALETTE_FLAGS $<TARGET_PROPERTY:${target},SUPERFAMICONV_PALETTE_FLAGS>
