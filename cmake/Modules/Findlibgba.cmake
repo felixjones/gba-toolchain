@@ -59,9 +59,7 @@ set_source_files_properties("src/console.c" PROPERTIES COMPILE_FLAGS -Wno-incomp
 set_source_files_properties("src/xcomms.c" "src/xcomms_print.c" PROPERTIES COMPILE_FLAGS -Wno-multichar)
 set_source_files_properties("src/fade.c" PROPERTIES COMPILE_FLAGS -Wno-discarded-qualifiers)
 
-#set_source_files_properties("src/mappy_print.c" PROPERTIES COMPILE_FLAGS -marm)
-
-add_asset_library(amiga_fnt SUFFIX_SIZE _size WORKING_DIRECTORY data amiga.fnt)
+add_asset_library(amiga_fnt SUFFIX_SIZE _size "data/amiga.fnt")
 
 target_link_libraries(libgba PRIVATE iosupport amiga_fnt)
 ]=])
