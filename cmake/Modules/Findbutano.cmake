@@ -239,12 +239,12 @@ else()
 endif()
 ]=])
 
+    file(GENERATE OUTPUT "${bnTargetDir}/_bn_${target}_inputs.txt" CONTENT "$<JOIN:${sourcesEval}, >" TARGET ${target}})
+
     add_custom_command(OUTPUT "${bnTargetDir}/_bn_audio_soundbank.o" "${bnTargetDir}/_bn_graphics.unity.o" "${bnTargetDir}/_bn_dmg_audio.unity.o"
+            DEPENDS "${sourcesEval}"
             DEPFILE "${bnTargetDir}/${target}.d"
             BYPRODUCTS "${bnTargetDir}/_bn_audio_soundbank.bin" "${bnTargetDir}/_bn_audio_files_info.txt" "${bnTargetDir}/_bn_graphics.unity.s" "${bnTargetDir}/_bn_dmg_audio.unity.c"
-            # Write inputs to file
-            COMMAND "${CMAKE_COMMAND}" -E rm -f args.txt
-            COMMAND "${CMAKE_COMMAND}" -E echo_append "$<PATH:ABSOLUTE_PATH,NORMALIZE,${sourcesEval},${CMAKE_CURRENT_SOURCE_DIR}>" > args.txt
             # Run script
             COMMAND "${CMAKE_COMMAND}"
                 -D DEPFILE_PATH=${DEPFILE_PATH}
@@ -256,10 +256,8 @@ endif()
                 -D Python_EXECUTABLE=${Python_EXECUTABLE}
                 -D CMAKE_LINKER="${CMAKE_LINKER}"
                 -D CMAKE_OBJCOPY="${CMAKE_OBJCOPY}"
-                -P "${assetScript}" -- ${target} args.txt
+                -P "${assetScript}" -- ${target} "_bn_${target}_inputs.txt"
                 > $<IF:$<BOOL:${CMAKE_HOST_WIN32}>,NUL,/dev/null> # Silence stdout
-            # Delete inputs file
-            COMMAND "${CMAKE_COMMAND}" -E rm -f args.txt
             # Compile _bn_graphics.unity.o
             COMMAND "${CMAKE_ASM_COMPILER}" "-c" "-o" "_bn_graphics.unity.o" "_bn_graphics.unity.s"
             # Compile _bn_dmg_audio.unity.o
@@ -278,6 +276,13 @@ endif()
             message(FATAL_ERROR "Source ${arg} must be preceded by valid mode [GRAPHICS|AUDIO|DMG_AUDIO]")
         endif()
 
+        if(NOT IS_ABSOLUTE "${arg}")
+            file(REAL_PATH "${arg}" arg BASE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
+        endif()
+        if(NOT EXISTS "${arg}")
+            message(FATAL_ERROR "Cannot find ${arg}")
+        endif()
+
         list(APPEND bn${mode} ${arg})
     endforeach()
 
@@ -294,7 +299,7 @@ endif()
             BUTANO_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/${bnTargetDir}/GRAPHICS;${bnGRAPHICS};${CMAKE_CURRENT_BINARY_DIR}/${bnTargetDir}/AUDIO;${bnAUDIO};${CMAKE_CURRENT_BINARY_DIR}/${bnTargetDir}/DMG_AUDIO;${bnDMG_AUDIO};${CMAKE_CURRENT_BINARY_DIR}/${bnTargetDir}/END"
     )
     target_sources(${target} INTERFACE
-            "$<PATH:ABSOLUTE_PATH,NORMALIZE,$<TARGET_PROPERTY:${target},BUTANO_SOURCES>,${CMAKE_CURRENT_SOURCE_DIR}>"
+            $<TARGET_PROPERTY:${target},BUTANO_SOURCES>
             $<TARGET_OBJECTS:butano-runtime>
     )
     target_include_directories(${target} INTERFACE
