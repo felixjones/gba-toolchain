@@ -405,7 +405,11 @@ else()
             GIT_TAG "master"
             INSTALL_COMMAND ""
     )
-    FetchContent_MakeAvailable(FreeImage)
+    FetchContent_GetProperties(FreeImage)
+    if(NOT FreeImage_POPULATED)
+      FetchContent_Populate(FreeImage)
+      add_subdirectory(${FreeImage_SOURCE_DIR} ${FreeImage_BINARY_DIR} EXCLUDE_FROM_ALL)
+    endif()
 
     target_link_libraries(cldib PUBLIC FreeImage)
     target_include_directories(cldib PUBLIC cldib "${FreeImage_SOURCE_DIR}/Source")
