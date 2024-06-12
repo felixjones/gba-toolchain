@@ -62,12 +62,38 @@ extern "C" {
 ]=])
     endif()
 
+    function(split_path result path)
+        if(UNIX AND path MATCHES "^/")
+            set(rootName "/")
+        else()
+            cmake_path(GET path ROOT_NAME rootName)
+        endif()
+
+        unset(components)
+
+        while(1)
+            cmake_path(GET path FILENAME name)
+            if(name)
+                cmake_path(GET path PARENT_PATH path)
+                list(INSERT components 0 "${name}")
+            else()
+                break()
+            endif()
+        endwhile()
+
+        if(rootName)
+            list(INSERT components 0 "${rootName}")
+        endif()
+
+        set(${result} ${components} PARENT_SCOPE)
+    endfunction()
+
     get_filename_component(cwd "." ABSOLUTE)
-    string(REPLACE "/" ";" cwdComponents "${cwd}")
+    split_path(cwdComponents "${cwd}")
     list(LENGTH cwdComponents cwdComponentsLength)
 
     function(__bin2o_get_symbol_name resultSymbol inputPath)
-        string(REPLACE "/" ";" inputComponents "${inputPath}")
+        split_path(inputComponents "${inputPath}")
 
         list(LENGTH inputComponents inputComponentsLength)
         if(${cwdComponentsLength} VERSION_LESS ${inputComponentsLength})

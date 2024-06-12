@@ -14,19 +14,41 @@
 #
 #===============================================================================
 
-function(common_dir output)
-    list(POP_FRONT ARGN commonPath)
-    if(NOT IS_DIRECTORY commonPath)
-        get_filename_component(commonPath "${commonPath}" DIRECTORY)
-    endif()
-    string(REPLACE "/" ";" commonParts "${commonPath}")
+function(common_dir output commonPath)
+    function(split_path result path)
+        if(UNIX AND path MATCHES "^/")
+            set(rootName "/")
+        else()
+            cmake_path(GET path ROOT_NAME rootName)
+        endif()
+
+        unset(components)
+
+        while(1)
+            cmake_path(GET path FILENAME name)
+            if(name)
+                cmake_path(GET path PARENT_PATH path)
+                list(INSERT components 0 "${name}")
+            else()
+                break()
+            endif()
+        endwhile()
+
+        if(rootName)
+            list(INSERT components 0 "${rootName}")
+        endif()
+
+        set(${result} ${components} PARENT_SCOPE)
+    endfunction()
+
+    split_path(commonParts "${commonPath}")
     list(LENGTH commonParts commonPartsLen)
 
     foreach(path ${ARGN})
         if(NOT IS_DIRECTORY path)
             get_filename_component(path "${path}" DIRECTORY)
         endif()
-        string(REPLACE "/" ";" pathParts "${path}")
+        split_path(pathParts "${path}")
         list(LENGTH pathParts pathPartsLen)
 
         if(${commonPartsLen} VERSION_LESS ${pathPartsLen})
