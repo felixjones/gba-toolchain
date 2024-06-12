@@ -35,6 +35,24 @@ if(newlibNano)
     set(NEWLIB_NANO 1)
 endif()
 
+# Detect the presence of picolibc
+execute_process(
+        COMMAND "${CMAKE_C_COMPILER}" -print-search-dirs
+        OUTPUT_VARIABLE picolibc
+)
+string(REGEX MATCH "libraries:[ \t]=*([^\r\n]*)" picolibc "${picolibc}" )
+set(picolibc "${CMAKE_MATCH_1}")
+if(CMAKE_HOST_SYSTEM_NAME STREQUAL Linux)
+    string(REPLACE ":" ";" picolibc "${picolibc}")
+endif()
+find_file(picolibc
+        NAMES picolibc.specs
+        PATHS ${picolibc}
+)
+if(picolibc)
+    set(PICOLIBC 1)
+endif()
+
 macro(__gba_compiler_common lang)
     # Default compiler flags
     set(CMAKE_${lang}_FLAGS_INIT " -ffunction-sections -fdata-sections -mthumb -D__GBA__")

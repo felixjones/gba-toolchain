@@ -1,6 +1,12 @@
 #pragma once
 
-#include <reent.h>
+#ifdef __WONDERFUL__
+struct _reent;
+#else
+#   include <reent.h>
+#endif
+
+#include <sys/stat.h>
 #include <sys/types.h>
 
 #ifdef __cplusplus

@@ -12,7 +12,10 @@
 #include <ctype.h>
 #include <errno.h>
 #include <stdio.h>
-#include <sys/stat.h>
+
+#ifdef __WONDERFUL__
+#   define _REENT ((struct _reent*) NULL)
+#endif
 
 #define STD_MAX (3)
 

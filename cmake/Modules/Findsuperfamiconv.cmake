@@ -325,6 +325,6 @@ if(NOT superfamiconv_POPULATED)
     execute_process(COMMAND "${CMAKE_COMMAND}" --build "${superfamiconv_BINARY_DIR}" --parallel ${nproc})  # Build
     find_program(SUPERFAMICONV_PATH superfamiconv superfamiconv.exe PATHS "${superfamiconv_BINARY_DIR}")
     if(CMAKE_HOST_SYSTEM_NAME STREQUAL Linux)
-        file(INSTALL "${SUPERFAMICONV_PATH}" DESTINATION "$ENV{HOME}/bin")  # Install
+        file(INSTALL "${SUPERFAMICONV_PATH}" DESTINATION "$ENV{HOME}/bin" PERMISSIONS OWNER_EXECUTE)  # Install
     endif()
 endif()

@@ -50,7 +50,7 @@ target_compile_options(tonclib PRIVATE
     $<$<COMPILE_LANGUAGE:C>:-mthumb -O2>
 )
 
-set_source_files_properties("src/tte/tte_iohook.c" PROPERTIES COMPILE_FLAGS "-Wno-incompatible-pointer-types -Wno-stringop-overflow")
+set_source_files_properties("src/tte/tte_iohook.c" PROPERTIES COMPILE_FLAGS "-Wno-incompatible-pointer-types -Wno-stringop-overflow -Wno-implicit-function-declaration")
 
 target_link_libraries(tonclib PRIVATE iosupport)
 ]=])

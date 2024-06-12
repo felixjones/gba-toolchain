@@ -21,5 +21,5 @@ set_target_properties(librom PROPERTIES PREFIX "")
 target_link_options(librom INTERFACE
         -T "${CMAKE_CURRENT_SOURCE_DIR}/rom.ld"
         $<$<BOOL:${NEWLIB_NANO}>:-specs=nano.specs>
-        -specs=nosys.specs
+        $<IF:$<BOOL:${PICOLIBC}>,-specs=picolibc.specs,-specs=nosys.specs>
 )

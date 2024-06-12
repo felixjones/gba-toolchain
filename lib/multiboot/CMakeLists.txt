@@ -21,5 +21,5 @@ set_target_properties(libmultiboot PROPERTIES PREFIX "")
 target_link_options(libmultiboot INTERFACE
         -T "${CMAKE_CURRENT_LIST_DIR}/multiboot.ld"
         $<$<BOOL:${NEWLIB_NANO}>:-specs=nano.specs>
-        -specs=nosys.specs
+        $<IF:$<BOOL:${PICOLIBC}>,-specs=picolibc.specs,-specs=nosys.specs>
 )

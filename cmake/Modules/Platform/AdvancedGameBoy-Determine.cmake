@@ -112,25 +112,55 @@ function(__gba_find_devkitarm outPaths)
         string(REGEX MATCHALL "[A-Z]:" drives ${drivesRaw})
 
         foreach(drive ${drives})
-            string(REPLACE "/opt" "${drive}" devkitARM $ENV{DEVKITARM})
-            if(EXISTS ${devkitARM})
-                list(APPEND foundPaths "${devkitARM}")
+            if(DEFINED ENV{DEVKITARM})
+                string(REPLACE "/opt" "${drive}" devkitARM $ENV{DEVKITARM})
+                if(EXISTS ${devkitARM})
+                    list(APPEND foundPaths "${devkitARM}")
+                endif()
             endif()
 
-            string(REPLACE "/opt" "${drive}" devkitpro $ENV{DEVKITPRO})
-            if(EXISTS "${devkitpro}/msys2/usr")
-                list(APPEND foundPaths "${devkitpro}" "${devkitpro}/msys2/usr")
+            if(DEFINED ENV{DEVKITPRO})
+                string(REPLACE "/opt" "${drive}" devkitpro $ENV{DEVKITPRO})
+                if(EXISTS "${devkitpro}/msys2/usr")
+                    list(APPEND foundPaths "${devkitpro}" "${devkitpro}/msys2/usr")
+                endif()
+            endif()
+        endforeach()
+
+        set(${outPaths} ${foundPaths} PARENT_SCOPE)
+    elseif(DEFINED ENV{DEVKITARM} OR DEFINED ENV{DEVKITPRO})
+        set(${outPaths} "$ENV{DEVKITARM}" "$ENV{DEVKITPRO}" PARENT_SCOPE)
+    endif()
+endfunction()
+
+function(__gba_find_wonderful outPaths)
+    if(NOT DEFINED ENV{WONDERFUL_TOOLCHAIN})
+        return()
+    endif()
+    if(CMAKE_HOST_SYSTEM_NAME MATCHES Windows)
+        # Assume /opt/ is a top-level drive letter
+        execute_process(
+                COMMAND cmd /c "wmic logicaldisk get caption"
+                OUTPUT_VARIABLE drivesRaw
+        )
+        string(REGEX MATCHALL "[A-Z]:" drives ${drivesRaw})
+
+        foreach(drive ${drives})
+            string(REPLACE "/opt" "${drive}" wonderful $ENV{WONDERFUL_TOOLCHAIN})
+            if(EXISTS "${wonderful}/msys2/usr")
+                list(APPEND foundPaths "${wonderful}" "${wonderful}/msys2/usr")
             endif()
         endforeach()
 
         set(${outPaths} ${foundPaths} PARENT_SCOPE)
     else()
-        set(${outPaths} "$ENV{DEVKITARM}" "$ENV{DEVKITPRO}" PARENT_SCOPE)
+        set(${outPaths} "$ENV{WONDERFUL_TOOLCHAIN}" PARENT_SCOPE)
     endif()
 endfunction()
 
 __gba_find_arm_gnu_toolchain(armGnuToolchain) # Arm GNU Toolchain
 __gba_find_devkitarm(devkitARM) # devkitARM
+__gba_find_wonderful(wonderfulToolchain) # Wonderful Toolchain
 
 foreach(lang C CXX)
     if(NOT CMAKE_${lang}_COMPILER)

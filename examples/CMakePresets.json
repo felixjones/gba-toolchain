@@ -24,6 +24,23 @@
       }
     },
     {
+      "name": "wsl",
+      "toolchainFile": "../cmake/gba.toolchain.cmake",
+      "binaryDir": "${sourceDir}/cmake-build-wsl",
+      "generator": "Unix Makefiles",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": {
+          "type": "STRING",
+          "value": "Debug"
+        }
+      },
+      "vendor": {
+        "jetbrains.com/clion": {
+          "toolchain": "Wonderful"
+        }
+      }
+    },
+    {
       "name": "rpi",
       "toolchainFile": "../cmake/gba.toolchain.cmake",
       "binaryDir": "${sourceDir}/cmake-build-rpi",
