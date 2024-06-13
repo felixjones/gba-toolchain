@@ -47,7 +47,7 @@ function(__gba_find_compiler lang)
     # Find a compiler
     find_program(CMAKE_${lang}_COMPILER
             NAMES ${compilerList}
-            HINTS "${armGnuToolchain}" ${devkitARM}
+            HINTS "${armGnuToolchain}" ${devkitARM} ${wonderfulToolchain}
             PATH_SUFFIXES bin
             VALIDATOR __gba_check_compiler_armv4t
             DOC "${lang} compiler"
@@ -147,14 +147,17 @@ function(__gba_find_wonderful outPaths)
 
         foreach(drive ${drives})
             string(REPLACE "/opt" "${drive}" wonderful $ENV{WONDERFUL_TOOLCHAIN})
-            if(EXISTS "${wonderful}/msys2/usr")
-                list(APPEND foundPaths "${wonderful}" "${wonderful}/msys2/usr")
+            if(EXISTS "${wonderful}/toolchain/gcc-arm-none-eabi")
+                list(APPEND foundPaths "${wonderful}/toolchain/gcc-arm-none-eabi")
+            endif()
+            if(EXISTS "${wonderful}/target/gba/external")
+                list(APPEND foundPaths "${wonderful}/target/gba/external")
             endif()
         endforeach()
 
         set(${outPaths} ${foundPaths} PARENT_SCOPE)
     else()
-        set(${outPaths} "$ENV{WONDERFUL_TOOLCHAIN}" PARENT_SCOPE)
+        set(${outPaths} "$ENV{WONDERFUL_TOOLCHAIN}/toolchain/gcc-arm-none-eabi" "$ENV{WONDERFUL_TOOLCHAIN}/target/gba/external" PARENT_SCOPE)
     endif()
 endfunction()
 

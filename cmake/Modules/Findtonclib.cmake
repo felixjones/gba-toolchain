@@ -12,7 +12,7 @@ if(TARGET tonclib)
 endif()
 
 find_library(LIBTONC_PATH tonc
-        PATHS ${devkitARM} "${TONCLIB_DIR}"
+        PATHS ${devkitARM} ${wonderfulToolchain} "${TONCLIB_DIR}"
         PATH_SUFFIXES "lib" "libtonc/lib"
 )
 
