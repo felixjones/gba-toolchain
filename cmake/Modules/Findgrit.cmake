@@ -403,12 +403,11 @@ else()
     FetchContent_Declare(FreeImage
             GIT_REPOSITORY "https://github.com/danoli3/FreeImage.git"
             GIT_TAG "master"
-            INSTALL_COMMAND ""
     )
     FetchContent_GetProperties(FreeImage)
     if(NOT FreeImage_POPULATED)
       FetchContent_Populate(FreeImage)
-      add_subdirectory(${FreeImage_SOURCE_DIR} ${FreeImage_BINARY_DIR} EXCLUDE_FROM_ALL)
+      add_subdirectory(${freeimage_SOURCE_DIR} ${freeimage_BINARY_DIR} EXCLUDE_FROM_ALL)
     endif()
 
     target_link_libraries(cldib PUBLIC FreeImage)
