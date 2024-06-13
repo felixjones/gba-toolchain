@@ -41,13 +41,13 @@ execute_process(
         OUTPUT_VARIABLE picolibc
 )
 string(REGEX MATCH "libraries:[ \t]=*([^\r\n]*)" picolibc "${picolibc}" )
-set(picolibc "${CMAKE_MATCH_1}")
+unset(picolibc)
 if(CMAKE_HOST_SYSTEM_NAME STREQUAL Linux)
-    string(REPLACE ":" ";" picolibc "${picolibc}")
+    string(REPLACE ":" ";" CMAKE_MATCH_1 "${CMAKE_MATCH_1}")
 endif()
 find_file(picolibc
         NAMES picolibc.specs
-        PATHS ${picolibc}
+        PATHS ${CMAKE_MATCH_1}
 )
 if(picolibc)
     set(PICOLIBC 1)
