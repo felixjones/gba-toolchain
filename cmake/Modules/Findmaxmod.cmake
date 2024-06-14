@@ -202,7 +202,7 @@ if(NOT mmutil_POPULATED)
         execute_process(COMMAND "${CMAKE_COMMAND}" --install "${mmutil_BINARY_DIR}" --prefix $ENV{HOME})  # Install
     endif()
 
-    find_program(GRIT_PATH mmutil mmutil.exe PATHS "${mmutil_BINARY_DIR}")
+    find_program(MMUTIL_PATH mmutil mmutil.exe PATHS "${mmutil_BINARY_DIR}")
 else()
     file(REMOVE "${mmutilCMakeLists}")
 endif()
