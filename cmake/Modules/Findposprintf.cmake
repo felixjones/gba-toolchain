@@ -8,10 +8,6 @@
 #
 #===============================================================================
 
-if(TARGET posprintf)
-    return()
-endif()
-
 include(FetchContent)
 include(Mktemp)
 

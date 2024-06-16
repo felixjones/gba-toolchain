@@ -5,10 +5,6 @@
 #
 #===============================================================================
 
-if(TARGET libgba)
-    return()
-endif()
-
 find_library(LIBGBA_PATH gba
         PATHS ${devkitARM} "${LIBGBA_DIR}"
         PATH_SUFFIXES "lib" "libgba/lib"

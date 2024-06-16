@@ -33,10 +33,6 @@
 #
 #===============================================================================
 
-if(TARGET maxmod)
-    return()
-endif()
-
 #TODO: add_mmutil_command
 
 function(add_maxmod_library target)

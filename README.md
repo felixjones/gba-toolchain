@@ -193,6 +193,10 @@ ROM runtime library for standard .gba ROMs.
 
 `install_rom(<target> [CONCAT [ALIGN <byte-alignment>] <artifact>...])`
 
+## libsavgba
+
+A library to access various backup media in GBA cartridges ([more info](https://github.com/laqieer/libsavgba))
+
 ## maxmod
 
 GBA music and sound solution ([more info](https://maxmod.devkitpro.org/))

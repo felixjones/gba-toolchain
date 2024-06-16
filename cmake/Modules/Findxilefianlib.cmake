@@ -8,10 +8,6 @@
 #
 #===============================================================================
 
-if(TARGET xilefianlib)
-    return()
-endif()
-
 include(FetchContent)
 
 FetchContent_Declare(xilefianlib

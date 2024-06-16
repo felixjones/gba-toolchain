@@ -5,10 +5,6 @@
 #
 #===============================================================================
 
-if(TARGET gba-hpp)
-    return()
-endif()
-
 include(FetchContent)
 
 FetchContent_Declare(gba-hpp

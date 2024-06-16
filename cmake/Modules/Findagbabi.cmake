@@ -11,10 +11,6 @@
 #
 #===============================================================================
 
-if(TARGET agbabi)
-    return()
-endif()
-
 include(FetchContent)
 
 FetchContent_Declare(agbabi
