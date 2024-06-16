@@ -259,6 +259,10 @@ add_superfamiconv_library(<target> [PALETTE] [TILES] [MAP]
 
 Classic C GBA development library from Coranac ([more info](https://www.coranac.com/man/tonclib/main.htm))
 
+## ugba
+
+Universal GBA Library ([more info](https://github.com/AntonioND/libugba))
+
 ## xilefianlib
 
 Some of my (Xilefian's) utility libraries ([more info](https://github.com/felixjones/xilefianlib))
