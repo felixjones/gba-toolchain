@@ -20,6 +20,8 @@
 #
 #===============================================================================
 
+include(Bin2o)
+
 function(add_gbfs_library target)
     set(gbfsTargetDir "_gbfs/${target}.dir")
     file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${gbfsTargetDir}")

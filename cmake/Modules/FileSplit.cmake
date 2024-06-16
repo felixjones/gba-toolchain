@@ -16,7 +16,7 @@
 
 include("${CMAKE_CURRENT_LIST_DIR}/Hexdecode.cmake" OPTIONAL RESULT_VARIABLE HEXDECODE_INCLUDED)
 
-function(file_split infile)
+function(file_split input)
     # Parse arguments
     set(output_length -1)
     foreach(arg ${ARGN})

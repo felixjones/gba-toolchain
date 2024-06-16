@@ -60,6 +60,8 @@ macro(__gba_compiler_common lang)
     set(CMAKE_${lang}_FLAGS_RELEASE_INIT " -O3 -DNDEBUG")
     set(CMAKE_${lang}_FLAGS_MINSIZEREL_INIT " -Os -DNDEBUG")
     set(CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT " -Og -g3 -gdwarf-4 -DNDEBUG")
+
+    set(CMAKE_${lang}_OUTPUT_EXTENSION ".o")
 endmacro()
 
 if(CMAKE_VERSION VERSION_LESS 3.27.0)
