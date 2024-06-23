@@ -33,8 +33,7 @@ function(add_gbfs_library target)
             COMMAND "${GBFS_PATH}" "${target}.gbfs" $<PATH:ABSOLUTE_PATH,NORMALIZE,${sourcesEval},${CMAKE_CURRENT_SOURCE_DIR}>
                 > $<IF:$<BOOL:${CMAKE_HOST_WIN32}>,NUL,/dev/null>
             # Create object file
-            COMMAND "${CMAKE_COMMAND}" -D "CMAKE_LINKER=\"${CMAKE_LINKER}\"" -D "CMAKE_OBJCOPY=\"${CMAKE_OBJCOPY}\""
-                -P "${BIN2O_PATH}" -- "${target}.o" HEADER "${target}.h" ALIGNMENT 256 "${target}.gbfs"
+            COMMAND ${BIN2O_COMMAND} "${target}.o" HEADER "${target}.h" ALIGNMENT 256 "${target}.gbfs"
             # Remove byproducts
             COMMAND "${CMAKE_COMMAND}" -E rm -f "${target}.gbfs"
             WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${gbfsTargetDir}"

@@ -168,8 +168,7 @@ function(add_grit_library target)
             COMMAND "${CMAKE_COMMAND}" -P "${FILE_RENAME_PATH}" -- "[.]img[.]bin$$" "Tiles.bin" ERROR_QUIET "${target}.img.bin"
             COMMAND "${CMAKE_COMMAND}" -P "${FILE_RENAME_PATH}" -- "[.]pal[.]bin$$" "Pal.bin" ERROR_QUIET "${target}.pal.bin"
             # Create object file
-            COMMAND "${CMAKE_COMMAND}" -D "CMAKE_LINKER=\"${CMAKE_LINKER}\"" -D "CMAKE_OBJCOPY=\"${CMAKE_OBJCOPY}\""
-                -P "${BIN2O_PATH}" -- "${target}.o" HEADER "${target}.h" SUFFIX_END End SUFFIX_SIZE Len NAME_WE ERROR_QUIET
+            COMMAND ${BIN2O_COMMAND} "${target}.o" HEADER "${target}.h" SUFFIX_END End SUFFIX_SIZE Len NAME_WE ERROR_IGNORE
                     $<JOIN:$<PATH:REMOVE_EXTENSION,$<PATH:GET_FILENAME,${sourcesEval}>>,Tiles.bin$<SEMICOLON>>Tiles.bin
                     $<JOIN:$<PATH:REMOVE_EXTENSION,$<PATH:GET_FILENAME,${sourcesEval}>>,Map.bin$<SEMICOLON>>Map.bin
                     $<JOIN:$<PATH:REMOVE_EXTENSION,$<PATH:GET_FILENAME,${sourcesEval}>>,Pal.bin$<SEMICOLON>>Pal.bin

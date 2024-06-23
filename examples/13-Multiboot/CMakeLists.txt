@@ -30,8 +30,8 @@ add_executable(13-Multiboot-host
         host.c
 )
 
-add_dependencies(13-Multiboot-host 13-Multiboot-client)
 add_custom_command(TARGET 13-Multiboot-client POST_BUILD
+        BYPRODUCTS "13-Multiboot-client.gba"
         COMMAND "${CMAKE_OBJCOPY}" -O binary "13-Multiboot-client.elf" "13-Multiboot-client.bin"
         COMMAND "${CMAKE_COMMAND}" -P "${GBAFIX_PATH}" -- "13-Multiboot-client.bin" "13-Multiboot-client.gba"
 )

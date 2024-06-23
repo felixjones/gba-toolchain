@@ -57,8 +57,7 @@ function(add_asset_library target)
     add_custom_command(OUTPUT "${assetsTargetDir}/${target}.o" "${assetsTargetDir}/${target}.h"
             DEPENDS ${commandSourcesEval}
             # Create object file
-            COMMAND "${CMAKE_COMMAND}" -D "CMAKE_LINKER=\"${CMAKE_LINKER}\"" -D "CMAKE_OBJCOPY=\"${CMAKE_OBJCOPY}\""
-                -P "${BIN2O_PATH}" -- "${target}.o" HEADER "${target}.h" ${bin2oArgs} ${commandSourcesEval}
+            COMMAND ${BIN2O_COMMAND} "${target}.o" HEADER "${target}.h" ${bin2oArgs} ${commandSourcesEval}
             WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${assetsTargetDir}"
             COMMAND_EXPAND_LISTS
     )

@@ -51,8 +51,7 @@ function(add_maxmod_library target)
             # Run mmutil
             COMMAND "${MMUTIL_PATH}" -o${target}.bin -h${target}.h ${commandSourcesEval} > $<IF:$<BOOL:${CMAKE_HOST_WIN32}>,NUL,/dev/null>
             # Create object file
-            COMMAND "${CMAKE_COMMAND}" -D "CMAKE_LINKER=\"${CMAKE_LINKER}\"" -D "CMAKE_OBJCOPY=\"${CMAKE_OBJCOPY}\""
-                -P "${BIN2O_PATH}" -- "${target}.o" HEADER "${target}_bin.h" "${target}.bin"
+            COMMAND ${BIN2O_COMMAND} "${target}.o" HEADER "${target}_bin.h" "${target}.bin"
             # Remove byproducts
             COMMAND "${CMAKE_COMMAND}" -E rm -f "${target}.bin"
             WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${maxmodTargetDir}"

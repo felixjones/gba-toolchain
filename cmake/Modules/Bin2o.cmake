@@ -3,10 +3,10 @@
 # Binary file to object tool
 #
 # Script usage:
-#   `cmake -P /path/to/Bin2o.cmake -- <output-file> [HEADER <header-file>] [ALIGNMENT <byte-alignment>] [PREFIX <symbol-prefix>] [SUFFIX_START <start-symbol-suffix>] [SUFFIX_END <end-symbol-suffix>] [SUFFIX_SIZE <size-symbol-suffix>] [NAME_WE] [ERROR_QUIET] <input-files>...`
+#   `cmake -P /path/to/Bin2o.cmake -- <output-file> [HEADER <header-file>] [ALIGNMENT <byte-alignment>] [PREFIX <symbol-prefix>] [SUFFIX_START <start-symbol-suffix>] [SUFFIX_END <end-symbol-suffix>] [SUFFIX_SIZE <size-symbol-suffix>] [NAME_WE] [ERROR_IGNORE] <input-files>...`
 #
 # CMake usage:
-#   `bin2o(<output-file> [HEADER <header-file>] [ALIGNMENT <byte-alignment>] [PREFIX <symbol-prefix>] [SUFFIX_START <start-symbol-suffix>] [SUFFIX_END <end-symbol-suffix>] [SUFFIX_SIZE <size-symbol-suffix>] [NAME_WE] [ERROR_QUIET] <input-files>...)`
+#   `bin2o(<output-file> [HEADER <header-file>] [ALIGNMENT <byte-alignment>] [PREFIX <symbol-prefix>] [SUFFIX_START <start-symbol-suffix>] [SUFFIX_END <end-symbol-suffix>] [SUFFIX_SIZE <size-symbol-suffix>] [NAME_WE] [ERROR_IGNORE] <input-files>...)`
 #
 # `HEADER` corresponding header file output name.
 # `ALIGNMENT` byte alignment of each input (default 4).
@@ -15,7 +15,7 @@
 # `SUFFIX_END` suffix for the end symbols (default "_end").
 # `SUFFIX_SIZE` suffix for the size symbols (default "_len").
 # `NAME_WE` remove longest extension from symbols.
-# `ERROR_QUIET` ignore missing files.
+# `ERROR_IGNORE` ignore missing files.
 #
 # Copyright (C) 2021-2024 gba-toolchain contributors
 # For conditions of distribution and use, see copyright notice in LICENSE.md
@@ -23,7 +23,7 @@
 #===============================================================================
 
 function(bin2o output)
-    set(options NAME_WE ERROR_QUIET)
+    set(options NAME_WE ERROR_IGNORE)
     set(oneValueArgs HEADER ALIGNMENT PREFIX SUFFIX_START SUFFIX_END SUFFIX_SIZE)
     cmake_parse_arguments(ARGS "${options}" "${oneValueArgs}" "" ${ARGN})
 
@@ -125,7 +125,7 @@ extern "C" {
 
     list(REMOVE_DUPLICATES ARGS_UNPARSED_ARGUMENTS)
     foreach(input ${ARGS_UNPARSED_ARGUMENTS})
-        if(ARGS_ERROR_QUIET AND NOT EXISTS "${input}")
+        if(ARGS_ERROR_IGNORE AND NOT EXISTS "${input}")
             continue()
         endif()
 
@@ -183,17 +183,91 @@ extern "C" {
 ]=])
     endif()
 
-    execute_process(
-            COMMAND "${CMAKE_LINKER}" -r -b binary -o "${output}" ${inputs}
-            COMMAND "${CMAKE_OBJCOPY}" "${output}"
-    )
+    if(CMAKE_GENERATOR MATCHES "Ninja")
+        get_filename_component(name "${output}" NAME_WE)
+        set(byproduct "${name}.s")
+        file(WRITE "${byproduct}" "@ Automatically generated. Do not edit!
 
-    foreach(rename ${objcopyRenames})
-        execute_process(COMMAND "${CMAKE_OBJCOPY}" --redefine-sym ${rename} "${output}")
-    endforeach()
+.syntax unified
+.cpu arm7tdmi
+.arch armv4t
+")
 
-    execute_process(COMMAND "${CMAKE_OBJCOPY}" --set-section-alignment .data=${ARGS_ALIGNMENT} "${output}")
-    execute_process(COMMAND "${CMAKE_OBJCOPY}" --rename-section .data=.rodata,alloc,load,readonly,data,contents "${output}")
+        function(split var size)
+            string(LENGTH ${${var}} len)
+
+            set(chunks)
+            foreach(ii RANGE 0 ${len} ${size})
+                string(SUBSTRING ${${var}} ${ii} ${size} chunk)
+                list(APPEND chunks ${chunk})
+            endforeach ()
+
+            set(${var} ${chunks} PARENT_SCOPE)
+        endfunction()
+
+        foreach(input ${inputs})
+            file(READ "${input}" data HEX)
+            string(LENGTH ${data} size)
+            split(data 32)
+
+            string(REGEX REPLACE "[^a-zA-Z0-9_;]" "_" inputSymbolName "${input}")
+            if(ARGS_NAME_WE)
+                get_filename_component(inputWe "${input}" NAME_WE)
+                __bin2o_get_symbol_name(symbolName "${inputWe}")
+            else()
+                get_filename_component(inputName "${input}" NAME)
+                __bin2o_get_symbol_name(symbolName "${inputName}")
+            endif()
+
+            file(APPEND "${byproduct}" "
+    .section .rodata.${symbolName}, \"a\", %progbits
+    .balign
+    .global ${ARGS_PREFIX}${symbolName}${ARGS_SUFFIX_START}
+${ARGS_PREFIX}${symbolName}${ARGS_SUFFIX_START}:
+    ")
+
+            foreach(line ${data})
+                split(line 2)
+                list(TRANSFORM line PREPEND "0x")
+                list(JOIN line ", " line)
+
+                file(APPEND "${byproduct}" ".byte ${line}
+    ")
+            endforeach()
+
+            math(EXPR size "${size} / 2")
+
+            file(APPEND "${byproduct}" "
+    .global ${ARGS_PREFIX}${symbolName}${ARGS_SUFFIX_END}
+${ARGS_PREFIX}${symbolName}${ARGS_SUFFIX_END}:
+
+    .global ${ARGS_PREFIX}${symbolName}${ARGS_SUFFIX_SIZE}
+    .balign 4
+${ARGS_PREFIX}${symbolName}${ARGS_SUFFIX_SIZE}: .int ${size}
+    ")
+        endforeach()
+
+        if(CMAKE_C_COMPILER)
+            set(compiler "${CMAKE_C_COMPILER}")
+        elseif(CMAKE_CXX_COMPILER)
+            set(compiler "${CMAKE_CXX_COMPILER}")
+        else()
+            message(FATAL_ERROR "Bin2o with Ninja requires either a C or C++ compiler")
+        endif()
+
+        execute_process(COMMAND "${compiler}" -mcpu=arm7tdmi -march=armv4t -c "${byproduct}" -o "${output}")
+        file(REMOVE "${byproduct}")
+        execute_process(COMMAND "${CMAKE_OBJCOPY}" --set-section-alignment .rodata=${ARGS_ALIGNMENT} "${output}")
+    else()
+        execute_process(COMMAND "${CMAKE_LINKER}" -r -b binary -o "${output}" ${inputs})
+
+        foreach(rename ${objcopyRenames})
+            execute_process(COMMAND "${CMAKE_OBJCOPY}" --redefine-sym ${rename} "${output}")
+        endforeach()
+
+        execute_process(COMMAND "${CMAKE_OBJCOPY}" --set-section-alignment .data=${ARGS_ALIGNMENT} "${output}")
+        execute_process(COMMAND "${CMAKE_OBJCOPY}" --rename-section .data=.rodata,alloc,load,readonly,data,contents "${output}")
+    endif()
 
     if(ARGS_HEADER)
         file(WRITE "${ARGS_HEADER}" "${headerContents}")
@@ -218,4 +292,14 @@ if(CMAKE_SCRIPT_MODE_FILE STREQUAL CMAKE_CURRENT_LIST_FILE)
     bin2o(${SCRIPT_ARGN})
 else()
     set(BIN2O_PATH "${CMAKE_CURRENT_LIST_FILE}")
+    if(CMAKE_GENERATOR MATCHES "Ninja")
+        # Ninja puts binary .o files in front of the linker, which causes ABI mismatch problems
+        if(CMAKE_C_COMPILER OR CMAKE_CXX_COMPILER)
+            set(BIN2O_COMMAND "${CMAKE_COMMAND}" -D CMAKE_GENERATOR=Ninja -D CMAKE_C_COMPILER=\"${CMAKE_C_COMPILER}\" -D CMAKE_CXX_COMPILER=\"${CMAKE_CXX_COMPILER}\" -P "${CMAKE_CURRENT_LIST_FILE}" --)
+        else()
+            message(FATAL_ERROR "Bin2o with Ninja requires either a C or C++ compiler")
+        endif()
+    else()
+        set(BIN2O_COMMAND "${CMAKE_COMMAND}" -D CMAKE_LINKER=\"${CMAKE_LINKER}\" -D CMAKE_OBJCOPY=\"${CMAKE_OBJCOPY}\" -P "${CMAKE_CURRENT_LIST_FILE}" --)
+    endif()
 endif()
