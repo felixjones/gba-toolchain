@@ -127,29 +127,9 @@ target_link_options(minrt_mb INTERFACE
 endif()
 
 if(libseven IN_LIST sdk-seven_FIND_COMPONENTS)
-    mktemp(libsevenCMakeLists TMPDIR)
-    file(WRITE "${libsevenCMakeLists}" [=[
-cmake_minimum_required(VERSION 3.25.1)
-project(libseven ASM C)
-
-file(GLOB sources CONFIGURE_DEPENDS "src/*.s" "src/*.c")
-
-add_library(seven STATIC ${sources})
-
-target_include_directories(seven PUBLIC include/)
-target_include_directories(seven PRIVATE src/)
-
-target_compile_options(seven PRIVATE
-    $<$<COMPILE_LANGUAGE:C>:-O2 -g3 -gdwarf-4 -ffunction-sections -fdata-sections -std=c99 -Wall -Wextra -Wpedantic -mabi=aapcs -mcpu=arm7tdmi -mthumb -masm-syntax-unified>
-)
-
-set_source_files_properties("src/bios.c" PROPERTIES COMPILE_FLAGS "-Wno-pedantic")
-]=])
-
     FetchContent_Declare(libseven
             GIT_REPOSITORY "https://github.com/sdk-seven/libseven.git"
             GIT_TAG "main"
-            PATCH_COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${libsevenCMakeLists}" "CMakeLists.txt"
     )
 
     FetchContent_GetProperties(libseven)
@@ -158,33 +138,13 @@ set_source_files_properties("src/bios.c" PROPERTIES COMPILE_FLAGS "-Wno-pedantic
         add_subdirectory(${libseven_SOURCE_DIR} ${libseven_BINARY_DIR} EXCLUDE_FROM_ALL)
     endif()
 
-    file(REMOVE "${libsevenCMakeLists}")
-
     add_library(sdk-seven::libseven ALIAS seven)
 endif()
 
 if(libutil IN_LIST sdk-seven_FIND_COMPONENTS)
-    mktemp(libutilCMakeLists TMPDIR)
-    file(WRITE "${libutilCMakeLists}" [=[
-cmake_minimum_required(VERSION 3.25.1)
-project(libutil ASM C)
-
-file(GLOB sources CONFIGURE_DEPENDS "src/*.s" "src/*.c")
-
-add_library(util STATIC ${sources})
-
-target_include_directories(util PUBLIC include/)
-target_include_directories(util PRIVATE src/)
-
-target_compile_options(util PRIVATE
-    $<$<COMPILE_LANGUAGE:C>:-masm-syntax-unified -Os -g3 -gdwarf-4 -ffunction-sections -fdata-sections -std=c99 -Wall -Wpedantic -mabi=aapcs -mcpu=arm7tdmi -mthumb>
-)
-]=])
-
     FetchContent_Declare(libutil
             GIT_REPOSITORY "https://github.com/sdk-seven/libutil.git"
             GIT_TAG "main"
-            PATCH_COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${libutilCMakeLists}" "CMakeLists.txt"
     )
 
     FetchContent_GetProperties(libutil)
@@ -192,8 +152,6 @@ target_compile_options(util PRIVATE
         FetchContent_Populate(libutil)
         add_subdirectory(${libutil_SOURCE_DIR} ${libutil_BINARY_DIR} EXCLUDE_FROM_ALL)
     endif()
-
-    file(REMOVE "${libutilCMakeLists}")
 
     add_library(sdk-seven::libutil ALIAS util)
 endif()
