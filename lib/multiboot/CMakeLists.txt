@@ -12,6 +12,8 @@ if(TARGET libmultiboot)
     return()
 endif()
 
+add_subdirectory("${CMAKE_SYSTEM_PREFIX_PATH}/lib/syscalls" "${CMAKE_CURRENT_BINARY_DIR}/lib/syscalls" EXCLUDE_FROM_ALL)
+
 add_library(libmultiboot STATIC
         crt0.s
         multiboot.header.s
@@ -23,3 +25,4 @@ target_link_options(libmultiboot INTERFACE
         $<$<BOOL:${NEWLIB_NANO}>:-specs=nano.specs>
         $<IF:$<BOOL:${PICOLIBC}>,-specs=picolibc.specs,-specs=nosys.specs>
 )
+target_link_libraries(libmultiboot PRIVATE syscalls-stub)

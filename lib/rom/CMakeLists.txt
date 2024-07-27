@@ -12,6 +12,8 @@ if(TARGET librom)
     return()
 endif()
 
+add_subdirectory("${CMAKE_SYSTEM_PREFIX_PATH}/lib/syscalls" "${CMAKE_CURRENT_BINARY_DIR}/lib/syscalls" EXCLUDE_FROM_ALL)
+
 add_library(librom STATIC
         crt0.s
         rom.header.s
@@ -23,3 +25,4 @@ target_link_options(librom INTERFACE
         $<$<BOOL:${NEWLIB_NANO}>:-specs=nano.specs>
         $<IF:$<BOOL:${PICOLIBC}>,-specs=picolibc.specs,-specs=nosys.specs>
 )
+target_link_libraries(librom PRIVATE syscalls-stub)
