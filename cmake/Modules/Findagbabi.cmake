@@ -16,10 +16,7 @@ include(FetchContent)
 FetchContent_Declare(agbabi
         GIT_REPOSITORY "https://github.com/felixjones/agbabi.git"
         GIT_TAG "main"
+        EXCLUDE_FROM_ALL
 )
 
-FetchContent_GetProperties(agbabi)
-if(NOT agbabi_POPULATED)
-    FetchContent_Populate(agbabi)
-    add_subdirectory(${agbabi_SOURCE_DIR} ${agbabi_BINARY_DIR} EXCLUDE_FROM_ALL)
-endif()
+FetchContent_MakeAvailable(agbabi)

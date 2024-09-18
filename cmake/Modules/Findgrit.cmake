@@ -402,12 +402,9 @@ else()
     FetchContent_Declare(FreeImage
             GIT_REPOSITORY "https://github.com/danoli3/FreeImage.git"
             GIT_TAG "master"
+            EXCLUDE_FROM_ALL
     )
-    FetchContent_GetProperties(FreeImage)
-    if(NOT FreeImage_POPULATED)
-      FetchContent_Populate(FreeImage)
-      add_subdirectory(${freeimage_SOURCE_DIR} ${freeimage_BINARY_DIR} EXCLUDE_FROM_ALL)
-    endif()
+    FetchContent_MakeAvailable(FreeImage)
 
     target_link_libraries(cldib PUBLIC FreeImage)
     target_include_directories(cldib PUBLIC cldib "${FreeImage_SOURCE_DIR}/Source")
@@ -446,28 +443,24 @@ FetchContent_Declare(grit
         GIT_TAG "master"
 )
 
-FetchContent_GetProperties(grit)
-if(NOT grit_POPULATED)
-    FetchContent_Populate(grit)
-    execute_process(COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${gritCMakeLists}" "${grit_SOURCE_DIR}/CMakeLists.txt")
-    file(REMOVE "${gritCMakeLists}")
+FetchContent_MakeAvailable(grit)
 
-    if(CMAKE_C_COMPILER_LAUNCHER)
-        list(APPEND cmakeFlags -D CMAKE_C_COMPILER_LAUNCHER=${CMAKE_C_COMPILER_LAUNCHER})
-    endif()
-    if(CMAKE_CXX_COMPILER_LAUNCHER)
-        list(APPEND cmakeFlags -D CMAKE_CXX_COMPILER_LAUNCHER=${CMAKE_CXX_COMPILER_LAUNCHER})
-    endif()
-    ProcessorCount(nproc)
-    math(EXPR nproc "${nproc} - 1")
+execute_process(COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${gritCMakeLists}" "${grit_SOURCE_DIR}/CMakeLists.txt")
+file(REMOVE "${gritCMakeLists}")
 
-    execute_process(COMMAND "${CMAKE_COMMAND}" -S "${grit_SOURCE_DIR}" -B "${grit_BINARY_DIR}" -G "${CMAKE_GENERATOR}" ${cmakeFlags})  # Configure
-    execute_process(COMMAND "${CMAKE_COMMAND}" --build "${grit_BINARY_DIR}" --parallel ${nproc})  # Build
-    if(CMAKE_HOST_SYSTEM_NAME STREQUAL Linux)
-        execute_process(COMMAND "${CMAKE_COMMAND}" --install "${grit_BINARY_DIR}" --prefix $ENV{HOME})  # Install
-    endif()
-
-    find_program(GRIT_PATH grit grit.exe PATHS "${grit_BINARY_DIR}")
-else()
-    file(REMOVE "${gritCMakeLists}")
+if(CMAKE_C_COMPILER_LAUNCHER)
+    list(APPEND cmakeFlags -D CMAKE_C_COMPILER_LAUNCHER=${CMAKE_C_COMPILER_LAUNCHER})
 endif()
+if(CMAKE_CXX_COMPILER_LAUNCHER)
+    list(APPEND cmakeFlags -D CMAKE_CXX_COMPILER_LAUNCHER=${CMAKE_CXX_COMPILER_LAUNCHER})
+endif()
+ProcessorCount(nproc)
+math(EXPR nproc "${nproc} - 1")
+
+execute_process(COMMAND "${CMAKE_COMMAND}" -S "${grit_SOURCE_DIR}" -B "${grit_BINARY_DIR}" -G "${CMAKE_GENERATOR}" ${cmakeFlags})  # Configure
+execute_process(COMMAND "${CMAKE_COMMAND}" --build "${grit_BINARY_DIR}" --parallel ${nproc})  # Build
+if(CMAKE_HOST_SYSTEM_NAME STREQUAL Linux)
+    execute_process(COMMAND "${CMAKE_COMMAND}" --install "${grit_BINARY_DIR}" --prefix $ENV{HOME})  # Install
+endif()
+
+find_program(GRIT_PATH grit grit.exe PATHS "${grit_BINARY_DIR}")

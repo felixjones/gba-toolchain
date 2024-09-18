@@ -13,10 +13,7 @@ include(FetchContent)
 FetchContent_Declare(xilefianlib
         GIT_REPOSITORY "https://github.com/felixjones/xilefianlib.git"
         GIT_TAG "main"
+        EXCLUDE_FROM_ALL
 )
 
-FetchContent_GetProperties(xilefianlib)
-if(NOT xilefianlib_POPULATED)
-    FetchContent_Populate(xilefianlib)
-    add_subdirectory(${xilefianlib_SOURCE_DIR} ${xilefianlib_BINARY_DIR} EXCLUDE_FROM_ALL)
-endif()
+FetchContent_MakeAvailable(xilefianlib)

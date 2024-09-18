@@ -305,25 +305,23 @@ include(ProcessorCount)
 FetchContent_Declare(superfamiconv
         GIT_REPOSITORY "https://github.com/Optiroc/SuperFamiconv.git"
         GIT_TAG "main"
+        SOURCE_SUBDIR NO_SOURCE_SUBDIR
 )
 
-FetchContent_GetProperties(superfamiconv)
-if(NOT superfamiconv_POPULATED)
-    FetchContent_Populate(superfamiconv)
+FetchContent_MakeAvailable(superfamiconv)
 
-    if(CMAKE_C_COMPILER_LAUNCHER)
-        list(APPEND cmakeFlags -D CMAKE_C_COMPILER_LAUNCHER=${CMAKE_C_COMPILER_LAUNCHER})
-    endif()
-    if(CMAKE_CXX_COMPILER_LAUNCHER)
-        list(APPEND cmakeFlags -D CMAKE_CXX_COMPILER_LAUNCHER=${CMAKE_CXX_COMPILER_LAUNCHER})
-    endif()
-    ProcessorCount(nproc)
-    math(EXPR nproc "${nproc} - 1")
+if(CMAKE_C_COMPILER_LAUNCHER)
+    list(APPEND cmakeFlags -D CMAKE_C_COMPILER_LAUNCHER=${CMAKE_C_COMPILER_LAUNCHER})
+endif()
+if(CMAKE_CXX_COMPILER_LAUNCHER)
+    list(APPEND cmakeFlags -D CMAKE_CXX_COMPILER_LAUNCHER=${CMAKE_CXX_COMPILER_LAUNCHER})
+endif()
+ProcessorCount(nproc)
+math(EXPR nproc "${nproc} - 1")
 
-    execute_process(COMMAND "${CMAKE_COMMAND}" -S "${superfamiconv_SOURCE_DIR}" -B "${superfamiconv_BINARY_DIR}" -G "${CMAKE_GENERATOR}" -D CMAKE_CXX_FLAGS="-Wno-return-type" ${cmakeFlags})  # Configure
-    execute_process(COMMAND "${CMAKE_COMMAND}" --build "${superfamiconv_BINARY_DIR}" --parallel ${nproc})  # Build
-    find_program(SUPERFAMICONV_PATH superfamiconv superfamiconv.exe PATHS "${superfamiconv_BINARY_DIR}")
-    if(CMAKE_HOST_SYSTEM_NAME STREQUAL Linux)
-        file(INSTALL "${SUPERFAMICONV_PATH}" DESTINATION "$ENV{HOME}/bin" PERMISSIONS OWNER_EXECUTE)  # Install
-    endif()
+execute_process(COMMAND "${CMAKE_COMMAND}" -S "${superfamiconv_SOURCE_DIR}" -B "${superfamiconv_BINARY_DIR}" -G "${CMAKE_GENERATOR}" -D CMAKE_CXX_FLAGS="-Wno-return-type" ${cmakeFlags})  # Configure
+execute_process(COMMAND "${CMAKE_COMMAND}" --build "${superfamiconv_BINARY_DIR}" --parallel ${nproc})  # Build
+find_program(SUPERFAMICONV_PATH superfamiconv superfamiconv.exe PATHS "${superfamiconv_BINARY_DIR}")
+if(CMAKE_HOST_SYSTEM_NAME STREQUAL Linux)
+    file(INSTALL "${SUPERFAMICONV_PATH}" DESTINATION "$ENV{HOME}/bin" PERMISSIONS OWNER_EXECUTE)  # Install
 endif()

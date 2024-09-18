@@ -176,28 +176,24 @@ FetchContent_Declare(mmutil
         GIT_TAG "master"
 )
 
-FetchContent_GetProperties(mmutil)
-if(NOT mmutil_POPULATED)
-    FetchContent_Populate(mmutil)
-    execute_process(COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${mmutilCMakeLists}" "${mmutil_SOURCE_DIR}/CMakeLists.txt")
-    file(REMOVE "${mmutilCMakeLists}")
+FetchContent_MakeAvailable(mmutil)
 
-    if(CMAKE_C_COMPILER_LAUNCHER)
-        list(APPEND cmakeFlags -D CMAKE_C_COMPILER_LAUNCHER=${CMAKE_C_COMPILER_LAUNCHER})
-    endif()
-    if(CMAKE_CXX_COMPILER_LAUNCHER)
-        list(APPEND cmakeFlags -D CMAKE_CXX_COMPILER_LAUNCHER=${CMAKE_CXX_COMPILER_LAUNCHER})
-    endif()
-    ProcessorCount(nproc)
-    math(EXPR nproc "${nproc} - 1")
+execute_process(COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${mmutilCMakeLists}" "${mmutil_SOURCE_DIR}/CMakeLists.txt")
+file(REMOVE "${mmutilCMakeLists}")
 
-    execute_process(COMMAND "${CMAKE_COMMAND}" -S "${mmutil_SOURCE_DIR}" -B "${mmutil_BINARY_DIR}" -G "${CMAKE_GENERATOR}" ${cmakeFlags})  # Configure
-    execute_process(COMMAND "${CMAKE_COMMAND}" --build "${mmutil_BINARY_DIR}" --parallel ${nproc})  # Build
-    if(CMAKE_HOST_SYSTEM_NAME STREQUAL Linux)
-        execute_process(COMMAND "${CMAKE_COMMAND}" --install "${mmutil_BINARY_DIR}" --prefix $ENV{HOME})  # Install
-    endif()
-
-    find_program(MMUTIL_PATH mmutil mmutil.exe PATHS "${mmutil_BINARY_DIR}")
-else()
-    file(REMOVE "${mmutilCMakeLists}")
+if(CMAKE_C_COMPILER_LAUNCHER)
+    list(APPEND cmakeFlags -D CMAKE_C_COMPILER_LAUNCHER=${CMAKE_C_COMPILER_LAUNCHER})
 endif()
+if(CMAKE_CXX_COMPILER_LAUNCHER)
+    list(APPEND cmakeFlags -D CMAKE_CXX_COMPILER_LAUNCHER=${CMAKE_CXX_COMPILER_LAUNCHER})
+endif()
+ProcessorCount(nproc)
+math(EXPR nproc "${nproc} - 1")
+
+execute_process(COMMAND "${CMAKE_COMMAND}" -S "${mmutil_SOURCE_DIR}" -B "${mmutil_BINARY_DIR}" -G "${CMAKE_GENERATOR}" ${cmakeFlags})  # Configure
+execute_process(COMMAND "${CMAKE_COMMAND}" --build "${mmutil_BINARY_DIR}" --parallel ${nproc})  # Build
+if(CMAKE_HOST_SYSTEM_NAME STREQUAL Linux)
+    execute_process(COMMAND "${CMAKE_COMMAND}" --install "${mmutil_BINARY_DIR}" --prefix $ENV{HOME})  # Install
+endif()
+
+find_program(MMUTIL_PATH mmutil mmutil.exe PATHS "${mmutil_BINARY_DIR}")

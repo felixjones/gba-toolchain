@@ -130,13 +130,10 @@ if(libseven IN_LIST sdk-seven_FIND_COMPONENTS)
     FetchContent_Declare(libseven
             GIT_REPOSITORY "https://github.com/sdk-seven/libseven.git"
             GIT_TAG "main"
+            EXCLUDE_FROM_ALL
     )
 
-    FetchContent_GetProperties(libseven)
-    if(NOT libseven_POPULATED)
-        FetchContent_Populate(libseven)
-        add_subdirectory(${libseven_SOURCE_DIR} ${libseven_BINARY_DIR} EXCLUDE_FROM_ALL)
-    endif()
+    FetchContent_MakeAvailable(libseven)
 
     add_library(sdk-seven::libseven ALIAS seven)
 endif()
@@ -145,13 +142,10 @@ if(libutil IN_LIST sdk-seven_FIND_COMPONENTS)
     FetchContent_Declare(libutil
             GIT_REPOSITORY "https://github.com/sdk-seven/libutil.git"
             GIT_TAG "main"
+            EXCLUDE_FROM_ALL
     )
 
-    FetchContent_GetProperties(libutil)
-    if(NOT libutil_POPULATED)
-        FetchContent_Populate(libutil)
-        add_subdirectory(${libutil_SOURCE_DIR} ${libutil_BINARY_DIR} EXCLUDE_FROM_ALL)
-    endif()
+    FetchContent_MakeAvailable(libutil)
 
     add_library(sdk-seven::libutil ALIAS util)
 endif()
