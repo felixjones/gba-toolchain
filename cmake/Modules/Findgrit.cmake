@@ -116,7 +116,92 @@ include(Bin2o)
 include(Depfile)
 include(FileRename)
 
-#TODO: add_grit_command
+function(add_grit_command)
+    __grit_palette_args()
+    __grit_graphics_args()
+    __grit_map_args()
+    __grit_meta_args()
+
+    set(options ${paletteOptions} ${graphicsOptions} ${mapOptions} ${metaOptions}
+            PALETTE_SHARED
+            GRAPHICS_SHARED
+    )
+    set(oneValueArgs ${paletteOneValueArgs} ${graphicsOneValueArgs} ${mapOneValueArgs} ${metaOneValueArgs}
+            FLAGS
+            FLAGS_FILE
+            TILESET_FILE
+            OUTPUT_SHARED
+    )
+    set(multiValueArgs ${mapMultiValueArgs})
+    cmake_parse_arguments(ARGS "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+    if(ARGS_PALETTE_SHARED)
+        list(APPEND sharedFlags -pS)
+    endif()
+    if(ARGS_GRAPHICS_SHARED)
+        list(APPEND sharedFlags -gS)
+    endif()
+    if(sharedFlags AND ARGS_OUTPUT_SHARED)
+        list(APPEND sharedFlags -O${ARGS_OUTPUT_SHARED})
+    endif()
+
+    set(sources ${ARGS_UNPARSED_ARGUMENTS})
+
+    foreach(source ${sources})
+        get_filename_component(source "${source}" NAME_WE)
+        if(ARGS_PALETTE AND NOT ARGS_NO_PALETTE)
+            list(APPEND outputs ${source}.pal.bin)
+        endif()
+        if(ARGS_GRAPHICS AND NOT ARGS_NO_GRAPHICS)
+            list(APPEND outputs ${source}.img.bin)
+        endif()
+        if(ARGS_MAP AND NOT ARGS_NO_MAP)
+            list(APPEND outputs ${source}.map.bin)
+        endif()
+    endforeach()
+
+    if(ARGS_FLAGS)
+        separate_arguments(gritFlags NATIVE_COMMAND "${ARGS_FLAGS}")
+    endif()
+
+    foreach(option ${paletteOptions} ${paletteOneValueArgs} ${graphicsOptions} ${graphicsOneValueArgs} ${mapOptions} ${mapOneValueArgs} ${mapMultiValueArgs} ${metaOptions} ${metaOneValueArgs})
+        if(NOT ARGS_${option})
+            continue()
+        endif()
+
+        if(${option}_KEYS)  # Keyword arg
+            unset(gritMultiArgs)
+            foreach(arg ${ARGS_${option}})
+                if(NOT ${arg} IN_LIST ${option}_KEYS)
+                    message(WARNING "Unknown key \"${arg}\" for \"${option}\"")
+                    continue()
+                endif()
+
+                string(APPEND gritMultiArgs ${${option}_VALUE_${arg}})
+            endforeach()
+
+            list(APPEND gritFlags "${${option}}${gritMultiArgs}")
+        elseif(${option}_ARG)  # One value arg
+            list(APPEND gritFlags "${${option}}${ARGS_${option}}")
+        else()  # Flag
+            list(APPEND gritFlags "${${option}}")
+        endif()
+    endforeach()
+
+    add_custom_command(
+        OUTPUT ${outputs}
+        DEPENDS ${sources}
+        # Run grit
+        COMMAND "${GRIT_PATH}" $<PATH:ABSOLUTE_PATH,NORMALIZE,${sources},${CMAKE_CURRENT_SOURCE_DIR}> -fh! -ftb
+            ${gritFlags}
+            $<$<BOOL:${ARGS_FLAGS_FILE}>:-ff$<PATH:ABSOLUTE_PATH,NORMALIZE,${ARGS_FLAGS_FILE},${CMAKE_CURRENT_SOURCE_DIR}>>
+            $<$<BOOL:${ARGS_TILESET_FILE}>:-fx$<PATH:ABSOLUTE_PATH,NORMALIZE,${ARGS_TILESET_FILE},${CMAKE_CURRENT_SOURCE_DIR}>>
+            "$<$<BOOL:${sharedFlags}>:${sharedFlags}>"
+        COMMAND_EXPAND_LISTS
+    )
+
+    set(GRIT_COMMAND_OUTPUTS "${outputs}" PARENT_SCOPE)
+endfunction()
 
 function(add_grit_library target)
     set(gritTargetDir "_grit/${target}.dir")

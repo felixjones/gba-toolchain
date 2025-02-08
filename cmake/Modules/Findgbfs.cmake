@@ -22,6 +22,41 @@
 
 include(Bin2o)
 
+function(add_gbfs_command target)
+    foreach(arg ${ARGN})
+        if(IS_ABSOLUTE "${arg}" AND EXISTS "${arg}")
+            list(APPEND sources "${arg}")
+            continue()
+        endif()
+
+        if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${arg}")
+            list(APPEND sources "${arg}")
+            continue()
+        endif()
+
+        get_source_file_property(isGenerated "${arg}" GENERATED)
+        if(isGenerated)
+            if(IS_ABSOLUTE "${arg}")
+                list(APPEND sources "${arg}")
+                continue()
+            endif()
+
+            list(APPEND sources "${CMAKE_CURRENT_BINARY_DIR}/${arg}")
+            continue()
+        endif()
+
+        message(FATAL_ERROR "Cannot find source file: ${arg}")
+    endforeach()
+
+    add_custom_command(OUTPUT "${target}"
+        DEPENDS ${sources}
+        # Run gbfs
+        COMMAND "${GBFS_PATH}" "${target}" ${sources}
+            > $<IF:$<BOOL:${CMAKE_HOST_WIN32}>,NUL,/dev/null>
+        COMMAND_EXPAND_LISTS
+    )
+endfunction()
+
 function(add_gbfs_library target)
     set(gbfsTargetDir "_gbfs/${target}.dir")
     file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${gbfsTargetDir}")
@@ -37,12 +72,38 @@ function(add_gbfs_library target)
             # Remove byproducts
             COMMAND "${CMAKE_COMMAND}" -E rm -f "${target}.gbfs"
             WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${gbfsTargetDir}"
+            COMMAND_EXPAND_LISTS
     )
+
+    foreach(arg ${ARGN})
+        if(IS_ABSOLUTE "${arg}" AND EXISTS "${arg}")
+            list(APPEND sources "${arg}")
+            continue()
+        endif()
+
+        if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${arg}")
+            list(APPEND sources "${arg}")
+            continue()
+        endif()
+
+        get_source_file_property(isGenerated "${arg}" GENERATED)
+        if(isGenerated)
+            if(IS_ABSOLUTE "${arg}")
+                list(APPEND sources "${arg}")
+                continue()
+            endif()
+
+            list(APPEND sources "${CMAKE_CURRENT_BINARY_DIR}/${arg}")
+            continue()
+        endif()
+
+        message(FATAL_ERROR "Cannot find source file: ${arg}")
+    endforeach()
 
     add_library(${target} OBJECT IMPORTED)
     set_target_properties(${target} PROPERTIES
             IMPORTED_OBJECTS "${CMAKE_CURRENT_BINARY_DIR}/${gbfsTargetDir}/${target}.o"
-            GBFS_SOURCES "${ARGN}"
+            GBFS_SOURCES "${sources}"
     )
     target_sources(${target}
             INTERFACE "$<PATH:ABSOLUTE_PATH,NORMALIZE,$<TARGET_PROPERTY:${target},GBFS_SOURCES>,${CMAKE_CURRENT_SOURCE_DIR}>"

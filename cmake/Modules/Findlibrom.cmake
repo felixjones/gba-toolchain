@@ -84,14 +84,42 @@ function(install_rom target)
         set(CONCAT_ARGS_ALIGN 1)
     endif()
 
+    # Get a suitable dependant file for sources
+    get_target_property(dependantSource ${target} SOURCES)
+    list(GET dependantSource 0 dependantSource)
+
     # List files to be appended
     foreach(concat ${CONCAT_ARGS_UNPARSED_ARGUMENTS})
-        if(NOT TARGET ${concat})
-            list(APPEND appendFiles $<PATH:ABSOLUTE_PATH,NORMALIZE,${concat},${CMAKE_CURRENT_SOURCE_DIR}>)
-        else()
+        if(TARGET ${concat})
             add_dependencies(${target} ${concat})
             list(APPEND appendFiles $<TARGET_FILE:${concat}>)
+            continue()
         endif()
+
+        set_source_files_properties("${dependantSource}" PROPERTIES OBJECT_DEPENDS "${concat}")
+
+        if(IS_ABSOLUTE "${concat}" AND EXISTS "${concat}")
+            list(APPEND appendFiles "${concat}")
+            continue()
+        endif()
+
+        if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${concat}")
+            list(APPEND appendFiles "${concat}")
+            continue()
+        endif()
+
+        get_source_file_property(isGenerated "${concat}" GENERATED)
+        if(isGenerated)
+            if(IS_ABSOLUTE "${concat}")
+                list(APPEND appendFiles "${concat}")
+                continue()
+            endif()
+
+            list(APPEND appendFiles "${CMAKE_CURRENT_BINARY_DIR}/${concat}")
+            continue()
+        endif()
+
+        message(FATAL_ERROR "Cannot find source file: ${concat}")
     endforeach()
 
     # Append files
