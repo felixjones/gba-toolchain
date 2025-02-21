@@ -14,11 +14,52 @@
 #
 # Example:
 #   ```cmake
+#   add_grit_command(GRAPHICS PALETTE
+#       path/to/image.png
+#   )
+#   add_gbfs_library(my_assets ${GRIT_COMMAND_OUTPUTS})
+#   target_link_libraries(my_target PRIVATE my_assets)
+#
 #   add_grit_library(my_sprite
 #       GRAPHICS_BIT_DEPTH 4
 #       path/to/sprite.png
 #   )
 #   target_link_libraries(my_target PRIVATE my_sprite)
+#   ```
+#
+# Add grit command:
+#
+#   List of expected outputs are returned via `GRIT_COMMAND_OUTPUTS`
+#
+#   ```cmake
+#    add_grit_command([PALETTE_SHARED] [GRAPHICS_SHARED] [FLAGS <flags-string>] [FLAGS_FILE <flags-path>] [TILESET_FILE <tileset-path>]
+#       [PALETTE|NO_PALETTE]
+#       [PALETTE_COMPRESSION <OFF|LZ77|HUFF|RLE|FAKE>]
+#       [PALETTE_RANGE_START <integer>]
+#       [PALETTE_RANGE_END <integer>]
+#       [PALETTE_COUNT <integer>]
+#       [PALETTE_TRANSPARENT_INDEX <integer>]
+#       [GRAPHICS|NO_GRAPHICS]
+#       [GRAPHICS_COMPRESSION <OFF|LZ77|HUFF|RLE|FAKE>]
+#       [GRAPHICS_PIXEL_OFFSET <integer>]
+#       [GRAPHICS_FORMAT <BITMAP|TILE>]
+#       [GRAPHICS_BIT_DEPTH <integer>]
+#       [GRAPHICS_TRANSPARENT_COLOR <hex-code>]
+#       [AREA_LEFT <integer>]
+#       [AREA_RIGHT <integer>]
+#       [AREA_WIDTH <integer>]
+#       [AREA_TOP <integer>]
+#       [AREA_BOTTOM <integer>]
+#       [AREA_HEIGHT <integer>]
+#       [MAP|NO_MAP]
+#       [MAP_COMPRESSION <OFF|LZ77|HUFF|RLE|FAKE>]
+#       [<MAP_TILE_REDUCTION <TILES|PALETTES|FLIPPED>...>|MAP_NO_TILE_REDUCTION]
+#       [MAP_LAYOUT <REGULAR_FLAT|REGULAR_SBB|AFFINE>]
+#       [METATILE_HEIGHT <integer>]
+#       [METATILE_WIDTH <integer>]
+#       [METATILE_REDUCTION]
+#       <file-path>...
+#   )
 #   ```
 #
 # Add grit library command:
@@ -188,11 +229,25 @@ function(add_grit_command)
         endif()
     endforeach()
 
+    if(NOT sources)
+        message(FATAL_ERROR "No sources")
+    endif()
+
+    if(CMAKE_GENERATOR MATCHES "Ninja")
+        # CMake is buggy with Ninja, so we write inputs to a file
+        string(JOIN ";" argHash "${sources}")
+        string(SHA256 argHash "${argHash}")
+        file(GENERATE OUTPUT "_grit/${argHash}.txt" CONTENT "$<JOIN:$<PATH:ABSOLUTE_PATH,NORMALIZE,${sources},${CMAKE_CURRENT_SOURCE_DIR}>,\n>")
+        set(sourceCommand -ff "_grit/${argHash}.txt")
+    else()
+        set(sourceCommand "$<PATH:ABSOLUTE_PATH,NORMALIZE,${sources},${CMAKE_CURRENT_SOURCE_DIR}>")
+    endif()
+
     add_custom_command(
         OUTPUT ${outputs}
         DEPENDS ${sources}
         # Run grit
-        COMMAND "${GRIT_PATH}" $<PATH:ABSOLUTE_PATH,NORMALIZE,${sources},${CMAKE_CURRENT_SOURCE_DIR}> -fh! -ftb
+        COMMAND "${GRIT_PATH}" ${sourceCommand} -fh! -ftb
             ${gritFlags}
             $<$<BOOL:${ARGS_FLAGS_FILE}>:-ff$<PATH:ABSOLUTE_PATH,NORMALIZE,${ARGS_FLAGS_FILE},${CMAKE_CURRENT_SOURCE_DIR}>>
             $<$<BOOL:${ARGS_TILESET_FILE}>:-fx$<PATH:ABSOLUTE_PATH,NORMALIZE,${ARGS_TILESET_FILE},${CMAKE_CURRENT_SOURCE_DIR}>>

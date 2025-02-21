@@ -30,7 +30,7 @@ function(add_gbfs_command target)
         endif()
 
         if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${arg}")
-            list(APPEND sources "${arg}")
+            list(APPEND sources "${CMAKE_CURRENT_SOURCE_DIR}/${arg}")
             continue()
         endif()
 
