@@ -148,6 +148,41 @@ Game Boy music player library and converter kit ([more info](https://github.com/
 
 Bitmap and Tile graphics converter ([more info](https://www.coranac.com/man/grit/html/grit.htm))
 
+List of expected outputs are returned via `GRIT_COMMAND_OUTPUTS`, suitable for passing to other library commands as inputs (such as `add_asset_library` or `add_gbfs_library`).
+
+```cmake
+add_grit_command([PALETTE_SHARED] [GRAPHICS_SHARED] [FLAGS <flags-string>] [FLAGS_FILE <flags-path>] [TILESET_FILE <tileset-path>]
+    [PALETTE|NO_PALETTE]
+    [PALETTE_COMPRESSION <OFF|LZ77|HUFF|RLE|FAKE>]
+    [PALETTE_RANGE_START <integer>]
+    [PALETTE_RANGE_END <integer>]
+    [PALETTE_COUNT <integer>]
+    [PALETTE_TRANSPARENT_INDEX <integer>]
+    [GRAPHICS|NO_GRAPHICS]
+    [GRAPHICS_COMPRESSION <OFF|LZ77|HUFF|RLE|FAKE>]
+    [GRAPHICS_PIXEL_OFFSET <integer>]
+    [GRAPHICS_FORMAT <BITMAP|TILE>]
+    [GRAPHICS_BIT_DEPTH <integer>]
+    [GRAPHICS_TRANSPARENT_COLOR <hex-code>]
+    [AREA_LEFT <integer>]
+    [AREA_RIGHT <integer>]
+    [AREA_WIDTH <integer>]
+    [AREA_TOP <integer>]
+    [AREA_BOTTOM <integer>]
+    [AREA_HEIGHT <integer>]
+    [MAP|NO_MAP]
+    [MAP_COMPRESSION <OFF|LZ77|HUFF|RLE|FAKE>]
+    [<MAP_TILE_REDUCTION <TILES|PALETTES|FLIPPED>...>|MAP_NO_TILE_REDUCTION]
+    [MAP_LAYOUT <REGULAR_FLAT|REGULAR_SBB|AFFINE>]
+    [METATILE_HEIGHT <integer>]
+    [METATILE_WIDTH <integer>]
+    [METATILE_REDUCTION]
+    <file-path>...
+)
+```
+
+The library version of this command produces a linkable output.
+
 ```cmake
 add_grit_library(<target> [PALETTE_SHARED] [GRAPHICS_SHARED] [FLAGS <flags-string>] [FLAGS_FILE <flags-path>] [TILESET_FILE <tileset-path>]
     [PALETTE|NO_PALETTE]

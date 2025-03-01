@@ -32,7 +32,7 @@
 #   List of expected outputs are returned via `GRIT_COMMAND_OUTPUTS`
 #
 #   ```cmake
-#    add_grit_command([PALETTE_SHARED] [GRAPHICS_SHARED] [FLAGS <flags-string>] [FLAGS_FILE <flags-path>] [TILESET_FILE <tileset-path>]
+#   add_grit_command([PALETTE_SHARED] [GRAPHICS_SHARED] [FLAGS <flags-string>] [FLAGS_FILE <flags-path>] [TILESET_FILE <tileset-path>]
 #       [PALETTE|NO_PALETTE]
 #       [PALETTE_COMPRESSION <OFF|LZ77|HUFF|RLE|FAKE>]
 #       [PALETTE_RANGE_START <integer>]
