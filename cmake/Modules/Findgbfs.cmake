@@ -69,6 +69,7 @@ function(add_gbfs_library target)
                 > $<IF:$<BOOL:${CMAKE_HOST_WIN32}>,NUL,/dev/null>
             # Create object file
             COMMAND ${BIN2O_COMMAND} "${target}.o" HEADER "${target}.h" ALIGNMENT 256 "${target}.gbfs"
+            COMMAND ${CMAKE_OBJCOPY} --rename-section .rodata.${target}_gbfs=.gbfsdata.${target} "${target}.o"
             # Remove byproducts
             COMMAND "${CMAKE_COMMAND}" -E rm -f "${target}.gbfs"
             WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${gbfsTargetDir}"

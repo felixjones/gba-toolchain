@@ -63,6 +63,10 @@ SECTIONS {
         PROVIDE_HIDDEN(__exidx_end = .);
     } > rom
 
+    .ARM.extab : {
+        *(.ARM.extab.text.*)
+    } > rom
+
     PROVIDE_HIDDEN(__ewram_overlay_start = ORIGIN(ewram));
     PROVIDE_HIDDEN(__ewram_overlay_lma = ALIGN(4));
     . = __ewram_overlay_lma;
@@ -154,4 +158,10 @@ SECTIONS {
     }
 
     PROVIDE_HIDDEN(__rom_end = ALIGN(256));
+
+    . = __rom_end;
+
+    .gbfsdata : {
+        *(.gbfsdata .gbfsdata.*)
+    }
 }
