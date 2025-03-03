@@ -200,9 +200,7 @@ function(gbafix input)
     )
 
     # Cleanup temporaries
-    file(REMOVE "${part3}")
-    file(REMOVE "${part2}")
-    file(REMOVE "${part1}")
+    file(REMOVE "${part3}" "${part2}" "${part1}")
 endfunction()
 
 if(CMAKE_SCRIPT_MODE_FILE STREQUAL CMAKE_CURRENT_LIST_FILE)

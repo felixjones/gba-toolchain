@@ -15,6 +15,7 @@
 #===============================================================================
 
 include("${CMAKE_CURRENT_LIST_DIR}/Hexdecode.cmake" OPTIONAL RESULT_VARIABLE HEXDECODE_INCLUDED)
+include("${CMAKE_CURRENT_LIST_DIR}/Mktemp.cmake" OPTIONAL RESULT_VARIABLE MKTEMP_INCLUDED)
 
 function(file_split input)
     # Parse arguments
@@ -46,11 +47,36 @@ function(file_split input)
     endif()
 
     # Split macros
+    find_program(HEAD_EXECUTABLE NAMES head)
+    find_program(TAIL_EXECUTABLE NAMES tail)
     find_program(DD_EXECUTABLE NAMES dd)
     find_program(POWERSHELL_EXECUTABLE NAMES powershell pwsh)
 
-    # Try if dd is available
-    if(DD_EXECUTABLE)
+    if(HEAD_EXECUTABLE AND TAIL_EXECUTABLE AND MKTEMP_INCLUDED)
+        # Try if head & tail is available
+        macro(do_split part length offset)
+            # Extract all bytes from the given offset
+            execute_process(
+                    COMMAND "${TAIL_EXECUTABLE}" -c +${offset} "${input}"
+                    OUTPUT_FILE "${part}"
+                    ERROR_QUIET
+            )
+            if(${length} GREATER_EQUAL 0)
+                # Rename first part to temporary file
+                mktemp(tailPart)
+                file(RENAME "${part}" "${tailPart}")
+                # Extract the length of bytes we care about
+                execute_process(
+                        COMMAND "${HEAD_EXECUTABLE}" -c ${length} "${tailPart}"
+                        OUTPUT_FILE "${part}"
+                        ERROR_QUIET
+                )
+                # Cleanup temporaries
+                file(REMOVE "${tailPart}")
+            endif()
+        endmacro()
+    elseif(DD_EXECUTABLE)
+        # Try if dd is available
         macro(do_split part length offset)
             if(${length} LESS 0)
                 execute_process(
