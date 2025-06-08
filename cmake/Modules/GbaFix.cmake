@@ -191,7 +191,7 @@ function(gbafix input)
     )
 
     # Override part2 with fixed header
-    hexdecode("${part2}" "${header}" "${complement}" 0000)
+    hexdecode("${part2}" "${header}" "${complement}" 00)
 
     # Concat
     execute_process(
