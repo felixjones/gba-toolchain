@@ -1,7 +1,7 @@
 /*
 ===============================================================================
 
- Copyright (C) 2021-2023 gba-toolchain contributors
+ Copyright (C) 2021-2025 gba-toolchain contributors
  For conditions of distribution and use, see copyright notice in LICENSE.md
 
 ===============================================================================
@@ -35,10 +35,7 @@ SECTIONS {
         KEEP(*(.crt0.postheader))
 
         PROVIDE_HIDDEN(__sbss_swi0c = ABSOLUTE((SIZEOF(.sbss) / 4) | (1 << 24)));
-        PROVIDE_HIDDEN(__bss_swi0c = ABSOLUTE((SIZEOF(.bss) / 4) | (1 << 24)));
-
-        PROVIDE_HIDDEN(__ewram_swi0c = ABSOLUTE(SIZEOF(.ewram) / 4));
-        PROVIDE_HIDDEN(__iwram_swi0c = ABSOLUTE(SIZEOF(.iwram) / 4));
+        PROVIDE_HIDDEN(__bss_swi0c  = ABSOLUTE((SIZEOF(.bss)  / 4) | (1 << 24)));
     } > rom
 
     .init_array : {
@@ -63,9 +60,7 @@ SECTIONS {
         PROVIDE_HIDDEN(__exidx_end = .);
     } > rom
 
-    .ARM.extab : {
-        *(.ARM.extab.text.*)
-    } > rom
+    .ARM.extab : { *(.ARM.extab.text.*) } > rom
 
     PROVIDE_HIDDEN(__ewram_overlay_start = ORIGIN(ewram));
     PROVIDE_HIDDEN(__ewram_overlay_lma = ALIGN(4));
@@ -95,8 +90,9 @@ SECTIONS {
     } > ewram
 
     PROVIDE_HIDDEN(__ewram_lma_end = ALIGN(__ewram_lma + (. - __ewram_start), 4));
+    PROVIDE_HIDDEN(__ewram_swi0c = ABSOLUTE(SIZEOF(.ewram) / 4));
 
-    .sbss(NOLOAD) : ALIGN(32) {
+    .sbss (NOLOAD) : ALIGN(32) {
         PROVIDE_HIDDEN(__sbss_start = ABSOLUTE(.));
         *(.sbss .sbss.*)
         . = ALIGN(32);
@@ -137,8 +133,9 @@ SECTIONS {
     } > iwram
 
     PROVIDE_HIDDEN(__iwram_lma_end = ALIGN(__iwram_lma + SIZEOF(.iwram), 4));
+    PROVIDE_HIDDEN(__iwram_swi0c = ABSOLUTE(SIZEOF(.iwram) / 4));
 
-    .bss(NOLOAD) : ALIGN(32) {
+    .bss (NOLOAD) : ALIGN(32) {
         PROVIDE_HIDDEN(__bss_start = ABSOLUTE(.));
         *(.bss .bss.*)
         *(COMMON)
@@ -153,15 +150,10 @@ SECTIONS {
         . = ALIGN(4);
     }
 
-    .rodata : {
-        *(.rodata .rodata.* .gnu.linkonce.r.*)
-    }
+    .rodata : { *(.rodata .rodata.* .gnu.linkonce.r.*) }
 
     PROVIDE_HIDDEN(__rom_end = ALIGN(256));
-
     . = __rom_end;
 
-    .gbfsdata : {
-        *(.gbfsdata .gbfsdata.*)
-    }
+    .gbfsdata : { *(.gbfsdata .gbfsdata.*) }
 }

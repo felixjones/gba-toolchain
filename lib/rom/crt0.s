@@ -1,6 +1,6 @@
 @===============================================================================
 @
-@ Copyright (C) 2021-2024 gba-toolchain contributors
+@ Copyright (C) 2021-2025 gba-toolchain contributors
 @ For conditions of distribution and use, see copyright notice in LICENSE.md
 @
 @===============================================================================
@@ -58,7 +58,13 @@ _start:
     @ init immediately follows preinit so we can join these arrays
     ldr     r4, =__preinit_array_start
     ldr     r5, =__init_array_end
-    bl      __array_call
+1:  cmp     r4, r5
+    beq     2f
+    ldr     r0, [r4]
+    add     r4, r4, #4
+    bl      _CALL_R0_VENEER
+    b       1b
+2:
 
     @ argc, argv
     mov     r0, #0
@@ -73,16 +79,18 @@ exit:
     str     r1, [r1] @ Disable REG_IME (lowest bit = 0)
 
     mov     r1, #0 @ NULL
-    push    {r0} @ Push exit code
     bl      __call_exitprocs
-    pop     {r0}
 
-    .global _fini
-_fini:
-    @ Using r4-r5 to avoid pushing r0-r3
-    ldr     r4, =__fini_array_start
-    ldr     r5, =__fini_array_end
-    bl      __array_call
+    ldr     r4, =__fini_array_end
+    ldr     r5, =__fini_array_start
+3:  cmp     r4, r5
+    beq     4f
+    sub     r4, r4, #4
+    ldr     r0, [r4]
+    bl      _CALL_R0_VENEER
+    b       3b
+4:
+
     @ Fallthrough
 
     .thumb
@@ -95,16 +103,6 @@ _Exit:
     swi     #0x0
 
     .thumb
-__array_call:
-    push    {lr}
-    cmp     r4, r5
-    beq     .Larray_skip
-.Larray_loop:
-    ldm     r4!, {r0}
-    bl      .Larray_bx
-    cmp     r4, r5
-    bne     .Larray_loop
-.Larray_skip:
-    pop     {r0}
-.Larray_bx:
+_CALL_R0_VENEER:
     bx      r0
+    .size   _CALL_R0_VENEER, .-_CALL_R0_VENEER

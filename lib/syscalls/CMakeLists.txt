@@ -1,6 +1,6 @@
 #===============================================================================
 #
-# Copyright (C) 2021-2024 gba-toolchain contributors
+# Copyright (C) 2021-2025 gba-toolchain contributors
 # For conditions of distribution and use, see copyright notice in LICENSE.md
 #
 #===============================================================================
@@ -10,6 +10,7 @@ project(syscalls C)
 
 if(NOT TARGET syscalls-stub)
     add_library(syscalls-stub STATIC
+            atexit.c
             stub/syscalls.c
     )
     # Keep the stub symbols
