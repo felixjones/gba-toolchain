@@ -122,11 +122,13 @@ SECTIONS {
     } > iwram
 
     PROVIDE_HIDDEN(__iwram_start = ALIGN(4));
-    PROVIDE_HIDDEN(__iwram_lma = ALIGN(__iwram_overlay_lma + (. - __iwram_overlay_start), 32));
+    PROVIDE_HIDDEN(__iwram_lma = ALIGN(__iwram_overlay_lma + SIZEOF(.iwram0) + SIZEOF(.iwram1) + SIZEOF(.iwram2) +
+            SIZEOF(.iwram3) + SIZEOF(.iwram4) + SIZEOF(.iwram5) + SIZEOF(.iwram6) +
+            SIZEOF(.iwram7) + SIZEOF(.iwram8) + SIZEOF(.iwram9), 32));
 
     .iwram : AT(__iwram_lma) {
         KEEP(*(SORT(.iwram.sorted.*)))
-        *(.iwram .iwram.*)
+        *(.iwram)
         *.iwram.*(.data .data.* .text .text.*)
         *(.data .data.* .gnu.linkonce.d.*)
         . = ALIGN(32);
