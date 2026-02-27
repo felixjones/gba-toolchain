@@ -67,20 +67,20 @@ SECTIONS {
     . = __ewram_overlay_lma;
 
     OVERLAY : NOCROSSREFS AT(__ewram_overlay_lma) {
-        .ewram0 { *(.ewram0 .ewram0.*) *.ewram0.*(.text .text.*) }
-        .ewram1 { *(.ewram1 .ewram1.*) *.ewram1.*(.text .text.*) }
-        .ewram2 { *(.ewram2 .ewram2.*) *.ewram2.*(.text .text.*) }
-        .ewram3 { *(.ewram3 .ewram3.*) *.ewram3.*(.text .text.*) }
-        .ewram4 { *(.ewram4 .ewram4.*) *.ewram4.*(.text .text.*) }
-        .ewram5 { *(.ewram5 .ewram5.*) *.ewram5.*(.text .text.*) }
-        .ewram6 { *(.ewram6 .ewram6.*) *.ewram6.*(.text .text.*) }
-        .ewram7 { *(.ewram7 .ewram7.*) *.ewram7.*(.text .text.*) }
-        .ewram8 { *(.ewram8 .ewram8.*) *.ewram8.*(.text .text.*) }
-        .ewram9 { *(.ewram9 .ewram9.*) *.ewram9.*(.text .text.*) }
+        .ewram0 { KEEP(*(.ewram0 .ewram0.*)) KEEP(*.ewram0.*(.text .text.*)) }
+        .ewram1 { KEEP(*(.ewram1 .ewram1.*)) KEEP(*.ewram1.*(.text .text.*)) }
+        .ewram2 { KEEP(*(.ewram2 .ewram2.*)) KEEP(*.ewram2.*(.text .text.*)) }
+        .ewram3 { KEEP(*(.ewram3 .ewram3.*)) KEEP(*.ewram3.*(.text .text.*)) }
+        .ewram4 { KEEP(*(.ewram4 .ewram4.*)) KEEP(*.ewram4.*(.text .text.*)) }
+        .ewram5 { KEEP(*(.ewram5 .ewram5.*)) KEEP(*.ewram5.*(.text .text.*)) }
+        .ewram6 { KEEP(*(.ewram6 .ewram6.*)) KEEP(*.ewram6.*(.text .text.*)) }
+        .ewram7 { KEEP(*(.ewram7 .ewram7.*)) KEEP(*.ewram7.*(.text .text.*)) }
+        .ewram8 { KEEP(*(.ewram8 .ewram8.*)) KEEP(*.ewram8.*(.text .text.*)) }
+        .ewram9 { KEEP(*(.ewram9 .ewram9.*)) KEEP(*.ewram9.*(.text .text.*)) }
     } > ewram
 
     PROVIDE_HIDDEN(__ewram_start = ALIGN(4));
-    PROVIDE_HIDDEN(__ewram_lma = ALIGN(__ewram_overlay_lma + (. - __ewram_overlay_start), 4));
+    PROVIDE_HIDDEN(__ewram_lma = ALIGN(__ewram_overlay_lma + SIZEOF(.ewram0) + SIZEOF(.ewram1) + SIZEOF(.ewram2) + SIZEOF(.ewram3) + SIZEOF(.ewram4) + SIZEOF(.ewram5) + SIZEOF(.ewram6) + SIZEOF(.ewram7) + SIZEOF(.ewram8) + SIZEOF(.ewram9), 4));
 
     .ewram : AT(__ewram_lma) ALIGN(32) {
         KEEP(*(SORT(.ewram.sorted.*)))
@@ -109,20 +109,20 @@ SECTIONS {
     . = __iwram_overlay_lma;
 
     OVERLAY : NOCROSSREFS AT(__iwram_overlay_lma) {
-        .iwram0 { *(.iwram0 .iwram0.*) *.iwram0.*(.text .text.*) }
-        .iwram1 { *(.iwram1 .iwram1.*) *.iwram1.*(.text .text.*) }
-        .iwram2 { *(.iwram2 .iwram2.*) *.iwram2.*(.text .text.*) }
-        .iwram3 { *(.iwram3 .iwram3.*) *.iwram3.*(.text .text.*) }
-        .iwram4 { *(.iwram4 .iwram4.*) *.iwram4.*(.text .text.*) }
-        .iwram5 { *(.iwram5 .iwram5.*) *.iwram5.*(.text .text.*) }
-        .iwram6 { *(.iwram6 .iwram6.*) *.iwram6.*(.text .text.*) }
-        .iwram7 { *(.iwram7 .iwram7.*) *.iwram7.*(.text .text.*) }
-        .iwram8 { *(.iwram8 .iwram8.*) *.iwram8.*(.text .text.*) }
-        .iwram9 { *(.iwram9 .iwram9.*) *.iwram9.*(.text .text.*) }
+        .iwram0 { KEEP(*(.iwram0 .iwram0.*)) KEEP(*.iwram0.*(.text .text.*)) }
+        .iwram1 { KEEP(*(.iwram1 .iwram1.*)) KEEP(*.iwram1.*(.text .text.*)) }
+        .iwram2 { KEEP(*(.iwram2 .iwram2.*)) KEEP(*.iwram2.*(.text .text.*)) }
+        .iwram3 { KEEP(*(.iwram3 .iwram3.*)) KEEP(*.iwram3.*(.text .text.*)) }
+        .iwram4 { KEEP(*(.iwram4 .iwram4.*)) KEEP(*.iwram4.*(.text .text.*)) }
+        .iwram5 { KEEP(*(.iwram5 .iwram5.*)) KEEP(*.iwram5.*(.text .text.*)) }
+        .iwram6 { KEEP(*(.iwram6 .iwram6.*)) KEEP(*.iwram6.*(.text .text.*)) }
+        .iwram7 { KEEP(*(.iwram7 .iwram7.*)) KEEP(*.iwram7.*(.text .text.*)) }
+        .iwram8 { KEEP(*(.iwram8 .iwram8.*)) KEEP(*.iwram8.*(.text .text.*)) }
+        .iwram9 { KEEP(*(.iwram9 .iwram9.*)) KEEP(*.iwram9.*(.text .text.*)) }
     } > iwram
 
     PROVIDE_HIDDEN(__iwram_start = ALIGN(4));
-    PROVIDE_HIDDEN(__iwram_lma = ALIGN(__iwram_overlay_lma + (. - __iwram_overlay_start), 32));
+    PROVIDE_HIDDEN(__iwram_lma = ALIGN(__iwram_overlay_lma + SIZEOF(.iwram0) + SIZEOF(.iwram1) + SIZEOF(.iwram2) + SIZEOF(.iwram3) + SIZEOF(.iwram4) + SIZEOF(.iwram5) + SIZEOF(.iwram6) + SIZEOF(.iwram7) + SIZEOF(.iwram8) + SIZEOF(.iwram9), 32));
 
     .iwram : AT(__iwram_lma) {
         KEEP(*(SORT(.iwram.sorted.*)))

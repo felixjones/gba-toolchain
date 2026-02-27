@@ -62,6 +62,11 @@ macro(__gba_compiler_common lang)
     set(CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT " -Og -g3 -gdwarf-4 -DNDEBUG")
 
     set(CMAKE_${lang}_OUTPUT_EXTENSION ".o")
+
+    # CMake 4.x requires explicit compile/link rules for custom platforms
+    if(NOT CMAKE_${lang}_COMPILE_OBJECT)
+        set(CMAKE_${lang}_COMPILE_OBJECT "<CMAKE_${lang}_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -o <OBJECT> -c <SOURCE>")
+    endif()
 endmacro()
 
 if(CMAKE_VERSION VERSION_LESS 3.27.0)

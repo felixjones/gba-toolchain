@@ -546,6 +546,7 @@ else()
     )
     FetchContent_MakeAvailable(FreeImage)
 
+    target_compile_options(FreeImage PRIVATE -fpermissive)
     target_link_libraries(cldib PUBLIC FreeImage)
     target_include_directories(cldib PUBLIC cldib "${FreeImage_SOURCE_DIR}/Source")
 endif()
@@ -574,6 +575,7 @@ add_executable(grit
         extlib/fi.cpp
 )
 target_include_directories(grit PRIVATE extlib)
+target_compile_definitions(grit PRIVATE FREEIMAGE_LIB)
 target_link_libraries(grit PRIVATE libgrit $<$<NOT:$<BOOL:MSVC>>:m>)
 install(TARGETS grit DESTINATION bin)
 ]=])
@@ -597,7 +599,7 @@ endif()
 ProcessorCount(nproc)
 math(EXPR nproc "${nproc} - 1")
 
-execute_process(COMMAND "${CMAKE_COMMAND}" -S "${grit_SOURCE_DIR}" -B "${grit_BINARY_DIR}" -G "${CMAKE_GENERATOR}" ${cmakeFlags})  # Configure
+execute_process(COMMAND "${CMAKE_COMMAND}" -S "${grit_SOURCE_DIR}" -B "${grit_BINARY_DIR}" -G "${CMAKE_GENERATOR}" -D CMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM} ${cmakeFlags})  # Configure
 execute_process(COMMAND "${CMAKE_COMMAND}" --build "${grit_BINARY_DIR}" --parallel ${nproc})  # Build
 if(CMAKE_HOST_SYSTEM_NAME STREQUAL Linux)
     execute_process(COMMAND "${CMAKE_COMMAND}" --install "${grit_BINARY_DIR}" --prefix $ENV{HOME})  # Install

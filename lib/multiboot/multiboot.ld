@@ -73,20 +73,20 @@ SECTIONS {
     . = __iwram_overlay_lma;
 
     OVERLAY : NOCROSSREFS AT(__iwram_overlay_lma) {
-        .iwram0 { *(.iwram0 .iwram0.*) *.iwram0.*(.text .text.*) }
-        .iwram1 { *(.iwram1 .iwram1.*) *.iwram1.*(.text .text.*) }
-        .iwram2 { *(.iwram2 .iwram2.*) *.iwram2.*(.text .text.*) }
-        .iwram3 { *(.iwram3 .iwram3.*) *.iwram3.*(.text .text.*) }
-        .iwram4 { *(.iwram4 .iwram4.*) *.iwram4.*(.text .text.*) }
-        .iwram5 { *(.iwram5 .iwram5.*) *.iwram5.*(.text .text.*) }
-        .iwram6 { *(.iwram6 .iwram6.*) *.iwram6.*(.text .text.*) }
-        .iwram7 { *(.iwram7 .iwram7.*) *.iwram7.*(.text .text.*) }
-        .iwram8 { *(.iwram8 .iwram8.*) *.iwram8.*(.text .text.*) }
-        .iwram9 { *(.iwram9 .iwram9.*) *.iwram9.*(.text .text.*) }
+        .iwram0 { KEEP(*(.iwram0 .iwram0.*)) KEEP(*.iwram0.*(.text .text.*)) }
+        .iwram1 { KEEP(*(.iwram1 .iwram1.*)) KEEP(*.iwram1.*(.text .text.*)) }
+        .iwram2 { KEEP(*(.iwram2 .iwram2.*)) KEEP(*.iwram2.*(.text .text.*)) }
+        .iwram3 { KEEP(*(.iwram3 .iwram3.*)) KEEP(*.iwram3.*(.text .text.*)) }
+        .iwram4 { KEEP(*(.iwram4 .iwram4.*)) KEEP(*.iwram4.*(.text .text.*)) }
+        .iwram5 { KEEP(*(.iwram5 .iwram5.*)) KEEP(*.iwram5.*(.text .text.*)) }
+        .iwram6 { KEEP(*(.iwram6 .iwram6.*)) KEEP(*.iwram6.*(.text .text.*)) }
+        .iwram7 { KEEP(*(.iwram7 .iwram7.*)) KEEP(*.iwram7.*(.text .text.*)) }
+        .iwram8 { KEEP(*(.iwram8 .iwram8.*)) KEEP(*.iwram8.*(.text .text.*)) }
+        .iwram9 { KEEP(*(.iwram9 .iwram9.*)) KEEP(*.iwram9.*(.text .text.*)) }
     } > iwram
 
     PROVIDE_HIDDEN(__iwram_start = ALIGN(4));
-    PROVIDE_HIDDEN(__iwram_lma = ALIGN(__iwram_overlay_lma + (. - __iwram_overlay_start), 32));
+    PROVIDE_HIDDEN(__iwram_lma = ALIGN(LOADADDR(.iwram9) + SIZEOF(.iwram9), 32));
 
     .iwram : AT(__iwram_lma) {
         KEEP(*(SORT(.iwram.sorted.*)))
