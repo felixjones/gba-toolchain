@@ -80,7 +80,9 @@ SECTIONS {
     } > ewram
 
     PROVIDE_HIDDEN(__ewram_start = ALIGN(4));
-    PROVIDE_HIDDEN(__ewram_lma = ALIGN(__ewram_overlay_lma + (. - __ewram_overlay_start), 4));
+    PROVIDE_HIDDEN(__ewram_lma = ALIGN(__ewram_overlay_lma + SIZEOF(.ewram0) + SIZEOF(.ewram1) + SIZEOF(.ewram2) +
+                SIZEOF(.ewram3) + SIZEOF(.ewram4) + SIZEOF(.ewram5) + SIZEOF(.ewram6) +
+                SIZEOF(.ewram7) + SIZEOF(.ewram8) + SIZEOF(.ewram9), 4));
 
     .ewram : AT(__ewram_lma) ALIGN(32) {
         KEEP(*(SORT(.ewram.sorted.*)))
@@ -128,7 +130,7 @@ SECTIONS {
 
     .iwram : AT(__iwram_lma) {
         KEEP(*(SORT(.iwram.sorted.*)))
-        *(.iwram)
+        *(.iwram .iwram.*)
         *.iwram.*(.data .data.* .text .text.*)
         *(.data .data.* .gnu.linkonce.d.*)
         . = ALIGN(32);
