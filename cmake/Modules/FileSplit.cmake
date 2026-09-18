@@ -56,8 +56,10 @@ function(file_split input)
         # Try if head & tail is available
         macro(do_split part length offset)
             # Extract all bytes from the given offset
+            # tail -c +N is 1-based (POSIX), so add 1 to the 0-based offset
+            math(EXPR _tail_offset "${offset} + 1")
             execute_process(
-                    COMMAND "${TAIL_EXECUTABLE}" -c +${offset} "${input}"
+                    COMMAND "${TAIL_EXECUTABLE}" -c +${_tail_offset} "${input}"
                     OUTPUT_FILE "${part}"
                     ERROR_QUIET
             )

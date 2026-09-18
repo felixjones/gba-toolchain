@@ -102,14 +102,19 @@ function(__gba_find_arm_gnu_toolchain outPath)
     endif()
 endfunction()
 
+function(__gba_host_drives outDrives)
+    foreach(letter A B C D E F G H I J K L M N O P Q R S T U V W X Y Z)
+        if(IS_DIRECTORY "${letter}:/")
+            list(APPEND drives "${letter}:")
+        endif()
+    endforeach()
+    set(${outDrives} ${drives} PARENT_SCOPE)
+endfunction()
+
 function(__gba_find_devkitarm outPaths)
     if(CMAKE_HOST_SYSTEM_NAME MATCHES Windows)
         # Assume /opt/ is a top-level drive letter
-        execute_process(
-                COMMAND cmd /c "wmic logicaldisk get caption"
-                OUTPUT_VARIABLE drivesRaw
-        )
-        string(REGEX MATCHALL "[A-Z]:" drives ${drivesRaw})
+        __gba_host_drives(drives)
 
         foreach(drive ${drives})
             if(DEFINED ENV{DEVKITARM})
@@ -139,11 +144,7 @@ function(__gba_find_wonderful outPaths)
     endif()
     if(CMAKE_HOST_SYSTEM_NAME MATCHES Windows)
         # Assume /opt/ is a top-level drive letter
-        execute_process(
-                COMMAND cmd /c "wmic logicaldisk get caption"
-                OUTPUT_VARIABLE drivesRaw
-        )
-        string(REGEX MATCHALL "[A-Z]:" drives ${drivesRaw})
+        __gba_host_drives(drives)
 
         foreach(drive ${drives})
             string(REPLACE "/opt" "${drive}" wonderful $ENV{WONDERFUL_TOOLCHAIN})
