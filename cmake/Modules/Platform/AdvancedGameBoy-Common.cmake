@@ -27,6 +27,9 @@ execute_process(
 )
 string(REGEX MATCH "libraries:[ \t]=*([^\r\n]*)" newlibNano "${newlibNano}" )
 unset(newlibNano)
+if(CMAKE_HOST_SYSTEM_NAME STREQUAL Linux)
+    string(REPLACE ":" ";" CMAKE_MATCH_1 "${CMAKE_MATCH_1}")
+endif()
 find_library(newlibNano
         NAMES c_nano g_nano stdc++_nano supc++_nano
         PATHS ${CMAKE_MATCH_1}
